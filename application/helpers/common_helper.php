@@ -73,7 +73,7 @@ function comparePermission($aPermissionA,$aPermissionB)
  * Helper function to replace calls to Yii::app() and enable correct code completion.
  * @return LSYii_Application
  */
-function LS()
+function App()
 {
     return Yii::app();
 }
