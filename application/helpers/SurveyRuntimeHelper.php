@@ -14,6 +14,12 @@
 class SurveyRuntimeHelper {
 
     /**
+     *
+     * @var Twig_Environment;
+     */
+    private $twig;
+    private $context = array();
+    /**
     * Main function
     *
     * @param mixed $surveyid
@@ -372,8 +378,7 @@ class SurveyRuntimeHelper {
                     }
                     sendCacheHeaders();
                     doHeader();
-
-                    echo templatereplace(file_get_contents($sTemplatePath."startpage.pstpl"), array(), $redata);
+                    echo $this->startpage($sTemplatePath, $redata);
 
                     //Check for assessments
                     if ($thissurvey['assessments'] == "Y" && $assessments)
@@ -410,7 +415,7 @@ class SurveyRuntimeHelper {
 
 
                     $content = '';
-                    $content .= templatereplace(file_get_contents($sTemplatePath."startpage.pstpl"), array(), $redata);
+                    $content .= $this->startpage($sTemplatePath, $redata);
 
                     //Check for assessments
                     if ($thissurvey['assessments'] == "Y")
@@ -435,7 +440,7 @@ class SurveyRuntimeHelper {
 
                     $content = '';
 
-                    $content .= templatereplace(file_get_contents($sTemplatePath."startpage.pstpl"), array(), $redata);
+                    $content .= $this->startpage($sTemplatePath, $redata);
 
                     //echo $thissurvey['url'];
                     //Check for assessments
@@ -448,15 +453,18 @@ class SurveyRuntimeHelper {
                         }
                     }
 
+                    
 
                     if (trim(strip_tags($thissurvey['surveyls_endtext'])) == '')
                     {
                         $completed = "<br /><span class='success'>" . $clang->gT("Thank you!") . "</span><br /><br />\n\n"
                         . $clang->gT("Your survey responses have been recorded.") . "<br /><br />\n";
+                        
                     }
                     else
                     {
                         $completed = templatereplace($thissurvey['surveyls_endtext'], array(), $redata);
+                        
                     }
 
                     // Link to Print Answer Preview  **********
@@ -499,20 +507,36 @@ class SurveyRuntimeHelper {
                     doHeader();
                     echo $content;
                 }
-                $redata['completed'] = $completed;
-                echo templatereplace(file_get_contents($sTemplatePath."completed.pstpl"), array('completed' => $completed), $redata);
-                echo "\n<br />\n";
-                if ((($LEMdebugLevel & LEM_DEBUG_TIMING) == LEM_DEBUG_TIMING))
-                {
-                    echo LimeExpressionManager::GetDebugTimingMessage();
-                }
-                if ((($LEMdebugLevel & LEM_DEBUG_VALIDATION_SUMMARY) == LEM_DEBUG_VALIDATION_SUMMARY))
-                {
-                    echo "<table><tr><td align='left'><b>Group/Question Validation Results:</b>" . $moveResult['message'] . "</td></tr></table>\n";
-                }
-                echo templatereplace(file_get_contents($sTemplatePath."endpage.pstpl"), array(), $redata);
-                doFooter();
                 
+                // Render via Twig if possible.
+                if (file_exists($sTemplatePath."completed.twig"))
+                {
+                     $this->twig->getLoader()->addPath($sTemplatePath);
+                     $context = array(
+                         'survey' => array(
+                             'completed' => $thissurvey['surveyls_endtext'],
+                             'name' => $thissurvey['surveyls_title']
+                         )
+                     );
+                     $this->twig->display('completed.twig', $context);
+                
+                }
+                else
+                {
+                    $redata['completed'] = $completed;
+                    echo templatereplace(file_get_contents($sTemplatePath."completed.pstpl"), array('completed' => $completed), $redata);
+                    echo "\n<br />\n";
+                    if ((($LEMdebugLevel & LEM_DEBUG_TIMING) == LEM_DEBUG_TIMING))
+                    {
+                        echo LimeExpressionManager::GetDebugTimingMessage();
+                    }
+                    if ((($LEMdebugLevel & LEM_DEBUG_VALIDATION_SUMMARY) == LEM_DEBUG_VALIDATION_SUMMARY))
+                    {
+                        echo "<table><tr><td align='left'><b>Group/Question Validation Results:</b>" . $moveResult['message'] . "</td></tr></table>\n";
+                    }
+                    echo templatereplace(file_get_contents($sTemplatePath."endpage.pstpl"), array(), $redata);
+                    doFooter();
+                }
                 // The session cannot be killed until the page is completely rendered
                 if ($thissurvey['printanswers'] != 'Y')
                 {
@@ -529,7 +553,7 @@ class SurveyRuntimeHelper {
         if ($surveyExists < 1)
         {
             //SURVEY DOES NOT EXIST. POLITELY EXIT.
-            echo templatereplace(file_get_contents($sTemplatePath."startpage.pstpl"), array(), $redata);
+            echo $this->startpage($sTemplatePath, $redata);
             echo "\t<center><br />\n";
             echo "\t" . $clang->gT("Sorry. There is no matching survey.") . "<br /></center>&nbsp;\n";
             echo templatereplace(file_get_contents($sTemplatePath."endpage.pstpl"), array(), $redata);
@@ -708,7 +732,7 @@ class SurveyRuntimeHelper {
         doHeader();
 
         $redata = compact(array_keys(get_defined_vars()));
-        echo templatereplace(file_get_contents($sTemplatePath."startpage.pstpl"), array(), $redata);
+        echo $this->startpage($sTemplatePath, $redata);
         //popup need jquery
         if (isset($popup))
         {
@@ -771,102 +795,9 @@ class SurveyRuntimeHelper {
 
         // the runonce element has been changed from a hidden to a text/display:none one
         // in order to workaround an not-reproduced issue #4453 (lemeur)
-        echo "<input type='text' id='runonce' value='0' style='display: none;'/>
-        <!-- JAVASCRIPT FOR CONDITIONAL QUESTIONS -->
-        <script type='text/javascript'>
-        <!--\n";
-
-        echo "var LEMradix='" . $radix . "';\n";
-        echo "var numRegex = new RegExp('[^-' + LEMradix + '0-9]','g');\n";
-        echo "var intRegex = new RegExp('[^-0-9]','g');\n";
-
-        print <<<END
-            function fixnum_checkconditions(value, name, type, evt_type, intonly)
-            {
-                newval = new String(value);
-                if (typeof intonly !=='undefined' && intonly==1) {
-                    newval = newval.replace(intRegex,'');
-                }
-                else {
-                    newval = newval.replace(numRegex,'');
-                }
-                if (LEMradix === ',') {
-                    newval = newval.split(',').join('.');
-                }
-                if (newval != '-' && newval != '.' && newval != '-.' && newval != parseFloat(newval)) {
-                    newval = '';
-                }
-                displayVal = newval;
-                if (LEMradix === ',') {
-                    displayVal = displayVal.split('.').join(',');
-                }
-                if (name.match(/other$/)) {
-                    $('#answer'+name+'text').val(displayVal);
-                }
-                $('#answer'+name).val(displayVal);
-
-                if (typeof evt_type === 'undefined')
-                {
-                    evt_type = 'onchange';
-                }
-                checkconditions(newval, name, type, evt_type);
-            }
-
-            function checkconditions(value, name, type, evt_type)
-            {
-                if (typeof evt_type === 'undefined')
-                {
-                    evt_type = 'onchange';
-                }
-                if (type == 'radio' || type == 'select-one')
-                {
-                    $('#java'+name).val(value);
-                }
-                else if (type == 'checkbox')
-                {
-                    if ($('#answer'+name).is(':checked'))
-                    {
-                        $('#java'+name).val('Y');
-                    } else
-                    {
-                        $('#java'+name).val('');
-                    }
-                }
-                else if (type == 'text' && name.match(/other$/))
-                {
-                    $('#java'+name).val(value);
-                }
-                ExprMgr_process_relevance_and_tailoring(evt_type,name,type);
-END;
-
-        if ($previewgrp)
-        {
-            // force the group to be visible, even if irrelevant - will not always work
-            print <<<END
-    $('#relevanceG' + LEMgseq).val(1);
-    $(document).ready(function() {
-        $('#group-' + LEMgseq).show();
-    });
-    $(document).change(function() {
-        $('#group-' + LEMgseq).show();
-    });
-    $(document).bind('keydown',function(e) {
-                if (e.keyCode == 9) {
-                    $('#group-' + LEMgseq).show();
-                    return true;
-                }
-                return true;
-            });
-
-END;
-        }
-
-        print <<<END
-            }
-        // -->
-        </script>
-END;
-
+        
+        echo $this->runOnceJs($radix, $previewgrp);
+        
         //Display the "mandatory" message on page if necessary
         $showpopups = Yii::app()->getConfig('showpopups');
         if (!$showpopups && $stepInfo['mandViolation'] && $okToShowErrors)
@@ -973,37 +904,65 @@ END;
                 $help = $qinfo['info']['help'];   // $qa[2];
 
                 $redata = compact(array_keys(get_defined_vars()));
-
-                $question_template = file_get_contents($sTemplatePath.'question.pstpl');
-                if (preg_match('/\{QUESTION_ESSENTIALS\}/', $question_template) === false || preg_match('/\{QUESTION_CLASS\}/', $question_template) === false)
+                if (file_exists($sTemplatePath . 'question.twig'))
                 {
-                    // if {QUESTION_ESSENTIALS} is present in the template but not {QUESTION_CLASS} remove it because you don't want id="" and display="" duplicated.
-                    $question_template = str_replace('{QUESTION_ESSENTIALS}', '', $question_template);
-                    $question_template = str_replace('{QUESTION_CLASS}', '', $question_template);
-                    echo '
-                    <!-- NEW QUESTION -->
-                    <div id="question' . $q->id . '" class="' . $q_class . $man_class . '"' . $n_q_display . '>';
-                    echo templatereplace($question_template, array(), $redata, false, false, $q->id);
-                    echo '</div>';
+                    $context = array(
+                        'question' => array(
+                            'code' => $q->title,
+                            'id' => $q->id,
+                            'text' => $q->text,
+                            'mandatory' => ($q->mandatory =='Y'),
+                            'message' => array(
+                                'mandatory' => 'This needs to be the mandatory message.'
+                            ),
+                            'answer' => $answer
+                        )
+                    );
+                    /*
+                    echo '<pre>';
+                    print_r($qinfo);
+                    print_r($question);
+                    echo '</pre>';
+                     * 
+                     */
+                    $this->twig->getLoader()->addPath($sTemplatePath);
+                    $out = $this->twig->render('question.twig', $context);
+                    echo $out;
                 }
-                else
+                else 
                 {
-                    // TMSW - eventually refactor so that only substitutes the QUESTION_** fields - doesn't need full power of template replace
-                    // TMSW - also, want to return a string, and call templatereplace once on that result string once all done.
-                    echo templatereplace($question_template, array(), $redata, false, false, $q->id);
+                    $question_template = file_get_contents($sTemplatePath.'question.pstpl');
+                    if (preg_match('/\{QUESTION_ESSENTIALS\}/', $question_template) === false || preg_match('/\{QUESTION_CLASS\}/', $question_template) === false)
+                    {
+                        // if {QUESTION_ESSENTIALS} is present in the template but not {QUESTION_CLASS} remove it because you don't want id="" and display="" duplicated.
+                        $question_template = str_replace('{QUESTION_ESSENTIALS}', '', $question_template);
+                        $question_template = str_replace('{QUESTION_CLASS}', '', $question_template);
+                        echo '
+                        <!-- NEW QUESTION -->
+                        <div id="question' . $q->id . '" class="' . $q_class . $man_class . '"' . $n_q_display . '>';
+                        echo templatereplace($question_template, array(), $redata, false, false, $q->id);
+                        echo '</div>';
+                    }
+                    else
+                    {
+                        // TMSW - eventually refactor so that only substitutes the QUESTION_** fields - doesn't need full power of template replace
+                        // TMSW - also, want to return a string, and call templatereplace once on that result string once all done.
+                        echo templatereplace($question_template, array(), $redata, false, false, $q->id);
+                        if ($surveyMode == 'group') {
+                            echo "<input type='hidden' name='lastgroup' value='$lastgroup' id='lastgroup' />\n"; // for counting the time spent on each group
+                        }
+                        if ($surveyMode == 'question') {
+                            echo "<input type='hidden' name='lastanswer' value='$lastanswer' id='lastanswer' />\n";
+                        }
+
+                        echo "\n\n<!-- END THE GROUP -->\n";
+                        echo templatereplace(file_get_contents($sTemplatePath."endgroup.pstpl"), array(), $redata);
+                        echo "\n\n</div>\n";
+                    }
                 }
             }
-            if ($surveyMode == 'group') {
-                echo "<input type='hidden' name='lastgroup' value='$lastgroup' id='lastgroup' />\n"; // for counting the time spent on each group
-            }
-            if ($surveyMode == 'question') {
-                echo "<input type='hidden' name='lastanswer' value='$lastanswer' id='lastanswer' />\n";
-            }
-
-            echo "\n\n<!-- END THE GROUP -->\n";
-            echo templatereplace(file_get_contents($sTemplatePath."endgroup.pstpl"), array(), $redata);
-            echo "\n\n</div>\n";
         }
+
 
         LimeExpressionManager::FinishProcessingGroup($LEMskipReprocessing);
         echo LimeExpressionManager::GetRelevanceAndTailoringJavaScript();
@@ -1011,115 +970,7 @@ END;
 
         if (!$previewgrp && !$previewquestion)
         {
-            $navigator = surveymover(); //This gets globalised in the templatereplace function
-            $redata = compact(array_keys(get_defined_vars()));
-
-            echo "\n\n<!-- PRESENT THE NAVIGATOR -->\n";
-            echo templatereplace(file_get_contents($sTemplatePath."navigator.pstpl"), array(), $redata);
-            echo "\n";
-
-            if ($thissurvey['active'] != "Y")
-            {
-                echo "<p style='text-align:center' class='error'>" . $clang->gT("This survey is currently not active. You will not be able to save your responses.") . "</p>\n";
-            }
-
-
-            if ($surveyMode != 'survey' && $thissurvey['allowjumps'] == 'Y')
-            {
-                echo "\n\n<!-- PRESENT THE INDEX -->\n";
-
-                echo '<div id="index"><div class="container"><h2>' . $clang->gT("Question index") . '</h2>';
-
-                $stepIndex = LimeExpressionManager::GetStepIndexInfo();
-                $lastGseq=-1;
-                $gseq = -1;
-                $grel = true;
-                for($v = 0, $n = 0; $n != $_SESSION[$LEMsessid]['maxstep']; ++$n)
-                {
-                    if (!isset($stepIndex[$n])) {
-                        continue;   // this is an invalid group - skip it
-                    }
-                    $stepInfo = $stepIndex[$n];
-
-                    if ($surveyMode == 'question')
-                    {
-                        if ($lastGseq != $stepInfo['gseq']) {
-                            // show the group label
-                            ++$gseq;
-                            $g = $_SESSION[$LEMsessid]['grouplist'][$gseq];
-                            $grel = !LimeExpressionManager::GroupIsIrrelevantOrHidden($gseq);
-                            if ($grel)
-                            {
-                                $gtitle = LimeExpressionManager::ProcessString($g[1]);
-                                echo '<h3>' . flattenText($gtitle) . "</h3>";
-                            }
-                            $lastGseq = $stepInfo['gseq'];
-                        }
-                        if (!$grel || !$stepInfo['show'])
-                        {
-                            continue;
-                        }
-                        $q = $_SESSION[$LEMsessid]['questions'][$n];
-                    }
-                    else
-                    {
-                        ++$gseq;
-                        if (!$stepInfo['show'])
-                        {
-                            continue;
-                        }
-                        $g = $_SESSION[$LEMsessid]['grouplist'][$gseq];
-                    }
-
-                    if ($surveyMode == 'group')
-                    {
-                        $indexlabel = LimeExpressionManager::ProcessString($g[1]);
-                    }
-                    else
-                    {
-                        $indexlabel = LimeExpressionManager::ProcessString($q->text);
-                    }
-
-                    $sText = (($surveyMode == 'group') ? flattenText($indexlabel) : flattenText($indexlabel));
-                    $bGAnsw = !$stepInfo['anyUnanswered'];
-
-                    ++$v;
-
-                    $class = ($n == $_SESSION[$LEMsessid]['step'] - 1 ? 'current' : ($bGAnsw ? 'answer' : 'missing'));
-                    if ($v % 2)
-                        $class .= " odd";
-
-                    $s = $n + 1;
-                    echo "<div class=\"row $class\" onclick=\"javascript:document.limesurvey.move.value = '$s'; document.limesurvey.submit();\"><span class=\"hdr\">$v</span><span title=\"$sText\">$sText</span></div>";
-                }
-
-                if ($_SESSION[$LEMsessid]['maxstep'] == $_SESSION[$LEMsessid]['totalsteps'])
-                {
-                    echo "<input class='submit' type='submit' accesskey='l' onclick=\"javascript:document.limesurvey.move.value = 'movesubmit';\" value=' "
-                    . $clang->gT("Submit") . " ' name='move2' />\n";
-                }
-
-                echo '</div></div>';
-                /* Can be replaced by php or in global js */
-                echo "<script type=\"text/javascript\">\n"
-                . "  $(\".outerframe\").addClass(\"withindex\");\n"
-                . "  var idx = $(\"#index\");\n"
-                . "  var row = $(\"#index .row.current\");\n"
-                . "  idx.scrollTop(row.position().top - idx.height() / 2 - row.height() / 2);\n"
-                . "</script>\n";
-                echo "\n";
-            }
-
-            echo "<input type='hidden' name='thisstep' value='{$_SESSION[$LEMsessid]['step']}' id='thisstep' />\n";
-            echo "<input type='hidden' name='sid' value='$surveyid' id='sid' />\n";
-            echo "<input type='hidden' name='start_time' value='" . time() . "' id='start_time' />\n";
-            $_SESSION[$LEMsessid]['LEMpostKey'] = mt_rand();
-            echo "<input type='hidden' name='LEMpostKey' value='{$_SESSION[$LEMsessid]['LEMpostKey']}' id='LEMpostKey' />\n";
-
-            if (isset($token) && !empty($token))
-            {
-                echo "\n<input type='hidden' name='token' value='$token' id='token' />\n";
-            }
+            echo $this->navigator($surveyid);
         }
 
         if (($LEMdebugLevel & LEM_DEBUG_TIMING) == LEM_DEBUG_TIMING)
@@ -1138,5 +989,214 @@ END;
 
         doFooter();
 
+    }
+    
+    
+    public function __construct() {
+        App()->loadHelper('twig');
+        $this->twig = Twig::getTwigEnvironment(array('language' => App()->lang->langcode));
+                
+    }
+    protected function runOnceJs($radix, $previewgrp)
+    {
+        $out = <<<END
+<input type='text' id='runonce' value='0' style='display: none;'/>
+<!-- JAVASCRIPT FOR CONDITIONAL QUESTIONS -->
+<script type='text/javascript'>
+<!--
+var LEMradix='$radix';
+var numRegex = new RegExp('[^-' + LEMradix + '0-9]','g');
+var intRegex = new RegExp('[^-0-9]','g');
+
+function fixnum_checkconditions(value, name, type, evt_type, intonly)
+{
+    newval = new String(value);
+    if (typeof intonly !=='undefined' && intonly==1) {
+        newval = newval.replace(intRegex,'');
+    }
+    else {
+        newval = newval.replace(numRegex,'');
+    }
+    if (LEMradix === ',') {
+        newval = newval.split(',').join('.');
+    }
+    if (newval != '-' && newval != '.' && newval != '-.' && newval != parseFloat(newval)) {
+        newval = '';
+    }
+    displayVal = newval;
+    if (LEMradix === ',') {
+        displayVal = displayVal.split('.').join(',');
+    }
+    if (name.match(/other$/)) {
+        $('#answer'+name+'text').val(displayVal);
+    }
+    $('#answer'+name).val(displayVal);
+
+    if (typeof evt_type === 'undefined')
+    {
+        evt_type = 'onchange';
+    }
+    checkconditions(newval, name, type, evt_type);
+}
+
+function checkconditions(value, name, type, evt_type)
+{
+    if (typeof evt_type === 'undefined')
+    {
+        evt_type = 'onchange';
+    }
+    if (type == 'radio' || type == 'select-one')
+    {
+        $('#java'+name).val(value);
+    }
+    else if (type == 'checkbox')
+    {
+        if ($('#answer'+name).is(':checked'))
+        {
+            $('#java'+name).val('Y');
+        } else
+        {
+            $('#java'+name).val('');
+        }
+    }
+    else if (type == 'text' && name.match(/other$/))
+    {
+        $('#java'+name).val(value);
+    }
+    ExprMgr_process_relevance_and_tailoring(evt_type,name,type);
+}
+END;
+        if ($previewgrp)
+        {
+            $out .= <<<END
+$('#relevanceG' + LEMgseq).val(1);
+$(document).ready(function() {
+    $('#group-' + LEMgseq).show();
+});
+$(document).change(function() {
+    $('#group-' + LEMgseq).show();
+});
+$(document).bind('keydown',function(e) {
+    if (e.keyCode == 9) {
+        $('#group-' + LEMgseq).show();
+        return true;
+    }
+    return true;
+});
+END;
+        }
+        $out .= <<<END
+// -->
+</script>   
+END;
+        return $out;
+    }
+    
+    
+    protected function startpage($sTemplatePath, $redata)
+    {
+        
+        $out = templatereplace(file_get_contents($sTemplatePath."startpage.pstpl"), array(), $redata);
+        App()->getClientScript()->registerScriptFile(App()->getConfig('third_party') . 'jquery/jquery.js');
+        App()->getClientScript()->registerScriptFile(App()->getConfig('third_party') . 'jquery-ui/js/jquery-ui-1.9.2.custom.js');
+        App()->getClientScript()->registerScriptFile(App()->getConfig('generalscripts'). 'jquery/jquery.ui.touch-punch.min.js');
+        App()->getClientScript()->registerScriptFile(App()->getConfig('generalscripts'). 'survey_runtime.js');
+        App()->getClientScript()->registerScriptFile(App()->getConfig('generalscripts'). 'survey_nav.js');
+        
+        App()->getClientScript()->renderHead($out);
+        return $out;
+    }
+    
+    
+    protected function index($surveyId)
+    {
+        // Render it using twig also; for testing.
+        $survey = getSurveyInfo($surveyId);
+        if (file_exists(getTemplatePath($survey['template']) . '/index.twig'))
+        {
+            $this->twig->getLoader()->addPath(getTemplatePath($survey['template']));
+            
+            $context = array(
+                'submittable' => ($_SESSION["survey_$surveyId"]['maxstep'] == $_SESSION["survey_$surveyId"]['totalsteps']),
+                'groups' => array()
+            );
+            foreach (LimeExpressionManager::GetStepIndexInfo() as $index => $step)
+            {
+                // Check if the $step is in a new group.
+                if (!isset($context['groups'][$step['gid']]))
+                {
+                    $context['groups'][$step['gid']] = array(
+                        'questions' => array(),
+                        'title' => $step['gname']
+                    );
+                }
+                // Add the question info to the array.
+                $context['groups'][$step['gid']]['questions'][] = array(
+                    'step' => $index + 1,
+                    'title' => LimeExpressionManager::ProcessString($step['qtext'])
+                    
+                );
+            }
+            $this->twig->display('index.twig', $context);
+        }
+    }
+    
+    public function navigator($surveyId)
+    {
+        $survey = getSurveyInfo($surveyId);
+        $navigator = surveymover(); //This gets globalised in the templatereplace function
+        $redata = compact(array_keys(get_defined_vars()));
+
+        // Use Twig.
+        if (file_exists(getTemplatePath($survey['template'])."/navigator.twig"))
+        {
+            $options = array(
+                'move' => 'clearall',
+                'lang' => $survey['language'],
+            );
+            if (returnGlobal('token'))
+            {
+                $options['token'] = urlencode(trim(sanitize_token(strip_tags(returnGlobal('token')))));
+            }
+            App()->getClientScript()->corePackages = array();
+
+            //var_dump($_SESSION['survey_'.$surveyId]);
+            $data = array('navigator' => array(
+                'next' => !($_SESSION["survey_$surveyId"]['step'] == $_SESSION["survey_$surveyId"]['totalsteps']),
+                'submit' => ($_SESSION["survey_$surveyId"]['maxstep'] == $_SESSION["survey_$surveyId"]['totalsteps']),
+                'previous' => ($survey['allowprev'] == 'Y'),
+                'clearall' => false,
+                'save' => ($survey['allowprev'] == 'Y'),
+                'load' => true
+            ));
+            $this->twig->getLoader()->addPath(getTemplatePath($survey['template']));
+            $navigator = $this->twig->render("navigator.twig", $data);
+            App()->getClientScript()->render($navigator);
+            echo $navigator;
+        }
+        else
+        {
+            echo "\n\n<!-- PRESENT THE NAVIGATOR -->\n";
+            echo templatereplace(file_get_contents($sTemplatePath."navigator.pstpl"), array(), $redata);
+            echo "\n";
+        }
+
+        if ($survey['active'] != "Y")
+        {
+            echo "<p style='text-align:center' class='error'>" . $clang->gT("This survey is currently not active. You will not be able to save your responses.") . "</p>\n";
+        }
+
+        echo $this->index($surveyId);
+
+        echo "<input type='hidden' name='thisstep' value='{$_SESSION["survey_$surveyId"]['step']}' id='thisstep' />\n";
+        echo "<input type='hidden' name='sid' value=' $surveyId' id='sid' />\n";
+        echo "<input type='hidden' name='start_time' value='" . time() . "' id='start_time' />\n";
+        $_SESSION["survey_$surveyId"]['LEMpostKey'] = mt_rand();
+        echo "<input type='hidden' name='LEMpostKey' value='{$_SESSION["survey_$surveyId"]['LEMpostKey']}' id='LEMpostKey' />\n";
+
+        if (isset($token) && !empty($token))
+        {
+            echo "\n<input type='hidden' name='token' value='$token' id='token' />\n";
+        }
     }
 }

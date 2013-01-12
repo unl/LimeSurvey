@@ -39,6 +39,8 @@ class SurveyController extends LSYii_Controller
         if (!Yii::app()->getConfig("action")) {Yii::app()->setConfig("action", returnGlobal('action'));}          //Desired action
         if (!Yii::app()->getConfig("subaction")) {Yii::app()->setConfig("subaction", returnGlobal('subaction'));} //Desired subaction
         if (!Yii::app()->getConfig("editedaction")) {Yii::app()->setConfig("editedaction", returnGlobal('editedaction'));} // for html editor integration
+        
+        
     }
 
     /**
@@ -67,6 +69,7 @@ class SurveyController extends LSYii_Controller
     {
         return array(
             'index' => 'application.controllers.survey.index',
+            // Half of these below seem not to exist...
             'optin' => 'application.controllers.optin',
             'optout' => 'application.controllers.optout',
             'printanswers' => 'application.controllers.printanswers',
@@ -77,5 +80,12 @@ class SurveyController extends LSYii_Controller
             'verification' => 'application.controllers.verification'
         );
     }
+    
+    
+    public function __construct($id, $module = null) {
+        parent::__construct($id, $module);
+    }
+    
+    
 
 }

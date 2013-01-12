@@ -171,7 +171,9 @@ class SurveyAdmin extends Survey_Common_Action
         $clang = $this->getController()->lang;
 
         Yii::app()->session['FileManagerContext'] = "edit:survey:{$iSurveyID}";
-
+        Yii::app()->loadHelper('/admin/htmleditor');
+        initKcfinder();
+        
         $esrow = array();
         $esrow = self::_fetchSurveyInfo('editsurvey', $iSurveyID);
         $aData['esrow'] = $esrow;
@@ -1358,7 +1360,6 @@ class SurveyAdmin extends Survey_Common_Action
         $clang = $this->getController()->lang;
 
         global $sCKEditorURL;
-
         // TAB Uploaded Resources Management
         $ZIPimportAction = " onclick='if (validatefilename(this.form,\"" . $clang->gT('Please select a file to import!', 'js') . "\")) { this.form.submit();}'";
         if (!function_exists("zip_open"))

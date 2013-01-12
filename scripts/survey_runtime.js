@@ -122,7 +122,8 @@ function navbuttonsJqueryUi(){
         primary: 'ui-icon-triangle-1-w'
     }
     });
-    $('#movesubmitbtn, input.saveall, input.clearall').button();
+    $('input[type=submit], .button').button();
+    //$('#movesubmitbtn, input.saveall, input.clearall').button();
 }
 
 // Put a empty class on empty answer text item (limit to answers part)

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="{{ language.code}}" dir="{{ language.direction }}">
+    
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <title>{{ survey.name }}</title>
+    <meta name="generator" content="LimeSurvey http://www.limesurvey.org" />
+
+    <!-- The following line includes jquery-ui.css or jquery-ui-custom.css from template dir, template.css and needed specific css file for survey -->
+    {% for cssFile in cssFiles %}
+        <style type="text/css" src="{{ cssFile }}"/>
+    {% endfor %}
+
+    <!--[if lte IE 6]>
+    <link rel="stylesheet" type="text/css" href="{{ template.url }}ie_fix_6.css" />
+    <![endif]-->
+    <!--[if IE 7]>
+    <link rel="stylesheet" type="text/css" href="{{ template.url }}ie_fix_7.css" />
+    <![endif]-->
+    <!--[if IE 8]>
+    <link rel="stylesheet" type="text/css" href="{{ template.url }}ie_fix_8.css" />
+    <![endif]-->
+
+    <!-- The following CSS hides visual elements of the progress bar from screen readers. -->
+    <style type="text/css" media="aural tty">
+        progress-graph .zero, progress-graph .graph, progress-graph .cent { display: none; }
+            </style>
+        <!-- The following line includes jquery.js, jquery-ui.js, survey_runtime.js , template.js and needed specific js file for survey -->
+        <!--TEMPLATEJS-->
+    <link rel="shortcut icon" href="{{ template.url }}favicon.ico" />
+    {% include 'google_analytics.twig' %}
+</head>
+<body class="default lang-{{ survey.language.code }} {{ survey.format }}">

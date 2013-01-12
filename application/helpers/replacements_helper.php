@@ -169,10 +169,7 @@ function templatereplace($line, $replacements = array(), &$redata = array(), $de
     if(stripos ($line,"{TEMPLATEJS}"))
     {
         $js_header_includes =header_includes(false,'js');
-        $_jqueryuijsurl=Yii::app()->getConfig('generalscripts')."jquery/jquery-ui.js";
-        $_templatejs.= "<script type='text/javascript' src='".Yii::app()->getConfig('generalscripts')."jquery/jquery.js'></script>\n";
-        $_templatejs.= "<script type='text/javascript' src='{$_jqueryuijsurl}'></script>\n";
-        $_templatejs.= "<script type='text/javascript' src='".Yii::app()->getConfig('generalscripts')."jquery/jquery.ui.touch-punch.min.js'></script>\n";
+        
         if($js_header_includes){
             foreach ($js_header_includes as $jsinclude)
             {

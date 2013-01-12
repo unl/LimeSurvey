@@ -24,6 +24,20 @@
             $this->render('/js', compact('data'));
         }
         
+        public function actionTest()
+        {
+            App()->loadHelper('twig');
+          
+            $twig = Twig::getTwigEnvironment();
+            
+            $nav = array(
+                'previous' => true,
+                'next' => true,
+                'clearall' => true
+            );
+            $twig->display('copy_of_default/navigator.twig', array('navigator' => $nav));
+            
+        }
         public function beforeRender($view)
         {
             return parent::beforeRender($view);

@@ -1,0 +1,23 @@
+{# Twig template for the question index shown below the questions in gbg or qbq modes. #}
+<div id="index">
+    <h2>{{ trans("Question index") }}</h2>
+    <ol class="container">
+    {% for group in groups %}
+    <li>
+        <h3>{{ group.title }}</h3>
+        <ol>
+        {% for question in group.questions %}
+            <li data-step="{{question.step}}">
+            {{ question.title }}
+            </li>
+        {% endfor %}
+        </ol>
+    </li>
+    {% endfor %}
+    </ol>
+    <div class="container">
+    {% if submittable %}
+        <button value="submit">{{ trans("Submit") }}</submit>
+    {% endif %}
+    </div>
+</div>
