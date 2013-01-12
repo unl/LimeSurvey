@@ -259,7 +259,7 @@ class responses extends Survey_Common_Action
                                 if ($metadata === "size")
                                     $answervalue = rawurldecode(((int) ($phparray[$index][$metadata])) . " KB");
                                 else if ($metadata === "name")
-                                    $answervalue = CHtml::link(rawurldecode($phparray[$index][$metadata]), $this->getController()->createUrl("/admin/responses/sa/index/downloadindividualfile/{$phparray[$index][$metadata]}/fieldname/{$fn[0]}/id/{$iId}/surveyid/{$iSurveyID}"));
+                                    $answervalue = CHtml::link(rawurldecode($phparray[$index][$metadata]), $this->getController()->createUrl("/admin/responses/sa/browse/downloadindividualfile/{$phparray[$index][$metadata]}/fieldname/{$fn[0]}/id/{$iId}/surveyid/{$iSurveyID}"));
                                 else
                                     $answervalue = rawurldecode($phparray[$index][$metadata]);
                             }
@@ -376,11 +376,11 @@ class responses extends Survey_Common_Action
             $zipfilename = "Files_for_responses_" . Yii::app()->request->getPost('downloadfile') . ".zip";
             $this->_zipFiles($iSurveyID, Yii::app()->request->getPost('downloadfile'), $zipfilename,$aData['language']);
         }
-        else if (Yii::app()->request->getPost('downloadindividualfile') != '')
+        else if (Yii::app()->request->getParam('downloadindividualfile') != '')
         {
-            $iId = (int) Yii::app()->request->getPost('id');
-            $downloadindividualfile = Yii::app()->request->getPost('downloadindividualfile');
-            $fieldname = Yii::app()->request->getPost('fieldname');
+            $iId = (int) Yii::app()->request->getParam('id');
+            $downloadindividualfile = Yii::app()->request->getParam('downloadindividualfile');
+            $fieldname = Yii::app()->request->getParam('fieldname');
 
             $oRow = Survey_dynamic::model($iSurveyID)->findByAttributes(array('id' => $iId));
             $phparray = json_decode_ls($oRow->$fieldname);
@@ -393,6 +393,7 @@ class responses extends Survey_Common_Action
 
                     if (file_exists($file))
                     {
+                        @ob_clean();
                         header('Content-Description: File Transfer');
                         header('Content-Type: application/octet-stream');
                         header('Content-Disposition: attachment; filename="' . rawurldecode($php->name) . '"');
@@ -401,8 +402,6 @@ class responses extends Survey_Common_Action
                         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
                         header('Pragma: public');
                         header('Content-Length: ' . filesize($file));
-                        ob_clean();
-                        flush();
                         readfile($file);
                         exit;
                     }
@@ -438,19 +437,17 @@ class responses extends Survey_Common_Action
                     $q->fieldname == 'submitdate' ||
                     $q->fieldname == 'token')
                     continue;
+                $question = viewHelper::getFieldText($q);
 
-                $question = $q->text;
-                if (!is_a($q, 'QuestionModule') || !$q->fileUpload())
+                if (!is_a($q, 'QuestionModule'))
                 {
-                    if (isset($q->sq) && $q->sq != '')
-                        $question .=' (' . $q->sq . ')';
-                    if (isset($q->sq1) && isset($q->sq2))
-                        $question .=' (' . $q->sq1 . ':' . $q->sq2 . ')';
-                    if (isset($q->scale))
-                        $question .='[' . $q->scale . ']';
                     $fnames[] = array($q->fieldname, $question);
                 }
-                else
+                elseif(!$q->fileUpload())
+                {
+                    $fnames[] = array($q->fieldname, $question,'code'=>viewHelper::getFieldCode($q));
+                }
+                else // Specific for file upload
                 {
                     if ($q->aid !== 'filecount')
                     {
@@ -459,17 +456,17 @@ class responses extends Survey_Common_Action
                         for ($i = 0; $i < $qidattributes['max_num_of_files']; $i++)
                         {
                             if ($qidattributes['show_title'] == 1)
-                                $fnames[] = array($q->fieldname, "File " . ($i + 1) . " - " . $q->text . "(Title)", "title", $i);
+                                $fnames[] = array($q->fieldname, "File " . ($i + 1) . " - " . $question . "(Title)",'code'=>viewHelper::getFieldCode($q).'[title]',"metadata"=>"title", "index"=>$i);
 
                             if ($qidattributes['show_comment'] == 1)
-                                $fnames[] = array($q->fieldname, "File " . ($i + 1) . " - " . $q->text . "(Comment)", "comment", $i);
+                                $fnames[] = array($q->fieldname, "File " . ($i + 1) . " - " . $question . "(Comment)",'code'=>viewHelper::getFieldCode($q).'[comment]', "metadata"=>"comment", "index"=>$i);
 
-                            $fnames[] = array($q->fieldname, "File " . ($i + 1) . " - " . $q->text . "(File name)", "name", $i);
-                            $fnames[] = array($q->fieldname, "File " . ($i + 1) . " - " . $q->text . "(File size)", "size", $i);
+                            $fnames[] = array($q->fieldname, "File " . ($i + 1) . " - " . $question . "(File name)",'code'=>viewHelper::getFieldCode($q).'[name]', "metadata"=>"name", "index"=>$i);
+                            $fnames[] = array($q->fieldname, "File " . ($i + 1) . " - " . $question . "(File size)",'code'=>viewHelper::getFieldCode($q).'[size]', "metadata"=>"size", "index"=>$i);
                         }
                     }
                     else
-                        $fnames[] = array($q->fieldname, "File count");
+                        $fnames[] = array($q->fieldname, $clang->gT("File count"));
                 }
             }
 
@@ -851,6 +848,7 @@ class responses extends Survey_Common_Action
 
             if (file_exists($tmpdir . '/' . $zipfilename))
             {
+                @ob_clean();
                 header('Content-Description: File Transfer');
                 header('Content-Type: application/octet-stream');
                 header('Content-Disposition: attachment; filename=' . basename($zipfilename));
@@ -859,8 +857,6 @@ class responses extends Survey_Common_Action
                 header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
                 header('Pragma: public');
                 header('Content-Length: ' . filesize($tmpdir . "/" . $zipfilename));
-                ob_clean();
-                flush();
                 readfile($tmpdir . '/' . $zipfilename);
                 unlink($tmpdir . '/' . $zipfilename);
                 exit;

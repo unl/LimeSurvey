@@ -63,7 +63,7 @@ class SurveyAdmin extends Survey_Common_Action
             Yii::app()->loadHelper('surveytranslator');
 
             $aData['issuperadmin'] = false;
-            if (Yii::app()->session['USER_RIGHT_SUPERADMIN'] == 1)
+            if (User::GetUserRights('superadmin'))
             {
                 $aData['issuperadmin'] = true;
             }
@@ -328,7 +328,7 @@ class SurveyAdmin extends Survey_Common_Action
         $postsid = Yii::app()->request->getPost('sid', $iSurveyID);
         $postsid = sanitize_int($postsid);
         $clang = $this->getController()->lang;
-        $date = date('YmdHis'); //'Hi' adds 24hours+minutes to name to allow multiple deactiviations in a day
+        $date = date('YmdHis'); //'His' adds 24hours+minutes to name to allow multiple deactiviations in a day
 
         if (empty($_POST['ok']))
         {
@@ -534,17 +534,19 @@ class SurveyAdmin extends Survey_Common_Action
     */
     public function ajaxgetusers()
     {
-        header('Content-type: application/json');
 
-        $result = User::model()->findAll();
+
+        $result = getUserList();
 
         $aUsers = array();
         if (count($result) > 0)
         {
             foreach ($result as $rows)
-                $aUsers[] = array($rows['uid'], $rows['users_name']);
+                $aUsers[] = array($rows['uid'], $rows['user']);
         }
         $ajaxoutput = ls_json_encode($aUsers) . "\n";
+        // Moving header just before output allow view error
+        header('Content-type: application/json');
         echo $ajaxoutput;
     }
 
@@ -558,7 +560,6 @@ class SurveyAdmin extends Survey_Common_Action
     */
     public function ajaxowneredit($newowner, $iSurveyID)
     {
-        header('Content-type: application/json');
 
         $intNewOwner = sanitize_int($newowner);
         $intSurveyId = sanitize_int($iSurveyID);
@@ -568,18 +569,18 @@ class SurveyAdmin extends Survey_Common_Action
         $params[':sid']=$intSurveyId;
         if (!hasGlobalPermission("USER_RIGHT_SUPERADMIN"))
         {
-            $query_condition .= 'AND owner_id=:uid';
+            $query_condition .= ' AND owner_id=:uid';
             $params[':uid']=$owner_id;
         }
 
-        $result = Survey::model()->updateAll(array('owner_id'=>$intNewOwner), $query_condition, $params);
+        $result = Survey::model()->updateAll(array('owner_id'=>$intNewOwner), $query_condition, $params);// Update
 
-        $result = Survey::model()->with('owner')->findAllByAttributes(array('sid' => $intSurveyId, 'owner_id' => $intNewOwner));
+        $result = Survey::model()->with('owner')->findAllByAttributes(array('sid' => $intSurveyId, 'owner_id' => $intNewOwner));// Find new owner name: return false if owner are not the new one
 
         $intRecordCount = count($result);
 
         $aUsers = array(
-        'record_count' => $intRecordCount,
+            'record_count' => $intRecordCount,
         );
 
         foreach ($result as $row)
@@ -587,6 +588,8 @@ class SurveyAdmin extends Survey_Common_Action
 
         $ajaxoutput = ls_json_encode($aUsers) . "\n";
 
+        // Moving header just before output allow view error
+        header('Content-type: application/json');
         echo $ajaxoutput;
     }
 
@@ -603,8 +606,8 @@ class SurveyAdmin extends Survey_Common_Action
         $dateformatdetails = getDateFormatData(Yii::app()->session['dateformat']);
 
         $surveys = Survey::model();
-        //!!! Is this even possible to execute?
-        if (empty(Yii::app()->session['USER_RIGHT_SUPERADMIN']))
+        //Add permission "view" survey
+        if (!User::GetUserRights('manage_survey'))
             $surveys->permission(Yii::app()->user->getId());
         $surveys = $surveys->with(array('languagesettings'=>array('condition'=>'surveyls_language=language'), 'owner'))->findAll();
         $aSurveyEntries = new stdClass();
@@ -662,8 +665,14 @@ class SurveyAdmin extends Survey_Common_Action
             $aSurveyEntry[] = '<!--' . $rows['datecreated'] . '-->' . $datetimeobj->convert($dateformatdetails['phpdate']);
 
             //Set Owner
-            $aSurveyEntry[] = $rows['users_name'] . ' (<a href="#" class="ownername_edit" translate_to="' . $clang->gT('Edit') . '" id="ownername_edit_' . $rows['sid'] . '">'. $clang->gT('Edit') .'</a>)';
-
+            if(User::GetUserRights('superadmin') || $rows['owner_id']==Yii::app()->user->getId())
+            {
+                $aSurveyEntry[] = $rows['users_name'] . ' (<span class="link ownername_edit" translate_to="' . $clang->gT('Edit') . '" id="ownername_edit_' . $rows['sid'] . '">'. $clang->gT('Edit') .'</span>)';
+            }
+            else
+            {
+                $aSurveyEntry[] = $rows['users_name'];
+            }
             //Set Access
             if (tableExists('tokens_' . $rows['sid'] ))
             {
@@ -1524,7 +1533,7 @@ class SurveyAdmin extends Survey_Common_Action
             $sTemplate = $_POST['template'];
             if (!$sTemplate || (Yii::app()->session['USER_RIGHT_SUPERADMIN'] != 1 && Yii::app()->session['USER_RIGHT_MANAGE_TEMPLATE'] != 1 && !hasTemplateManageRights(Yii::app()->session['loginID'], $_POST['template'])))
             {
-                $sTemplate = "default";
+                $sTemplate = Yii::app()->getConfig('defaulttemplate');
             }
 
             Yii::app()->loadHelper("surveytranslator");
