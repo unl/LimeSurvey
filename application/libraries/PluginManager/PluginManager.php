@@ -24,11 +24,11 @@
         
         /**
          * Registers a plugin to be notified on some event.
-         * @param Object $plugin Reference to the plugin.
+         * @param iPlugin $plugin Reference to the plugin.
          * @param string $event Name of the event.
          * @param string $function Optional function of the plugin to be called.
          */
-        public function subscribe(Object $plugin, $event, $function = null)
+        public function subscribe(iPlugin $plugin, $event, $function = null)
         {
             if (!isset($this->subscriptions[$event]))
             {
@@ -50,11 +50,11 @@
         
         /**
          * Unsubscribes a plugin from an event.
-         * @param Object $plugin Reference to the plugin being unsubscribed.
+         * @param iPlugin $plugin Reference to the plugin being unsubscribed.
          * @param string $event Name of the event. Use '*', to unsubscribe all events for the plugin.
          * @param string $function Optional function of the plugin that was registered.
          */
-        public function unsubscribe(Object $plugin, $event)
+        public function unsubscribe(iPlugin $plugin, $event)
         {
             // Unsubscribe recursively.
             if ($event == '*')
@@ -89,7 +89,7 @@
             {
                 foreach($this->subscriptions[$event] as $subscription)
                 {
-                    $eventResults[get_class($subscription[0])] = call_user_func_array($subscription, $param_arr);
+                    $eventResults[get_class($subscription[0])] = call_user_func_array($subscription, $params);
                 }
             }
             
@@ -135,6 +135,13 @@
             $result['description'] = $class::getDescription();
             $result['name'] = $pluginName;
             return $result;
+        }
+        
+        public function loadPlugin($pluginName)
+        {
+            Yii::import("webroot.plugins.{$pluginName}.{$pluginName}");
+            $plugin = new $pluginName($this);
+            return $plugin;
         }
     }
 ?>

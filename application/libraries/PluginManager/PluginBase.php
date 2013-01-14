@@ -3,7 +3,7 @@
     /**
      * Base class for plugins.
      */
-    abstract class PluginBase {
+    abstract class PluginBase implements iPlugin {
         
         protected $storage = 'DummyStorage';
         

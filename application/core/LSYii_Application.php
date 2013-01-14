@@ -24,6 +24,7 @@ class LSYii_Application extends CWebApplication
      * @var PluginManager
      */
     protected $pluginManager;
+    
     /**
     * Initiates the application
     *
@@ -118,9 +119,24 @@ class LSYii_Application extends CWebApplication
         foreach ($settings as $key => $value)
             $this->setConfig($key, $value);
         
+        // Now initialize the plugin manager
+        $this->initPluginManager(); 
+        
+        // @TODO: REMOVE TEST CODE BELOW
+        $this->pluginManager->loadPlugin('Example');
+        $this->getPluginManager()->dispatchEvent('dummyEvent');
+    }
+    
+    /**
+     * This method handles initialization of the plugin manager
+     * 
+     * When you want to insert your own plugin manager, or experiment with different settings
+     * then this is where you should do that.
+     */
+    public function initPluginManager()
+    {
         Yii::import('application.libraries.PluginManager.*');
         $this->pluginManager = new PluginManager();
-        
     }
 
     /**
@@ -202,6 +218,11 @@ class LSYii_Application extends CWebApplication
         $this->lang = $lang;
     }
     
+    /**
+     * Get the pluginManager
+     * 
+     * @return PluginManager
+     */
     public function getPluginManager()
     {
         return $this->pluginManager;
