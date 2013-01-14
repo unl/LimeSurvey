@@ -1,9 +1,11 @@
+<pre>
 <?php
 /**
  * @var ConfigController
  */
 $this;
 
-//$this->renderPartial('/admin/super/adminmenu', $data['menu']);
+print_r($plugins);
 
 ?>
+</pre>

@@ -38,19 +38,8 @@
         
         public function actionPlugins()
         {
-            $menu = array(
-                'showupdate' => (App()->session['USER_RIGHT_SUPERADMIN'] == 1 && getGlobalSetting("updatelastcheck")>0 && getGlobalSetting("updateavailable")==1 && App()->getConfig("updatable") ),
-                'updateversion' => getGlobalSetting("updateversion"),
-                'updatebuild' => getGlobalSetting("updatebuild"),
-                'iconsize' => App()->getConfig('adminthemeiconsize'),
-                'sImageURL' => App()->getConfig('adminimageurl'),
-                'surveyid' => null,
-                'clang' => App()->lang
-            );
-            $this->layout = 'main';
-            echo $this->render('/config/plugins', compact('menu'));
-            //var_dump(App()->getPluginManager()->scanPlugins());
-                    
+            $plugins = App()->getPluginManager()->scanPlugins();
+            echo $this->render('/config/plugins', compact('plugins'));
         }
         
         
