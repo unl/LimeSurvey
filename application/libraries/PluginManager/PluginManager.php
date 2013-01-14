@@ -3,11 +3,11 @@
      * Factory for limesurvey plugin objects.
      */
     class PluginManager {
-        
+
         private $stores = array();
-        
+
         private $subscriptions = array();
-        
+
         /**
          * Returns the storage instance of type $storageClass.
          * If needed initializes the storage object.
@@ -21,7 +21,7 @@
             }
             return $this->stores[$storageClass];
         }
-        
+
         /**
          * Registers a plugin to be notified on some event.
          * @param iPlugin $plugin Reference to the plugin.
@@ -44,10 +44,10 @@
             {
                 $this->subscriptions[$event][] = $subscription;
             }
-            
-            
+
+
         }
-        
+
         /**
          * Unsubscribes a plugin from an event.
          * @param iPlugin $plugin Reference to the plugin being unsubscribed.
@@ -75,8 +75,8 @@
                 }
             }
         }
-        
-        
+
+
         /**
          * This function dispatches an event to all registered plugins.
          * @param type $event Name of the event.
@@ -92,9 +92,9 @@
                     $eventResults[get_class($subscription[0])] = call_user_func_array($subscription, $params);
                 }
             }
-            
+
         }
-        
+
         /**
          * Scans the plugin directory for plugins.
          * This function is not efficient so should only be used in the admin interface
@@ -105,7 +105,7 @@
             $result = array();
             foreach (new DirectoryIterator(Yii::getPathOfAlias('webroot.plugins')) as $fileInfo)
             {
-                if (!$fileInfo->isDot() && $fileInfo->isDir()) 
+                if (!$fileInfo->isDot() && $fileInfo->isDir())
                 {
                     // Check if the base plugin file exists.
                     // Directory name Example most contain file ExamplePlugin.php.
@@ -116,15 +116,15 @@
                         $result[] = $this->getPluginInfo($pluginName);
                     }
                 }
-                
+
             }
             return $result;
         }
-        
+
         /**
          * Gets the description of a plugin. The description is accessed via a
          * static function inside the plugin file.
-         * 
+         *
          * @param string $pluginName
          */
         public function getPluginInfo($pluginName)
@@ -136,12 +136,46 @@
             $result['name'] = $pluginName;
             return $result;
         }
-        
-        public function loadPlugin($pluginName)
+
+        /**
+         * Returns the instantiated plugin
+         *
+         * @param string $pluginName
+         * @return iPlugin
+         */
+        protected function loadPlugin($pluginName)
         {
             Yii::import("webroot.plugins.{$pluginName}.{$pluginName}");
             $plugin = new $pluginName($this);
             return $plugin;
+        }
+
+        /**
+         * Handles loading all active plugins
+         *
+         * Possible improvement would be to load them for a specific context.
+         * For instance 'survey' for runtime or 'admin' for backend. This needs
+         * some thinking before implementing.
+         */
+        public function loadPlugins()
+        {
+            try {
+                $pluginModel = Plugins::model();
+                $records = $pluginModel->findAllByAttributes(array('active'=>1));
+                foreach ($records as $record) {
+                    $plugins[] = $record->plugin;
+                }
+            } catch (Exception $exc) {
+                // Something went wrong, maybe no database was present so we load no plugins
+                $plugins = array();
+            }
+
+            foreach ($plugins as $pluginName)
+            {
+                $this->loadPlugin($pluginName);
+            }
+
+            $this->dispatchEvent('afterPluginLoad');    // Alow plugins to do stuff after all plugins are loaded
         }
     }
 ?>

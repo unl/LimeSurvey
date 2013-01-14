@@ -122,8 +122,10 @@ class LSYii_Application extends CWebApplication
         // Now initialize the plugin manager
         $this->initPluginManager(); 
         
+        // And load the active plugins
+        $this->pluginManager->loadPlugins();
+        
         // @TODO: REMOVE TEST CODE BELOW
-        $this->pluginManager->loadPlugin('Example');
         $this->getPluginManager()->dispatchEvent('dummyEvent');
     }
     
