@@ -43,6 +43,7 @@
         <title>Limesurvey Administration</title>
     </head>
     <body>
+        <?php $this->widget('application.extensions.Menu.MenuWidget'); ?>
         <?php echo $content; ?>
     </body>
 
