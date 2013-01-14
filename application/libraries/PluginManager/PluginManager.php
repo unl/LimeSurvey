@@ -159,22 +159,21 @@
          */
         public function loadPlugins()
         {
+            $plugins = array();
             try {
-                $pluginModel = Plugins::model();
+                $pluginModel = Plugins::model();    
                 $records = $pluginModel->findAllByAttributes(array('active'=>1));
+            
                 foreach ($records as $record) {
                     $plugins[$record->id] = $record->plugin;
                 }
             } catch (Exception $exc) {
                 // Something went wrong, maybe no database was present so we load no plugins
-                $plugins = array();
             }
-
             foreach ($plugins as $id => $pluginName)
             {
                 $this->loadPlugin($pluginName, $id);
             }
-
             $this->dispatchEvent('afterPluginLoad');    // Alow plugins to do stuff after all plugins are loaded
         }
     }
