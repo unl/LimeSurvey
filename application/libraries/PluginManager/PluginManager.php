@@ -143,10 +143,10 @@
          * @param string $pluginName
          * @return iPlugin
          */
-        protected function loadPlugin($pluginName)
+        protected function loadPlugin($pluginName, $id)
         {
             Yii::import("webroot.plugins.{$pluginName}.{$pluginName}");
-            $plugin = new $pluginName($this);
+            $plugin = new $pluginName($this, $id);
             return $plugin;
         }
 
@@ -163,16 +163,16 @@
                 $pluginModel = Plugins::model();
                 $records = $pluginModel->findAllByAttributes(array('active'=>1));
                 foreach ($records as $record) {
-                    $plugins[] = $record->plugin;
+                    $plugins[$record->id] = $record->plugin;
                 }
             } catch (Exception $exc) {
                 // Something went wrong, maybe no database was present so we load no plugins
                 $plugins = array();
             }
 
-            foreach ($plugins as $pluginName)
+            foreach ($plugins as $id => $pluginName)
             {
-                $this->loadPlugin($pluginName);
+                $this->loadPlugin($pluginName, $id);
             }
 
             $this->dispatchEvent('afterPluginLoad');    // Alow plugins to do stuff after all plugins are loaded

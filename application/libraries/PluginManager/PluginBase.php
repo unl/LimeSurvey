@@ -4,7 +4,8 @@
      * Base class for plugins.
      */
     abstract class PluginBase implements iPlugin {
-        
+
+        protected $id = null;
         protected $storage = 'DummyStorage';
         
         static private $description = 'Base plugin object';
@@ -18,10 +19,25 @@
          */
         protected $pluginManager;
 
-        public function __construct(PluginManager $pluginManager)
+        public function __construct(PluginManager $pluginManager, $id)
         {
             $this->pluginManager = $pluginManager;
-            $this->store = $this->pluginManager->getStore($this->storage);
+            $this->id = $id;
+        }
+        
+        /**
+         * Returns the plugin storage and takes care of
+         * instantiating it
+         * 
+         * @return iPluginStorage
+         */
+        public function getStore()
+        {
+            if (is_null($this->store)) {
+                $this->store = $this->pluginManager->getStore($this->storage);
+            }
+            
+            return $this->store;
         }
      
         /**
@@ -35,7 +51,7 @@
          */
         protected function set($key, $data, $model = null, $id = null)
         {
-            return $this->store->set($this, $key, $model, $id);
+            return $this->getStore()->set($this, $key, $data, $model, $id);
         }
     
         /**
@@ -50,7 +66,19 @@
          */
         protected function get($key = null, $model = null, $id = null)
         {
-            return $this->store->get($this, $key, $model, $id);
+            return $this->getStore()->get($this, $key, $model, $id);
+        }
+        
+        /**
+         * Returns the id of the plugin
+         * 
+         * Used by storage model to find settings specific to this plugin
+         * 
+         * @return int
+         */
+        public function getId()
+        {
+            return $this->id;
         }
         
         /**
