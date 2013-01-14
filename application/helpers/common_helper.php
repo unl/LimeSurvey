@@ -70,6 +70,15 @@ function comparePermission($aPermissionA,$aPermissionB)
 }
 
 /**
+ * Helper function to replace calls to Yii::app() and enable correct code completion.
+ * @return LSYii_Application
+ */
+function App()
+{
+    return Yii::app();
+}
+
+/**
 * isStandardTemplate returns true if a template is a standard template
 * This function does not check if a template actually exists
 *

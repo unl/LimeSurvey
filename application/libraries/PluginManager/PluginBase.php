@@ -3,10 +3,11 @@
     /**
      * Base class for plugins.
      */
-    class PluginBase {
+    abstract class PluginBase {
         
         protected $storage = 'DummyStorage';
         
+        static private $description = 'Base plugin object';
         private $store = null;
         private $settings = array();
         
@@ -92,6 +93,13 @@
         protected function registerSetting($name, $options = array('type' => 'string'))
         {
             $this->settings[$name] = $options;
+        }
+        
+        
+        
+        public static function getDescription()
+        {
+            return static::$description;
         }
     }
 ?>

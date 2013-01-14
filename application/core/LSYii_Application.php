@@ -20,6 +20,11 @@ class LSYii_Application extends CWebApplication
     public $lang = null;
 
     /**
+     *
+     * @var PluginManager
+     */
+    protected $pluginManager;
+    /**
     * Initiates the application
     *
     * @access public
@@ -112,6 +117,10 @@ class LSYii_Application extends CWebApplication
 
         foreach ($settings as $key => $value)
             $this->setConfig($key, $value);
+        
+        Yii::import('application.libraries.PluginManager.*');
+        $this->pluginManager = new PluginManager();
+        
     }
 
     /**
@@ -192,7 +201,11 @@ class LSYii_Application extends CWebApplication
     {
         $this->lang = $lang;
     }
-
+    
+    public function getPluginManager()
+    {
+        return $this->pluginManager;
+    }
 }
 
 /**

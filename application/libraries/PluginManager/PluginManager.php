@@ -2,7 +2,7 @@
     /**
      * Factory for limesurvey plugin objects.
      */
-    class Plugin {
+    class PluginManager {
         
         private $stores = array();
         
@@ -93,6 +93,48 @@
                 }
             }
             
+        }
+        
+        /**
+         * Scans the plugin directory for plugins.
+         * This function is not efficient so should only be used in the admin interface
+         * that specifically deals with enabling / disabling plugins.
+         */
+        public function scanPlugins()
+        {
+            $result = array();
+            foreach (new DirectoryIterator(Yii::getPathOfAlias('webroot.plugins')) as $fileInfo)
+            {
+                if (!$fileInfo->isDot() && $fileInfo->isDir()) 
+                {
+                    // Check if the base plugin file exists.
+                    // Directory name Example most contain file ExamplePlugin.php.
+                    $pluginName = $fileInfo->getFilename();
+                    $file = Yii::getPathOfAlias("webroot.plugins.$pluginName.{$pluginName}") . ".php";
+                    if (file_exists($file))
+                    {
+                        $result[] = $this->getPluginInfo($pluginName);
+                    }
+                }
+                
+            }
+            return $result;
+        }
+        
+        /**
+         * Gets the description of a plugin. The description is accessed via a
+         * static function inside the plugin file.
+         * 
+         * @param string $pluginName
+         */
+        public function getPluginInfo($pluginName)
+        {
+            $result = array();
+            Yii::import(App()->getConfig("plugindir") . ".$pluginName.*");
+            $class = "{$pluginName}";
+            $result['description'] = $class::getDescription();
+            $result['name'] = $pluginName;
+            return $result;
         }
     }
 ?>
