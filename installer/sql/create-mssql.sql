@@ -560,6 +560,25 @@ CREATE TABLE [prefix_question_type_groups] (
   PRIMARY KEY ([id]),
 ) AUTO_INCREMENT=6;
 
+
+CREATE TABLE [prefix_plugins] (
+  [id] int(11) NOT NULL identity(1,1),
+  [plugin] varchar(50) NOT NULL,
+  [active] int(1) NOT NULL default '0',
+  PRIMARY KEY  (`id`)
+);
+
+CREATE TABLE [prefix_plugin_settings] (
+  [id] int(11) NOT NULL IDENTITY(1,1),
+  [plugin_id] int(11) NOT NULL,
+  [model] varchar(50) NULL,
+  [model_id] int(11) NULL,
+  [key] varchar(50) NOT NULL,
+  [value] text NULL,
+  PRIMARY KEY  (`id`),
+  );
+
+
 --
 -- Secondary indexes
 --
@@ -578,6 +597,8 @@ create index [quota_idx2] on [prefix_quota] ([sid]);
 create index [saved_control_idx2] on [prefix_saved_control] ([sid]);
 create index [parent_qid_idx] on [prefix_questions] ([parent_qid]);
 create index [labels_code_idx] on [prefix_labels] ([code]);
+create index [plugins_active_idx] on [prefix_plugins] ([active]);
+create index [plugin_settings_pluginid_idx] on [prefix_plugin_settings] ([plugin_id]);
 
 INSERT INTO [prefix_question_types] ([tid], [order], [group], [name], [class], [legacy], [system]) VALUES
 (1, 1, 1, '5 point choice', 'FiveList', '5', 'Y'),

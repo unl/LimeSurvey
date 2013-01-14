@@ -568,6 +568,23 @@ CREATE TABLE `prefix_question_type_groups` (
   UNIQUE KEY `order` (`order`)
 ) ENGINE=MyISAM AUTO_INCREMENT=6 CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
+CREATE TABLE `prefix_plugins` (
+  `id` int(11) NOT NULL auto_increment,
+  `plugin` varchar(50) NOT NULL,
+  `active` int(1) NOT NULL default '0',
+  PRIMARY KEY  (`id`)
+) ENGINE=MYISAM CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+CREATE TABLE `prefix_plugin_settings` (
+  `id` int(11) NOT NULL auto_increment,
+  `plugin_id` int(11) NOT NULL,
+  `model` varchar(50) NULL,
+  `model_id` int(11) NULL,
+  `key` varchar(50) NOT NULL,
+  `value` text NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=MYISAM AUTO_INCREMENT=1 CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
 --
 -- Secondary indexes
 --
@@ -585,6 +602,8 @@ create index `questions_idx4` on `prefix_questions` (`tid`);
 create index `quota_idx2` on `prefix_quota` (`sid`);
 create index `saved_control_idx2` on `prefix_saved_control` (`sid`);
 create index `parent_qid_idx` on `prefix_questions` (`parent_qid`);
+create index `plugins_active_idx2` on `prefix_plugins` (`active`);
+create index `plugin_settings_idx2` on `prefix_plugin_settings` (`plugin_id`);
 
 INSERT INTO `prefix_question_types` (`tid`, `order`, `group`, `name`, `class`, `legacy`, `system`) VALUES
 (1, 1, 1, '5 point choice', 'FiveList', '5', 'Y'),

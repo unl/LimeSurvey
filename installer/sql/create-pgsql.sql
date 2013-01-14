@@ -569,6 +569,21 @@ CREATE TABLE `prefix_question_type_groups` (
   system character(1) NOT NULL DEFAULT 'N',
 ) AUTO_INCREMENT=6;
 
+CREATE TABLE `prefix_plugins` (
+  `id` integer PRIMARY KEY NOT NULL,
+  `plugin` character varying(50) NOT NULL,
+  `active` integer NOT NULL default '0'
+);
+
+CREATE TABLE `prefix_plugin_settings` (
+  `id` integer PRIMARY KEY NOT NULL,
+  `plugin_id` integer NOT NULL,
+  `model` character varying(50) NULL,
+  `model_id` integer NULL,
+  `key` character varying(50) NOT NULL,
+  `value` text NULL
+);
+
 --
 -- Secondary indexes
 --
@@ -587,6 +602,8 @@ create index quota_idx2 on prefix_quota (sid);
 create index saved_control_idx2 on prefix_saved_control (sid);
 create index parent_qid_idx on prefix_questions (parent_qid);
 create index labels_code_idx on prefix_labels (code);
+create index plugins_active_idx on prefix_plugins (active);
+create index plugin_settings_pluginid_idx on prefix_plugin_settings (plugin_id);
 
 INSERT INTO prefix_question_types (tid, "order", "group", name, "class", legacy, system) VALUES
 (1, 1, 1, '5 point choice', 'FiveList', '5', 'Y'),
