@@ -2,7 +2,7 @@
     /**
      * Factory for limesurvey plugin objects.
      */
-    class Plugin {
+    class PluginManager {
         
         private $stores = array();
         

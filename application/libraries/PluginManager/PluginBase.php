@@ -10,9 +10,17 @@
         private $store = null;
         private $settings = array();
         
-        public function __construct()
+        /**
+         * This holds the pluginmanager that instantiated the plugin
+         * 
+         * @var PluginManager
+         */
+        protected $pluginManager;
+
+        public function __construct(PluginManager $pluginManager)
         {
-            $this->store = Plugin::getStore($this->storage);
+            $this->pluginManager = $pluginManager;
+            $this->store = $this->pluginManager->getStore($this->storage);
         }
      
         /**
@@ -51,7 +59,7 @@
          */
         protected function subscribe($event, $function = null)
         {
-            return Plugin::subscribe($this, $event, $function);
+            return $this->pluginManager->subscribe($this, $event, $function);
         }
         
         /**
@@ -61,7 +69,7 @@
         
         protected function unsubscribe($event)
         {
-            return Plugin::unsubscribe($this, $event);
+            return $this->pluginManager->unsubscribe($this, $event);
         }
         
         /**
