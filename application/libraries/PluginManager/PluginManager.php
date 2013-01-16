@@ -113,7 +113,7 @@
                     $file = Yii::getPathOfAlias("webroot.plugins.$pluginName.{$pluginName}") . ".php";
                     if (file_exists($file))
                     {
-                        $result[] = $this->getPluginInfo($pluginName);
+                        $result[$pluginName] = $this->getPluginInfo($pluginName);
                     }
                 }
 

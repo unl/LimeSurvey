@@ -38,8 +38,14 @@
         
         public function actionPlugins()
         {
-            $plugins = App()->getPluginManager()->scanPlugins();
-            echo $this->render('/config/plugins', compact('plugins'));
+            // Scan the plugins folder.
+            $discoveredPlugins = App()->getPluginManager()->scanPlugins();
+            
+            // Register plugins that are not registered yet.
+            $registeredPlugins = Plugins::model()->findAll();
+           
+            
+            echo $this->render('/config/plugins', compact('discoveredPlugins', 'registeredPlugins'));
         }
         
         

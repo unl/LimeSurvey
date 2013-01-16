@@ -5,7 +5,9 @@
  */
 $this;
 
-print_r($plugins);
+
+var_dump($discoveredPlugins);
+var_dump($registeredPlugins);
 
 ?>
 </pre>
