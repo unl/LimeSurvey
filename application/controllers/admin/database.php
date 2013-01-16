@@ -472,10 +472,19 @@ class database extends Survey_Common_Action
                     } else {
                         $q = tidToQuestion(Yii::app()->request->getPost('type'));
                         $aLanguages=array_merge(array(Survey::model()->findByPk($surveyid)->language),Survey::model()->findByPk($surveyid)->additionalLanguages);
-var_dump($q->availableAttributes()); die();
-                        foreach ($q->availableAttributes() as $validAttribute)
+                        $attributeMetaData = questionAttributes();
+                        
+                        foreach ($q->availableAttributes() as $validAttributeName)
                         {
-                            if (isset($validAttribute['i18n']))
+                            if (isset($attributeMetaData[$validAttributeName]))
+                            {
+                                $defaults = array(
+                                    'name' => $validAttributeName,
+                                    'default' => null
+                                );
+                                $validAttribute = array_merge($defaults, $attributeMetaData[$validAttributeName]);
+                            }
+                            if ($validAttribute['name'] == 'i18n')
                             {
                                 foreach ($aLanguages as $sLanguage)
                                 {// TODO sanitise XSS
@@ -505,6 +514,7 @@ var_dump($q->availableAttributes()); die();
                             }
                             else
                             {
+                                
                                 $value=Yii::app()->request->getPost($validAttribute['name']);
 
                                 if ($validAttribute['name']=='multiflexible_step' && trim($value)!='') {

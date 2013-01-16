@@ -1131,6 +1131,11 @@ END;
                     );
                 }
                 // Add the question info to the array.
+                if (!isset($step['qtext']))
+                {
+                    $step['qtext'] = 'is not set';
+                    
+                }
                 $context['groups'][$step['gid']]['questions'][] = array(
                     'step' => $index + 1,
                     'title' => LimeExpressionManager::ProcessString($step['qtext'])
@@ -1161,14 +1166,19 @@ END;
             App()->getClientScript()->corePackages = array();
 
             //var_dump($_SESSION['survey_'.$surveyId]);
-            $data = array('navigator' => array(
-                'next' => !($_SESSION["survey_$surveyId"]['step'] == $_SESSION["survey_$surveyId"]['totalsteps']),
-                'submit' => ($_SESSION["survey_$surveyId"]['maxstep'] == $_SESSION["survey_$surveyId"]['totalsteps']),
-                'previous' => ($survey['allowprev'] == 'Y'),
-                'clearall' => false,
-                'save' => ($survey['allowprev'] == 'Y'),
-                'load' => true
-            ));
+            $data = array(
+                'navigator' => array(
+                    'next' => !($_SESSION["survey_$surveyId"]['step'] == $_SESSION["survey_$surveyId"]['totalsteps']),
+                    'submit' => ($_SESSION["survey_$surveyId"]['maxstep'] == $_SESSION["survey_$surveyId"]['totalsteps']),
+                    'previous' => ($survey['allowprev'] == 'Y'),
+                    'clearall' => false,
+                    'save' => ($survey['allowprev'] == 'Y'),
+                    'load' => true
+                ),
+                'survey' => array(
+                    'active' => ($survey['active'] == 'Y')
+                )
+            );
             $this->twig->getLoader()->addPath(getTemplatePath($survey['template']));
             $navigator = $this->twig->render("navigator.twig", $data);
             App()->getClientScript()->render($navigator);
@@ -1179,12 +1189,13 @@ END;
             echo "\n\n<!-- PRESENT THE NAVIGATOR -->\n";
             echo templatereplace(file_get_contents($sTemplatePath."navigator.pstpl"), array(), $redata);
             echo "\n";
+            if ($survey['active'] != "Y")
+            {
+                echo "<p style='text-align:center' class='error'>" . $this->lang->gT("This survey is currently not active. You will not be able to save your responses.") . "</p>\n";
+            }
         }
 
-        if ($survey['active'] != "Y")
-        {
-            echo "<p style='text-align:center' class='error'>" . $clang->gT("This survey is currently not active. You will not be able to save your responses.") . "</p>\n";
-        }
+        
 
         echo $this->index($surveyId);
 
