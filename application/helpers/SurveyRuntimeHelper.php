@@ -376,10 +376,6 @@ class SurveyRuntimeHelper {
                     {
                         $assessments = doAssessment($surveyid);
                     }
-                    sendCacheHeaders();
-                    doHeader();
-                    echo $this->startpage($sTemplatePath, $redata);
-
                     //Check for assessments
                     if ($thissurvey['assessments'] == "Y" && $assessments)
                     {
@@ -497,17 +493,16 @@ class SurveyRuntimeHelper {
                     $_SESSION[$LEMsessid]['finished'] = true;
                     $_SESSION[$LEMsessid]['sid'] = $surveyid;
 
-                    sendCacheHeaders();
+                    
                     if (isset($thissurvey['autoredirect']) && $thissurvey['autoredirect'] == "Y" && $thissurvey['surveyls_url'])
                     {
                         //Automatically redirect the page to the "url" setting for the survey
                         header("Location: {$thissurvey['surveyls_url']}");
                     }
 
-                    doHeader();
-                    echo $content;
+                    
                 }
-                
+                sendCacheHeaders();
                 // Render via Twig if possible.
                 if (file_exists($sTemplatePath."completed.twig"))
                 {
@@ -523,6 +518,9 @@ class SurveyRuntimeHelper {
                 }
                 else
                 {
+                    doHeader();
+                    echo $content;
+                
                     $redata['completed'] = $completed;
                     echo templatereplace(file_get_contents($sTemplatePath."completed.pstpl"), array('completed' => $completed), $redata);
                     echo "\n<br />\n";
