@@ -57,16 +57,18 @@ function renderItem($item, &$allowSeparator, MenuWidget $widget, $imageUrl)
         <?php 
             foreach ($menu as $class => $menuItems)
             {
-                echo CHtml::openTag('ol', array('class' => "menubar-$class"));
+                $tag = 'div';
+                echo CHtml::openTag($tag, array('class' => "menubar-$class"));
                 $allowSeparator = false;
                 foreach($menuItems as $item)
                 {
                     if ($content = renderItem($item, $allowSeparator, $this, $imageUrl))
                     {
-                        echo CHtml::tag('li', array(), $content);
+                        echo $content;
+                        //echo CHtml::tag('li', array(), $content);
                     }
                 }
-                echo CHtml::closeTag('ol');
+                echo CHtml::closeTag($tag);
                 
             }
         ?>

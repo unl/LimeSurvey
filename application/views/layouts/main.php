@@ -2,7 +2,6 @@
 <!DOCTYPE html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-        <?php /*
         <script type="text/javascript" src="<?php echo Yii::app()->getConfig('generalscripts');?>jquery/jquery.js"></script>
         <script type="text/javascript" src="<?php echo Yii::app()->getConfig('generalscripts');?>jquery/jquery-ui.js"></script>
         <script type="text/javascript" src="<?php echo Yii::app()->getConfig('generalscripts');?>jquery/jquery.ui.touch-punch.min.js"></script>
@@ -15,13 +14,7 @@
         <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->getConfig('adminstyleurl');?>printablestyle.css" media="print" />
         <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->getConfig('adminstyleurl');?>adminstyle.css" />
         <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->getConfig('styleurl');?>adminstyle.css" />
-         * 
-         * 
-         */
-        ?>
         <?php
-        /*
-        
         if(!empty($css_admin_includes)) {
             foreach ($css_admin_includes as $cssinclude)
             {
@@ -30,15 +23,14 @@
                 <?php
             }
         }
-        if ($bIsRTL){?>
+        /*if ($bIsRTL){?>
         <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->getConfig('adminstyleurl');?>adminstyle-rtl.css" /><?php
-        }
-         
-        <link rel="shortcut icon" href="<?php echo $baseurl;?>styles/favicon.ico" type="image/x-icon" />
-        <link rel="icon" href="<?php echo $baseurl;?>styles/favicon.ico" type="image/x-icon" />
-        <?php echo $firebug ?>
-        */
+        }*/
         ?>
+                <link rel="shortcut icon" href="<?php echo App()->baseUrl; ?>styles/favicon.ico" type="image/x-icon" />
+        <link rel="icon" href="<?php echo App()->baseUrl; ?>styles/favicon.ico" type="image/x-icon" />
+        <?php //echo $firebug ?>
+
         
         <title>Limesurvey Administration</title>
     </head>

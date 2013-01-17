@@ -45,6 +45,10 @@
             $menu['left'][] = $this->editTemplates();
             $menu['left'][] = 'separator';
             $menu['left'][] = $this->participantDatabase();
+            $menu['left'][] = array(
+                'href' => array('config/plugins'),
+                'title' => $this->gT('Plugin manager'),
+            );
 
             $menu['right'][] = array(
                 'title' => 'Surveys:',

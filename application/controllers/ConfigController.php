@@ -6,11 +6,16 @@
         public function __construct($id, $module = null) 
         {
             parent::__construct($id, $module);
-            Yii::import('application.libraries.Limesurvey_lang');
-            $this->_sessioncontrol();
         }
         
-        /**
+        public function init() {
+            parent::init();
+            $this->_sessioncontrol();
+            Yii::app()->setConfig('adminimageurl', Yii::app()->getConfig('styleurl').Yii::app()->getConfig('admintheme').'/images/');
+            Yii::app()->setConfig('adminstyleurl', Yii::app()->getConfig('styleurl').Yii::app()->getConfig('admintheme').'/');
+        }
+
+                /**
          * Load and set session vars
          * (copied from admincontroller)
          *
