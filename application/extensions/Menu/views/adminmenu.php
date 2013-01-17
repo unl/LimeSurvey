@@ -24,7 +24,7 @@ function renderItem($item, &$allowSeparator, MenuWidget $widget, $imageUrl)
             $title = $item['title'];
             if (isset($item['image']))
             {
-                $title .= $widget->gT($item['title']) . CHtml::image($imageUrl . $item['image'], $widget->gT($item['alt']));
+                $title .= $item['title'] . CHtml::image($imageUrl . $item['image'], $item['alt']);
             }
             $result = CHtml::link($title, $item['href']);
         }

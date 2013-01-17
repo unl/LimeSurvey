@@ -17,6 +17,9 @@
 class LSYii_Application extends CWebApplication
 {
     protected $config = array();
+    /**
+     * @var Limesurvey_lang 
+     */
     public $lang = null;
 
     /**

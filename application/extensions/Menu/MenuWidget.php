@@ -2,6 +2,15 @@
 
     class MenuWidget extends CWidget
     {
+        /**
+         * @var Limesurvey_lang
+         */
+        public $clang = null;
+        
+        public function __construct($owner = null) {
+            parent::__construct($owner);
+            $this->clang = App()->lang;
+        }
         public $defaults = array(
             'title' => '',
             'alt' => '',
@@ -18,12 +27,12 @@
             $menu['left'][] = 'separator';
             $menu['left'][] = array(
                 'href' => array('admin/user'),
-                'alt' => "Manage survey administrators",
+                'alt' => $this->gT('Manage survey administrators'),
                 'image' => 'security.png',
             );
             $menu['left'][] = array(
                 'href' => array('admin/usergroups/sa/index'),
-                'alt' => 'Create/edit user groups',
+                'alt' => $this->gT('Create/edit user groups'),
                 'image' => 'usergroup.png'
             );
 
@@ -43,8 +52,8 @@
                 'values' => getSurveyList(true)
             );
             $menu['right'][] = array(
-                'href' => array('admin/surveys'),
-                'alt' => 'Detailed list of surveys',
+                'href' => array('admin/survey/sa/index'),
+                'alt' => $this->gT('Detailed list of surveys'),
                 'image' => 'surveylist.png'
             );
             
@@ -53,19 +62,19 @@
 
             $menu['right'][] = array(
                 'href' => array('admin/authentication/sa/logout'),
-                'alt' => 'Logout',
+                'alt' => $this->gT('Logout'),
                 'image' => 'logout.png'
             );
             $menu['right'][] = array(
                 'href' => array('admin/user/sa/personalsettings'),
-                'alt' => 'Edit your personal preferences',
+                'alt' => $this->gT('Edit your personal preferences'),
                 'image' => 'edit.png'
             );
             
             
             $menu['right'][] = array(
                 'href' => "http://docs.limesurvey.org",
-                'alt' => 'LimeSurvey online manual',
+                'alt' => $this->gT('LimeSurvey online manual'),
                 'image' => 'showhelp.png'
             );
             
@@ -79,7 +88,7 @@
                 return array(
                     'href' => 'admin/globalsettings',
                     'image' => 'global.png',
-                    'alt' => 'Global Settings'
+                    'alt' => $this->gT('Global Settings')
                 );
             }
         }
@@ -91,7 +100,7 @@
                 return array(
                     'href' => 'admin/checkintegrity',
                     'image' => 'checkdb.png',
-                    'alt' => 'Check Data Integrity'
+                    'alt' => $this->gT('Check Data Integrity')
                 );
             }
         }
@@ -104,7 +113,7 @@
                 return array(
                     'href' => array("admin/survey/sa/newsurvey"),
                     'image' => 'add.png',
-                    'alt' => "Create, import, or copy a survey"
+                    'alt' => $this->gT('Create, import, or copy a survey')
                 );
             }
         }
@@ -117,14 +126,14 @@
                     return array(
                         'image' => 'backup.png',
                         'href' => array("admin/dumpdb"),
-                        'alt' => 'Backup Entire Database'
+                        'alt' => $this->gT('Backup Entire Database')
                     );
                 }
                 else
                 {
                     return array(
                         'image' => 'backup_disabled.png',
-                        'alt' => 'The database export is only available for MySQL databases. For other database types please use the according backup mechanism to create a database dump.',
+                        'alt' => $this->gT('The database export is only available for MySQL databases. For other database types please use the according backup mechanism to create a database dump.'),
                         'type' => 'image'
                     );
                 }
@@ -138,7 +147,7 @@
                 return array(
                     'href' => array('admin/labels'),
                     'image' => 'labels.png',
-                    'alt' => 'Edit label sets'
+                    'alt' => $this->gT('Edit label sets')
                 );
             }
         }
@@ -149,7 +158,7 @@
             {
                 return array(
                     'href' => array('admin/templates/'),
-                    'alt' => 'Template Editor',
+                    'alt' => $this->gT('Template Editor'),
                     'image' => 'templates.png'
                 );
             }
@@ -160,7 +169,7 @@
             if ($this->hasRight('USER_RIGHT_PARTICIPANT_PANEL'))
             {
                 return array(
-                    'alt' => 'Central participant database/panel',
+                    'alt' => $this->gT('Central participant database/panel'),
                     'href' => array('admin/participants'),
                     'image' => 'cpdb.png'
                  );
