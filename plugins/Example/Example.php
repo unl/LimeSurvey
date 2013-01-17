@@ -9,6 +9,7 @@ class Example extends PluginBase {
         parent::__construct($pluginManager, $id);
 
         $this->subscribe('dummyEvent', 'helloWorld');
+        $this->subscribe('afterAdminMenuLoaded');
     }
 
     public function helloWorld() 
@@ -18,6 +19,15 @@ class Example extends PluginBase {
         $count++;
         traceVar($count);
         $this->set('count', $count);
+    }
+    
+    public function afterAdminMenuLoaded(MenuWidget $menu)
+    {
+        $menu->menu['left'][]=array(
+                'href' => "http://docs.limesurvey.org",
+                'alt' => $menu->gT('LimeSurvey online manual'),
+                'image' => 'showhelp.png'
+            );
     }
 
 }
