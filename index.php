@@ -141,38 +141,7 @@
 		}
 
 		define('APPPATH', BASEPATH . $application_folder . '/');
-	}
-    if (file_exists(APPPATH.'config'.DIRECTORY_SEPARATOR.'config.php'))
-    {
-        $aSettings= include(APPPATH.'config'.DIRECTORY_SEPARATOR.'config.php');
-    }
-    else
-    {
-        $aSettings=array();
-    }
-    if (isset($aSettings['config']['debug']) && $aSettings['config']['debug']>0)
-    {
-        define('YII_DEBUG', true);
-        error_reporting(E_ALL);
-    }
-    else
-    {
-        define('YII_DEBUG', false);
-        error_reporting(0);
-    }
-
-
-
-/*
- * --------------------------------------------------------------------
- * LOAD THE BOOTSTRAP FILE
- * --------------------------------------------------------------------
- *
- * And away we go...
- *
- */
-require_once BASEPATH . 'yii' . EXT;
-require_once APPPATH . 'core/LSYii_Application' . EXT;
+        }
 
 $config = APPPATH . 'config/config' . EXT;
 
@@ -188,6 +157,27 @@ if (!file_exists($config)) {
     }
 }
 
+    if (isset($config['config']['debug']) && $config['config']['debug']>0)
+    {
+        define('YII_DEBUG', true);
+        error_reporting(E_ALL);
+    }
+    else
+    {
+        define('YII_DEBUG', false);
+        error_reporting(0);
+    }
+
+/*
+ * --------------------------------------------------------------------
+ * LOAD THE BOOTSTRAP FILE
+ * --------------------------------------------------------------------
+ *
+ * And away we go...
+ *
+ */
+require_once BASEPATH . 'yii' . EXT;
+require_once APPPATH . 'core/LSYii_Application' . EXT;
 
 Yii::createApplication('LSYii_Application', $config)->run();
 
