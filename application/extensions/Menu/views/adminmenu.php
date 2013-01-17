@@ -1,27 +1,23 @@
 <?php 
-
-/** 
- * @var MenuWidget;
- */
-$this;
-
+/* @var $this MenuWidget */
 
 App()->getClientScript()->registerCssFile(App()->getConfig('adminstyleurl') .  'nav.css');
 
 function renderSelect($item)
 {
-    echo CHtml::label($item['title'],  'surveylist');
-    echo CHtml::dropDownList('surveylist', null, CHtml::listData($item['values'], 'sid', 'surveyls_title'), array(
+    $result = CHtml::label($item['title'],  'surveylist');
+    $result .= CHtml::dropDownList('surveylist', null, CHtml::listData($item['values'], 'sid', 'surveyls_title'), array(
         'id' => 'surveylist'
     ));
+    
+    return $result;
 }
 function renderItem($item, &$allowSeparator, MenuWidget $widget, $imageUrl)
 {
-    
+    $result = false;
     if (is_array($item))
     {
         $allowSeparator = true;
-        echo CHtml::openTag('li');
         $item = array_merge($widget->defaults, $item);
         if ($item['type'] == 'link')
         {
@@ -30,31 +26,29 @@ function renderItem($item, &$allowSeparator, MenuWidget $widget, $imageUrl)
             {
                 $title .= $widget->gT($item['title']) . CHtml::image($imageUrl . $item['image'], $widget->gT($item['alt']));
             }
-            echo CHtml::link($title, $item['href']);
+            $result = CHtml::link($title, $item['href']);
         }
         elseif ($item['type'] == 'image')
         {
             if (isset($item['image']))
             {
-                echo CHtml::image($imageUrl . $item['image'], $item['alt']);
+                $result = CHtml::image($imageUrl . $item['image'], $item['alt']);
             }
         }
         elseif($item['type'] == 'select')
         {
-            renderSelect($item);
+            $result = renderSelect($item);
             
             
         }
-        echo CHtml::closeTag('li');
     }
     elseif (is_string($item) && $item == 'separator' && $allowSeparator)
     {
-        echo CHtml::openTag('li');
-        echo CHtml::image($imageUrl . 'separator.gif');
+        $result = CHtml::image($imageUrl . 'separator.gif');
         $allowSeparator = false;
-        echo CHtml::closeTag('li');
     }
     
+    return $result;
 }
 
 ?>
@@ -67,7 +61,10 @@ function renderItem($item, &$allowSeparator, MenuWidget $widget, $imageUrl)
                 $allowSeparator = false;
                 foreach($menuItems as $item)
                 {
-                    renderItem($item, $allowSeparator, $this, $imageUrl);
+                    if ($content = renderItem($item, $allowSeparator, $this, $imageUrl))
+                    {
+                        echo CHtml::tag('li', array(), $content);
+                    }
                 }
                 echo CHtml::closeTag('ol');
                 
