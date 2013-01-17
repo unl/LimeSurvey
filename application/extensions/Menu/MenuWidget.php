@@ -86,7 +86,7 @@
             if ($this->hasRight('USER_RIGHT_CONFIGURATOR'))
             {
                 return array(
-                    'href' => 'admin/globalsettings',
+                    'href' => array('admin/globalsettings'),
                     'image' => 'global.png',
                     'alt' => $this->gT('Global Settings')
                 );
@@ -98,7 +98,7 @@
             if ($this->hasRight('USER_RIGHT_CONFIGURATOR'))
             {
                 return array(
-                    'href' => 'admin/checkintegrity',
+                    'href' => array('admin/checkintegrity'),
                     'image' => 'checkdb.png',
                     'alt' => $this->gT('Check Data Integrity')
                 );
