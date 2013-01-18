@@ -83,12 +83,13 @@
                 'alt' => $this->gT('LimeSurvey online manual'),
                 'image' => 'showhelp.png'
             );
+
+            $event = new PluginEvent('afterAdminMenuLoaded', $this);
+            $event->set('menu', $menu);
             
-            $this->menu = $menu;
+            $result = App()->getPluginManager()->dispatchEvent($event);
             
-            App()->getPluginManager()->dispatchEvent('afterAdminMenuLoaded', array($this));
-            
-            $menu = $this->menu;
+            $menu = $result->get('menu');
             
             $this->render('adminmenu', compact('menu', 'imageUrl'));
         }

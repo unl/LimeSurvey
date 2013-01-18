@@ -12,7 +12,7 @@ class Example extends PluginBase {
         $this->subscribe('afterAdminMenuLoaded');
     }
 
-    public function helloWorld() 
+    public function helloWorld(PluginEvent $event) 
     {
         $count = (int) $this->get('count');
         if ($count === false) $count = 0;
@@ -21,13 +21,16 @@ class Example extends PluginBase {
         $this->set('count', $count);
     }
     
-    public function afterAdminMenuLoaded(MenuWidget $menu)
+    public function afterAdminMenuLoaded(PluginEvent $event)
     {
-        $menu->menu['left'][]=array(
+        $menu = $event->get('menu', array());
+        $menu['left'][]=array(
                 'href' => "http://docs.limesurvey.org",
-                'alt' => $menu->gT('LimeSurvey online manual'),
+                'alt' => $event->getSender()->gT('LimeSurvey online manual'),
                 'image' => 'showhelp.png'
             );
+        
+        $event->set('menu', $menu);
     }
 
 }

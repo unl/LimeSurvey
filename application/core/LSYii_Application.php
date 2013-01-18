@@ -129,7 +129,7 @@ class LSYii_Application extends CWebApplication
         $this->pluginManager->loadPlugins();
         
         // @TODO: REMOVE TEST CODE BELOW
-        $this->getPluginManager()->dispatchEvent('dummyEvent');
+        $this->getPluginManager()->dispatchEvent(new PluginEvent('dummyEvent', $this));
     }
     
     /**
