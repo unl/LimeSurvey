@@ -16,7 +16,7 @@
          * This Twig environment will have the plugin view path configured in its loader.
          * @param bool $return If true, return the content instead of outputting it.
          */
-        public function render($twig, $return = false);
+        public function render($twig, $name, $return = false);
         
     }
 ?>

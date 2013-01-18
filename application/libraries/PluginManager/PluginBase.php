@@ -8,7 +8,7 @@
         protected $id = null;
         protected $storage = 'DummyStorage';
         
-        static private $description = 'Base plugin object';
+        static protected $description = 'Base plugin object';
         private $store = null;
         private $settings = array();
         

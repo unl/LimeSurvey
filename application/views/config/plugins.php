@@ -7,9 +7,3 @@ $this->widget('zii.widgets.grid.CGridView', array(
     'columns'=>$gridColumns
 ));
 ?>
-<pre>
-<?php
-var_dump($discoveredPlugins);
-var_dump($registeredPlugins);
-?>
-</pre>
