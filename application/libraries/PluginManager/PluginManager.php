@@ -79,20 +79,30 @@
 
         /**
          * This function dispatches an event to all registered plugins.
-         * @param type $event Name of the event.
-         * @param type $params Parameters to be passed to the event handlers.
+         * @param PluginEvent $event Object holding all event properties
+         * @param string|array $target Optional name of plugin to fire the event on
+         * 
+         * @return PluginEvent
          */
-        public function dispatchEvent($event, $params = array())
+        public function dispatchEvent(PluginEvent $event, $target = array())
         {
-            $eventResults = array();
-            if (isset($this->subscriptions[$event]))
+            $eventName = $event->getEventName();
+            if (is_string($target)) {
+                $target = array($target);
+            }
+            if (isset($this->subscriptions[$eventName]))
             {
-                foreach($this->subscriptions[$event] as $subscription)
+                foreach($this->subscriptions[$eventName] as $subscription)
                 {
-                    $eventResults[get_class($subscription[0])] = call_user_func_array($subscription, $params);
+                    if (!$event->stop() 
+                     && (empty($target) || in_array($subscription[0], $target))) 
+                    {
+                        call_user_func($subscription, $event);
+                    }
                 }
             }
-
+            
+            return $event;
         }
 
         /**
@@ -174,7 +184,8 @@
             {
                 $this->loadPlugin($pluginName, $id);
             }
-            $this->dispatchEvent('afterPluginLoad');    // Alow plugins to do stuff after all plugins are loaded
+            
+            $this->dispatchEvent(new PluginEvent('afterPluginLoad', $this));    // Alow plugins to do stuff after all plugins are loaded
         }
     }
 ?>

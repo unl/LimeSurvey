@@ -7,6 +7,8 @@
          */
         public $clang = null;
         
+        public $menu = array();
+        
         public function __construct($owner = null) {
             parent::__construct($owner);
             $this->clang = App()->lang;
@@ -82,6 +84,13 @@
                 'alt' => $this->gT('LimeSurvey online manual'),
                 'image' => 'showhelp.png'
             );
+
+            $event = new PluginEvent('afterAdminMenuLoaded', $this);
+            $event->set('menu', $menu);
+            
+            $result = App()->getPluginManager()->dispatchEvent($event);
+            
+            $menu = $result->get('menu');
             
             $this->render('adminmenu', compact('menu', 'imageUrl'));
         }

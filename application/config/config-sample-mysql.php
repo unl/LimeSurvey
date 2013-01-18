@@ -54,7 +54,7 @@ return array(
             'urlFormat' => 'get',
             'rules' => require('routes.php'),
             'showScriptName' => true,
-        ),
+        )),
         // Use the following config variable to set modified optional settings copied from config-defaults.php
         'config'=>array(
             // debug: Set this to 1 if you are looking for errors. If you still get no errors after enabling this
@@ -64,7 +64,7 @@ return array(
             'debug'=>0,
             'debugsql'=>0 // Set this to 1 to enanble sql logging, only active when debug = 2
         )
-    )
+    
 );
 /* End of file config.php */
 /* Location: ./application/config/config.php */
