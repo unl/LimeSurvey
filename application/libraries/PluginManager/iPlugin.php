@@ -30,5 +30,4 @@ interface iPlugin {
      * @return array
      */
     public function getPluginSettings();
-
 }
