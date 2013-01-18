@@ -2,7 +2,8 @@
 /* @var $this ConfigController */
 /* @var $dataProvider CActiveDataProvider */
 
-$this->widget('zii.widgets.grid.CGridView', array(
+var_dump($discoveredPlugins);
+$this->widget('application.extensions.GridViewWidget', array(
     'dataProvider'=>$dataProvider,
     'columns'=>$gridColumns
 ));

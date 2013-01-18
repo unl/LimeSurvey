@@ -112,6 +112,7 @@ function getSurveyList($returnarray=false, $returnwithouturl=false, $surveyid=fa
     static $cached = null;
 
     $timeadjust = getGlobalSetting('timeadjust');
+    Yii::import('application.libraries.Limesurvey_lang');
     $clang = new Limesurvey_lang(Yii::app()->session['adminlang']);
 
     if(is_null($cached)) {
