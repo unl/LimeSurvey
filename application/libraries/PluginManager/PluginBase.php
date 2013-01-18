@@ -20,9 +20,10 @@
         protected $pluginManager;
 
         /**
+         * Constructor for the plugin
          * 
-         * @param PluginManager $pluginManager
-         * @param string $id
+         * @param PluginManager $manager    The plugin manager instantiating the object
+         * @param int           $id         The id for storage
          */
         public function __construct(PluginManager $pluginManager, $id)
         {
@@ -36,7 +37,7 @@
          * 
          * @return iPluginStorage
          */
-        public function getStore()
+        protected function getStore()
         {
             if (is_null($this->store)) {
                 $this->store = $this->pluginManager->getStore($this->storage);
@@ -99,8 +100,7 @@
         /**
          * This function unsubscribes the plugin from an event.
          * @param string $event
-         */
-        
+         */        
         protected function unsubscribe($event)
         {
             return $this->pluginManager->unsubscribe($this, $event);
@@ -117,8 +117,7 @@
         
         /**
          * 
-         * @param string $name Name of the setting.
-         
+         * @param string $name Name of the setting.         
          * The type of the setting is either a basic type or choice.
          * The choice type is either a single or a multiple choice setting.
          * @param array $options
@@ -137,7 +136,9 @@
         }
         
         
-        
+        /**
+         * Return the description for this plugin
+         */
         public static function getDescription()
         {
             return static::$description;
