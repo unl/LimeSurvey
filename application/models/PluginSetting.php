@@ -17,11 +17,11 @@
 /**
  * This is the model class for table "{{plugin_settings}}".
  */
-class PluginSettings extends CActiveRecord {
+class PluginSetting extends CActiveRecord {
 
     /**
      * @param type $className
-     * @return Plugins
+     * @return PluginSetting
      */
     public static function model($className = __CLASS__) {
         return parent::model($className);

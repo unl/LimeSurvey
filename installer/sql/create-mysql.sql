@@ -568,9 +568,12 @@ CREATE TABLE `prefix_question_type_groups` (
   UNIQUE KEY `order` (`order`)
 ) ENGINE=MyISAM AUTO_INCREMENT=6 CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
+--
+-- @todo Make name unique
+--
 CREATE TABLE `prefix_plugins` (
   `id` int(11) NOT NULL auto_increment,
-  `plugin` varchar(50) NOT NULL,
+  `name` varchar(50) NOT NULL,
   `active` int(1) NOT NULL default '0',
   PRIMARY KEY  (`id`)
 ) ENGINE=MYISAM CHARACTER SET utf8 COLLATE utf8_unicode_ci;

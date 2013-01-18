@@ -48,7 +48,7 @@
             $menu['left'][] = 'separator';
             $menu['left'][] = $this->participantDatabase();
             $menu['left'][] = array(
-                'href' => array('config/plugins'),
+                'href' => array('plugin'),
                 'alt' => $this->gT('Plugin manager'),
                 'image' => 'share.png'
             );

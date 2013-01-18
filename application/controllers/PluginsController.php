@@ -7,19 +7,30 @@
         {
             // Scan the plugins folder.
             $discoveredPlugins = App()->getPluginManager()->scanPlugins();
-
+            $plugins = Plugin::model()->findAll();
+            $discoveredNames = array_keys($discoveredPlugins);
+            $pluginNames = array_map(function(Plugin $plugin) { return $plugin->attributes['name']; }, $plugins);
+            
+            $allNames = array_unique(array_merge($pluginNames, $discoveredNames));
+            foreach ($allNames as $pluginName)
+            {
+                $data[$pluginName]['installed'] = in_array($pluginName, $pluginNames);
+                $data[$pluginName]['discovered'] = in_array($pluginName, $pluginNames);
+                $data[$pluginName]['new'] = !$data[$pluginName]['installed'];
+                $data[$pluginName]['missing'] = !$data[$pluginName]['discovered'];
+            }
             // Register plugins that are not registered yet.
-            $registeredPlugins = Plugins::model()->findAll();
+            
             Yii::import('application.extensions.*');
-            $dataProvider = new CActiveDataProvider(Plugins::model(), array(
+            $dataProvider = new CActiveDataProvider(Plugin::model(), array(
             'criteria' => array(
-            'order' => 'active DESC, plugin ASC'
+            'order' => 'active DESC, name ASC'
             ),
             'pagination' => array(
             'pageSize' => 20)));
 
             $gridColumns = array(
-                'plugin', // display the 'title' attribute
+                'name', // display the 'title' attribute
                 'active', // display the 'name' attribute of the 'category' relation
                 array(            // display a column with "view", "update" and "delete" buttons
                     'class' => 'CallbackColumn',
@@ -27,12 +38,13 @@
                     'url' => function($data) { return array("/config/toggle", "id"=>$data["id"]); }
                 )
             );
+                
             echo $this->render('/plugins/index', compact('discoveredPlugins', 'registeredPlugins', 'dataProvider', 'gridColumns'));
         }
         
          public function actionActivate($id)
         {
-            $plugin = Plugins::model()->findByPk($id);
+            $plugin = Plugin::model()->findByPk($id);
             if (!is_null($plugin)) {
                 $status = $plugin->active;
                 if ($status == 1) {
@@ -56,7 +68,7 @@
                 $plugin->active = $status;
                 $plugin->save();
             }
-            $this->redirect(array('/config/plugins'));
+            $this->redirect(array('/plugin/'));
         }
 
 

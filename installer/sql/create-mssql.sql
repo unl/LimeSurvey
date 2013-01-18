@@ -561,9 +561,13 @@ CREATE TABLE [prefix_question_type_groups] (
 ) AUTO_INCREMENT=6;
 
 
+--
+-- @todo Make name unique
+--
+
 CREATE TABLE [prefix_plugins] (
   [id] int(11) NOT NULL identity(1,1),
-  [plugin] varchar(50) NOT NULL,
+  [name] varchar(50) NOT NULL,
   [active] int(1) NOT NULL default '0',
   PRIMARY KEY  (`id`)
 );

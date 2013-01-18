@@ -171,7 +171,7 @@
         {
             $plugins = array();
             try {
-                $pluginModel = Plugins::model();    
+                $pluginModel = Plugin::model();    
                 $records = $pluginModel->findAllByAttributes(array('active'=>1));
             
                 foreach ($records as $record) {

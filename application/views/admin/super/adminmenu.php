@@ -82,7 +82,7 @@
                 <a href="<?php echo $this->createUrl("admin/participants/sa/index"); ?>" >
                     <img src='<?php echo $sImageURL;?>cpdb.png' alt='<?php $clang->eT("Central participant database/panel");?>' width='<?php echo $iconsize;?>' height='<?php echo $iconsize;?>'/></a>
                 <?php } ?>
-            <a href="<?php echo $this->createUrl("config/plugins"); ?>" >Plugin manager</a>
+            <a href="<?php echo $this->createUrl("plugin"); ?>" >Plugin manager</a>
                 
         </div>
         <div class='menubar-right'>
