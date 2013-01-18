@@ -185,7 +185,7 @@
                 $this->loadPlugin($pluginName, $id);
             }
             
-            //$this->dispatchEvent(new PluginEvent('afterPluginLoad', $this));    // Alow plugins to do stuff after all plugins are loaded
+            $this->dispatchEvent(new PluginEvent('afterPluginLoad', $this));    // Alow plugins to do stuff after all plugins are loaded
         }
     }
 ?>
