@@ -19,6 +19,11 @@
          */
         protected $pluginManager;
 
+        /**
+         * 
+         * @param PluginManager $pluginManager
+         * @param string $id
+         */
         public function __construct(PluginManager $pluginManager, $id)
         {
             $this->pluginManager = $pluginManager;

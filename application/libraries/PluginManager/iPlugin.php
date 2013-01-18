@@ -2,7 +2,7 @@
 interface iPlugin {
 
     /**
-     * Shoudl return the description for this plugin
+     * Should return the description for this plugin
      */
     public static function getDescription();
     
@@ -12,4 +12,10 @@ interface iPlugin {
      * @return int
      */
     public function getId();
+    
+    
+    /**
+     * 
+     */
+    public function __construct(PluginManager $pluginManager, $id);
 }

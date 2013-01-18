@@ -1,0 +1,5 @@
+{# Default view file for Yes/No pluggable question. #}
+
+<input type="radio" name="{{ name }}" {% if default == 0 %} checked="checked" {% endif %} form="limesurvey" value="0">{{ trans("Yes") }}</input>
+<input type="radio" name="{{ name }}" {% if default == 0 %} checked="checked" {% endif %} form="limesurvey" value="1">{{ trans("No") }}</input>
+
