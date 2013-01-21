@@ -7,6 +7,8 @@
         private $stores = array();
 
         private $subscriptions = array();
+        
+        protected $_plugins = array();
 
         /**
          * Returns the storage instance of type $storageClass.
@@ -155,9 +157,11 @@
          */
         public function loadPlugin($pluginName, $id)
         {
-            Yii::import("webroot.plugins.{$pluginName}.{$pluginName}");
-            $plugin = new $pluginName($this, $id);
-            return $plugin;
+            if (!isset($this->_plugins[$id]) || get_class($this->_plugins[$id]) !== $pluginName) {
+                Yii::import("webroot.plugins.{$pluginName}.{$pluginName}");
+                $this->_plugins[$id] = new $pluginName($this, $id);
+            }
+            return $this->_plugins[$id];
         }
 
         /**
