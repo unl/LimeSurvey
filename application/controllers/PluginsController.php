@@ -1,7 +1,18 @@
 <?php
-    
+    /**
+     * @property PluginSettingsHelper $PluginSettings
+     */
     class PluginsController extends LSYii_Controller 
     {
+        protected $helpers = array(
+            'PluginSettings'
+        );
+        
+        /**
+         * Stored dynamic properties set and unset via __get and __set.
+         * @var array of mixed.
+         */
+        protected $properties = array();
         
         public function actionIndex()
         {
@@ -30,12 +41,16 @@
             'pageSize' => 20)));
 
             $gridColumns = array(
-                'name', // display the 'title' attribute
+                array(// display the 'title' attribute
+                    'class' => 'CallbackColumn',
+                    'label' => 'name',
+                    'url' => function($data) { return array("/plugins/configure", "id" => $data['id']); }
+                ),
                 'active', // display the 'name' attribute of the 'category' relation
                 array(            // display a column with "view", "update" and "delete" buttons
                     'class' => 'CallbackColumn',
                     'label' => function($data) { return ($data->active == 1) ? "deactivate": "activate"; },
-                    'url' => function($data) { return array("/config/toggle", "id"=>$data["id"]); }
+                    'url' => function($data) { return array("/plugins/toggle", "id"=>$data["id"]); }
                 )
             );
                 
@@ -68,9 +83,69 @@
                 $plugin->active = $status;
                 $plugin->save();
             }
-            $this->redirect(array('/plugin/'));
+            $this->redirect(array('plugins/'));
         }
 
-
+         public function actionConfigure($id)
+         {
+             $plugin = Plugin::model()->findByPk($id)->attributes;
+             $pluginObject = App()->getPluginManager()->loadPlugin($plugin['name'], $plugin['id']);
+             
+             if ($plugin === null)
+             {
+                 /**
+                  * @todo Add flash message "Plugin not found".
+                  */
+                 $this->redirect(array('plugins/'));
+             }
+             // If post handle data.
+             if (App()->request->isPostRequest)
+             {
+                 $settings =  $pluginObject->getPluginSettings(false);
+                 $save = array();
+                 foreach ($settings as $name => $setting)
+                 {
+                     $save[$name] = App()->request->getPost($name, null);
+                     
+                 }
+                 $pluginObject->saveSettings($save);
+             }
+                 
+             
+             $settings =  $pluginObject->getPluginSettings();
+             $this->render('/plugins/configure', compact('settings', 'plugin'));
+             
+         }
+         
+         /**
+          * Allows for array configuration that loads helpers.
+          * @param type $view
+          * @return boolean
+          */
+         
+         public function beforeRender($view) {
+             parent::beforeRender($view);
+             // Load configured helpers.
+             foreach ($this->helpers as $helper)
+             {
+                 $class = "{$helper}Helper";
+                 Yii::import("application.helpers.$class");
+                 $this->$helper = new $class;
+             }
+             
+             return true;
+         }
+         
+         public function __get($property)
+         {
+             return  $this->properties[$property];
+         }
+         
+         public function __set($property, $value)
+         {
+             $this->properties[$property] = $value;
+         }
+         
+          
     }
 ?>

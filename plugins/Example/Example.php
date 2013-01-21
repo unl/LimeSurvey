@@ -3,6 +3,13 @@ class Example extends PluginBase {
 
     protected $storage = 'DbStorage';    
     static protected $description = 'Example plugin';
+    
+    protected $settings = array(
+        'message' => array(
+            'type' => 'string',
+            'label' => 'Message'
+        )
+    );
 
      public function __construct(PluginManager $pluginManager, $id) 
     {

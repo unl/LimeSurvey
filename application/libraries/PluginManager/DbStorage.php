@@ -5,15 +5,16 @@ class DbStorage implements iPluginStorage {
     protected $model = null;
 
     public function __construct() {
-        $this->model = PluginSettings::model();
+        $this->model = PluginSetting::model();
     }
 
     /**
      * 
      * @param iPlugin $plugin
-     * @param type $key
-     * @param type $model
-     * @param type $id
+     * @param string $key
+     * @param string $model
+     * @param int $id
+     * @return mixed Returns the value from the database or null if not set.
      */
     function get($plugin, $key = null, $model = null, $id = null) {
         $attributes = array(
@@ -22,11 +23,10 @@ class DbStorage implements iPluginStorage {
             'model_id'  => $id,
             'key'       => $key);
         $record = $this->model->findByAttributes($attributes);
-        
         if (!is_null($record)) {
             return unserialize($record->value);
         } else {
-            return false;
+            return null;
         }        
     }
 

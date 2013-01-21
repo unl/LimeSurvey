@@ -26,8 +26,8 @@ interface iPlugin {
     /**
      * Provides meta data on the plugin settings that are available for this plugin.
      * This does not include enable / disable; a disabled plugin is never loaded.
-     * 
+     * @param boolean $getValues Set to false to not get the current value for each plugin setting.
      * @return array
      */
-    public function getPluginSettings();
+    public function getPluginSettings($getValues = true);
 }

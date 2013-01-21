@@ -1,5 +1,5 @@
-<html>
 <!DOCTYPE html>
+<html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
         <script type="text/javascript" src="<?php echo Yii::app()->getConfig('generalscripts');?>jquery/jquery.js"></script>
@@ -40,4 +40,4 @@
         <?php echo $content; ?>
     </body>
 
-</hmtl>
+</html>

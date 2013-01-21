@@ -153,7 +153,7 @@
          * @param string $pluginName
          * @return iPlugin
          */
-        protected function loadPlugin($pluginName, $id)
+        public function loadPlugin($pluginName, $id)
         {
             Yii::import("webroot.plugins.{$pluginName}.{$pluginName}");
             $plugin = new $pluginName($this, $id);
