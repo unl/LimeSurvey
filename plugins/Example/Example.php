@@ -24,7 +24,7 @@ class Example extends PluginBase {
         $count = (int) $this->get('count');
         if ($count === false) $count = 0;
         $count++;
-        traceVar($count);
+        Yii::app()->session['flashmessage'] = $this->get('message') . $count;
         $this->set('count', $count);
     }
     

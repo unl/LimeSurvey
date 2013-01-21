@@ -2,13 +2,16 @@
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-        <script type="text/javascript" src="<?php echo Yii::app()->getConfig('generalscripts');?>jquery/jquery.js"></script>
-        <script type="text/javascript" src="<?php echo Yii::app()->getConfig('generalscripts');?>jquery/jquery-ui.js"></script>
-        <script type="text/javascript" src="<?php echo Yii::app()->getConfig('generalscripts');?>jquery/jquery.ui.touch-punch.min.js"></script>
-        <script type="text/javascript" src="<?php echo Yii::app()->getConfig('generalscripts');?>jquery/jquery.qtip.js"></script>
-        <script type="text/javascript" src="<?php echo Yii::app()->getConfig('generalscripts');?>jquery/jquery.notify.js"></script>
-        <script type="text/javascript" src="<?php echo Yii::app()->createUrl('config/script');?>"></script>
-        <script type="text/javascript" src="<?php echo Yii::app()->getConfig('adminscripts');?>admin_core.js"></script>
+        <?php $cs=Yii::app()->getClientScript();
+        /* @var $cs CClientScript */
+        $cs->registerCoreScript('jquery');
+        $cs->registerScriptFile(Yii::app()->getConfig('generalscripts') . 'jquery/jquery-ui.js');
+        $cs->registerScriptFile(Yii::app()->getConfig('generalscripts') . 'jquery/jquery.ui.touch-punch.min.js');
+        $cs->registerScriptFile(Yii::app()->getConfig('generalscripts') . 'jquery/jquery.qtip.js');
+        $cs->registerScriptFile(Yii::app()->getConfig('generalscripts') . 'jquery/jquery.notify.js');
+        $cs->registerScriptFile(Yii::app()->createUrl('config/script'));
+        $cs->registerScriptFile(Yii::app()->getConfig('adminscripts') . 'admin_core.js');
+        ?>
         
         <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->getConfig('adminstyleurl');?>jquery-ui/jquery-ui.css" />
         <link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->getConfig('adminstyleurl');?>printablestyle.css" media="print" />
@@ -35,6 +38,7 @@
         <title>Limesurvey Administration</title>
     </head>
     <body>
+        <?php $this->widget('application.extensions.FlashMessage.FlashMessage'); ?>
         <div class="maintitle"><?php echo App()->getConfig('sitename'); ?></div>
         <?php $this->widget('application.extensions.Menu.MenuWidget'); ?>
         <?php echo $content; ?>
