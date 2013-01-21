@@ -1,14 +1,6 @@
 <?php
 
-    interface iQuestionPlugin extends iPlugin {
-        
-        /**
-         * Constructor for a question object.
-         * @param bool $live True if we plan to display the question, false during administration.
-         * 
-         */
-        public function __construct(PluginManager $pluginManager, $id);
-        
+    interface iQuestionPlugin extends iPlugin {      
         
         /**
          * @param Twig_Environment $twig A reference to configured Twig Environment.

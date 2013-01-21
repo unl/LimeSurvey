@@ -175,7 +175,7 @@
                 $records = $pluginModel->findAllByAttributes(array('active'=>1));
             
                 foreach ($records as $record) {
-                    $plugins[$record->id] = $record->plugin;
+                    $plugins[$record->id] = $record->name;
                 }
             } catch (Exception $exc) {
                 // Something went wrong, maybe no database was present so we load no plugins

@@ -50,7 +50,7 @@
                 array(            // display a column with "view", "update" and "delete" buttons
                     'class' => 'CallbackColumn',
                     'label' => function($data) { return ($data->active == 1) ? "deactivate": "activate"; },
-                    'url' => function($data) { return array("/plugins/toggle", "id"=>$data["id"]); }
+                    'url' => function($data) { return array("/plugins/activate", "id"=>$data["id"]); }
                 )
             );
                 
@@ -63,16 +63,16 @@
             if (!is_null($plugin)) {
                 $status = $plugin->active;
                 if ($status == 1) {
-                    $result = App()->getPluginManager()->dispatchEvent(new PluginEvent('beforeDeactivate', $this), $plugin->plugin);
+                    $result = App()->getPluginManager()->dispatchEvent(new PluginEvent('beforeDeactivate', $this), $plugin->name);
                     if ($result->get('success', true)) {
                         $status = 0;
                     } else {
                         echo "Failed to deactivate";
-                        Yii::app()->end();
+                        Yii::app()->end(); 
                     }
 
                 } else {
-                    $result = App()->getPluginManager()->dispatchEvent(new PluginEvent('beforeActivate', $this), $plugin->plugin);
+                    $result = App()->getPluginManager()->dispatchEvent(new PluginEvent('beforeActivate', $this), $plugin->name);
                     if ($result->get('success', true)) {
                         $status = 1;
                     } else {
