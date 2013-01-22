@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: text/javascript;charset=utf-8');
 
 /*
  * This view file will wrap the passed data in a javascript object.
