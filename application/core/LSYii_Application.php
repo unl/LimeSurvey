@@ -180,6 +180,25 @@ class LSYii_Application extends CWebApplication
     {
         $this->config[$name] = $value;
     }
+    
+    /**
+     * Set a 'flash message'. 
+     * 
+     * A flahs message will be shown on the next request and can contain a message
+     * to tell that the action was successful or not. The message is displayed and
+     * cleared when it is shown in the view using the widget:
+     * <code>
+     * $this->widget('application.extensions.FlashMessage.FlashMessage');
+     * </code> 
+     * 
+     * @param string $message
+     * @return LSYii_Application Provides a fluent interface
+     */
+    public function setFlashMessage($message)
+    {
+        $this->session['flashmessage'] = $message;
+        return $this;
+    }
 
     /**
     * Loads a config from a file

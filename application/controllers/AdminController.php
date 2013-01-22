@@ -312,12 +312,14 @@ class AdminController extends LSYii_Controller
         if (!empty(Yii::app()->session['dateformat']))
             $aData['formatdata'] = getDateFormatData(Yii::app()->session['dateformat']);
 
+        /* Handled by a widget now so this code is obsolete
         // Prepare flashmessage
         if (!empty(Yii::app()->session['flashmessage']) && Yii::app()->session['flashmessage'] != '')
         {
             $aData['flashmessage'] = Yii::app()->session['flashmessage'];
             unset(Yii::app()->session['flashmessage']);
         }
+         */
 
         $aData['css_admin_includes'] = $this->_css_admin_includes(array(), true);
 
