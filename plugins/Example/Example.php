@@ -10,23 +10,18 @@ class Example extends PluginBase {
             'label' => 'Message'
         )
     );
-
-     public function __construct(PluginManager $pluginManager, $id) 
-    {
-        parent::__construct($pluginManager, $id);
-
+    
+    /**
+     * Here you should handle subscribing to the events your plugin will handle
+     */
+    public function registerEvents() {
         $this->subscribe('dummyEvent', 'helloWorld');
         $this->subscribe('afterAdminMenuLoaded');
     }
-
-    public function helloWorld(PluginEvent $event) 
-    {
-        $count = (int) $this->get('count');
-        if ($count === false) $count = 0;
-        $count++;
-        Yii::app()->session['flashmessage'] = $this->get('message') . $count;
-        $this->set('count', $count);
-    }
+    
+    /*
+     * Below are the actual methods that handle events
+     */
     
     public function afterAdminMenuLoaded(PluginEvent $event)
     {
@@ -38,6 +33,15 @@ class Example extends PluginBase {
             );
         
         $event->set('menu', $menu);
+    }
+
+    public function helloWorld(PluginEvent $event) 
+    {
+        $count = (int) $this->get('count');
+        if ($count === false) $count = 0;
+        $count++;
+        Yii::app()->session['flashmessage'] = $this->get('message') . $count;
+        $this->set('count', $count);
     }
 
 }

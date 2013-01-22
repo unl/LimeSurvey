@@ -11,6 +11,11 @@
         );
                
         protected $default = 0;
+        
+        public function registerEvents() {
+            // No events handled yet
+        }
+        
         /**
          * 
          * @param Twig_Environment $twig

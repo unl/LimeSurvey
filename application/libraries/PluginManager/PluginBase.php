@@ -29,6 +29,7 @@
         {
             $this->pluginManager = $pluginManager;
             $this->id = $id;
+            $this->registerEvents();
         }
         
         /**
@@ -145,9 +146,10 @@
             return $this->getStore()->set($this, $key, $data, $model, $id);
         }
     
-        
-        
-
+        /**
+         * Here you should handle subscribing to the events your plugin will handle
+         */
+        abstract public function registerEvents();
         
         /**
          * This function subscribes the plugin to receive an event.
@@ -167,11 +169,5 @@
         {
             return $this->pluginManager->unsubscribe($this, $event);
         }
-        
-        
-        
-   
-        
 
     }
-?>
