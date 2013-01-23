@@ -120,12 +120,13 @@ class PluginEvent
      * @param boolean $bool
      * @return boolean 
      */
-    public function stop($bool = null)
+    public function stop()
     {
-        if (!is_null($bool)) {
-            $this->_stop = (bool) $bool;
-        }
-        
-        return (bool) $this->_stop;
+        $this->_stop = true;
+    }
+    
+    public function isStopped()
+    {
+        return $this->_stop;
     }
 }

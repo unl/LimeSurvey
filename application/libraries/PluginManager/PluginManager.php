@@ -96,7 +96,7 @@
             {
                 foreach($this->subscriptions[$eventName] as $subscription)
                 {
-                    if (!$event->stop() 
+                    if (!$event->isStopped() 
                      && (empty($target) || in_array($subscription[0], $target))) 
                     {
                         call_user_func($subscription, $event);

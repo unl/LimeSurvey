@@ -18,43 +18,35 @@
         {
             // Scan the plugins folder.
             $discoveredPlugins = App()->getPluginManager()->scanPlugins();
-            $plugins = Plugin::model()->findAll();
-            $discoveredNames = array_keys($discoveredPlugins);
-            $pluginNames = array_map(function(Plugin $plugin) { return $plugin->attributes['name']; }, $plugins);
             
-            $allNames = array_unique(array_merge($pluginNames, $discoveredNames));
-            foreach ($allNames as $pluginName)
+            $installedPlugins = Plugin::model()->findAll();
+            
+            $installedNames = array_map(function ($installedPlugin) { return $installedPlugin->name; }, $installedPlugins);
+            
+            // Install newly discovered plugins.
+            foreach ($discoveredPlugins as $discoveredPlugin)
             {
-                $data[$pluginName]['installed'] = in_array($pluginName, $pluginNames);
-                $data[$pluginName]['discovered'] = in_array($pluginName, $pluginNames);
-                $data[$pluginName]['new'] = !$data[$pluginName]['installed'];
-                $data[$pluginName]['missing'] = !$data[$pluginName]['discovered'];
+                if (!in_array($discoveredPlugin['name'], $installedNames))
+                {
+                    $plugin = new Plugin();
+                    $plugin->name = $discoveredPlugin['name'];
+                    $plugin->active = 0;
+                    $plugin->save();
+                }
             }
-            // Register plugins that are not registered yet.
             
-            Yii::import('application.extensions.*');
-            $dataProvider = new CActiveDataProvider(Plugin::model(), array(
-            'criteria' => array(
-            'order' => 'active DESC, name ASC'
-            ),
-            'pagination' => array(
-            'pageSize' => 20)));
-
-            $gridColumns = array(
-                array(// display the 'title' attribute
-                    'class' => 'CallbackColumn',
-                    'label' => 'name',
-                    'url' => function($data) { return array("/plugins/configure", "id" => $data['id']); }
-                ),
-                'active', // display the 'name' attribute of the 'category' relation
-                array(            // display a column with "view", "update" and "delete" buttons
-                    'class' => 'CallbackColumn',
-                    'label' => function($data) { return ($data->active == 1) ? "deactivate": "activate"; },
-                    'url' => function($data) { return array("/plugins/activate", "id"=>$data["id"]); }
-                )
-            );
-                
-            echo $this->render('/plugins/index', compact('discoveredPlugins', 'registeredPlugins', 'dataProvider', 'gridColumns'));
+            $plugins = Plugin::model()->findAll();
+            $data = array();
+            foreach ($plugins as $plugin)
+            {
+                $data[] = array(
+                    'id' => $plugin->id,
+                    'name' => $plugin->name,
+                    'active' => $plugin->active,
+                    'new' => !in_array($plugin->name, $installedNames)
+                );
+            }
+            echo $this->render('/plugins/index', compact('data'));
         }
         
          public function actionActivate($id)

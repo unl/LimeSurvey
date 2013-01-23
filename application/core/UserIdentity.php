@@ -30,7 +30,14 @@ class UserIdentity extends CUserIdentity
         if (Yii::app()->getConfig("auth_webserver")==false || $this->username != "")         
         {
             $user = User::model()->findByAttributes(array('users_name' => $this->username));
-
+            $beforeLogin = new PluginEvent('beforeLogin');
+            $beforeLogin->set('user', $user);
+            App()->getPluginManager()->dispatchEvent($beforeLogin);
+            if ($beforeLogin->isStopped())
+            {
+                return false;
+            }
+            
             if ($user !== null)
             {
                 if (gettype($user->password)=='resource')
@@ -83,6 +90,13 @@ class UserIdentity extends CUserIdentity
             $this->username = $sUser;
 
             $oUser=User::model()->findByAttributes(array('users_name'=>$sUser));
+            $beforeLogin = new PluginEvent('beforeLogin');
+            $beforeLogin->set('user', $oUser);
+            App()->getPluginManager()->dispatchEvent($beforeLogin);
+            if ($beforeLogin->isStopped())
+            {
+                return false;
+            }
             if (is_null($oUser))
             {
                 if (function_exists("hook_get_auth_webserver_profile"))

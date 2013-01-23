@@ -77,5 +77,13 @@ class SurveyController extends LSYii_Controller
             'verification' => 'application.controllers.verification'
         );
     }
+    
+    public function beforeAction($action) 
+    {
+        parent::beforeAction($action);
+        $beforeSurvey = new PluginEvent('beforeSurveyController');
+        App()->getPluginManager()->dispatchEvent($beforeSurvey);
+        return !$beforeSurvey->isStopped();
+    }
 
 }
