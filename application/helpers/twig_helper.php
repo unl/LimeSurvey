@@ -21,7 +21,7 @@
         public static function getTwigEnvironment($options = array())
         {
             // If debugging dont use cache and enable twig debug.
-            if (App()->getConfig('debug') > 0)
+            if (true || App()->getConfig('debug') > 0)
             {
                 $options['debug'] = true;
                 $options['cache'] = false;
@@ -51,6 +51,7 @@
                 ));
                 $twig = new Twig_Environment($loader, $options);
                 $twig->addFunction(new Twig_SimpleFunction('trans', 'Twig::gT'));
+                $twig->addFunction(new Twig_SimpleFunction('ntrans', 'Twig::ngT'));
                 $twig->addFunction(new Twig_SimpleFunction('em', 'Twig::em'));
                 
                 //$twig->addExtension(new Twig_Extensions_Extension_I18n());
@@ -60,9 +61,34 @@
             return self::$environment;
         }
         
+        public static function ngt($singular, $plural, $count)
+        {
+            
+            // First translate using proper translation string.
+            $translated = self::$translator->ngT($singular, $plural, $count);
+            // Then apply printf.
+            $args = func_get_args();
+            array_shift($args);
+            array_shift($args);
+            return vsprintf($translated, $args);
+        }
+        
         public static function gT($txt)
         {
-            return self::$translator->gT($txt);
+            // First translate text.
+            $translated = self::$translator->gT($txt);
+            
+            // Then apply printf.
+            if (func_num_args() > 1)
+            {
+                $args = func_get_args();
+                array_shift($args);
+                return vsprintf($translated, $args);
+            }
+            else
+            {
+                return $translated;
+            }
         }
         
         public static function em($txt)

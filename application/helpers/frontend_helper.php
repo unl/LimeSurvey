@@ -2555,7 +2555,7 @@ function display_first_page() {
 
     
     
-    if (file_exists(getTemplatePath($thissurvey['template']). "/welcome.twig"))
+    if (file_exists(getTemplatePath($thissurvey['template']). DIRECTORY_SEPARATOR . "welcome.twig"))
     {
         Twig::activateTemplate($thissurvey['template']);
         $twig = Twig::getTwigEnvironment();
@@ -2565,7 +2565,8 @@ function display_first_page() {
             'survey' => array(
                 'name' => $thissurvey['name'],
                 'welcome' => $thissurvey['welcome'],
-                'description' => $thissurvey['description']
+                'description' => $thissurvey['description'],
+                'questioncount' => $_SESSION['survey_'.$surveyid]['totalquestions']
             ),
             'navigator' => array(
                 'next' => true,
@@ -2581,7 +2582,6 @@ function display_first_page() {
         App()->getClientScript()->registerScriptFile(App()->getConfig('generalscripts'). 'survey_runtime.js');
         App()->getClientScript()->registerScriptFile(App()->getConfig('generalscripts'). 'survey_nav.js');
         App()->getClientScript()->renderHead($out);
-
         echo $out;
     }       
     else

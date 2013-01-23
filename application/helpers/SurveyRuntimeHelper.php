@@ -1169,9 +1169,9 @@ END;
                     'next' => !($_SESSION["survey_$surveyId"]['step'] == $_SESSION["survey_$surveyId"]['totalsteps']),
                     'submit' => ($_SESSION["survey_$surveyId"]['maxstep'] == $_SESSION["survey_$surveyId"]['totalsteps']),
                     'previous' => ($survey['allowprev'] == 'Y'),
-                    'clearall' => false,
-                    'save' => ($survey['allowprev'] == 'Y'),
-                    'load' => true
+                    'clearall' => true,
+                    'save' => ($survey['allowsave'] == 'Y'),
+                    'load' => ($survey['allowsave'] == 'Y') // @todo Add check to see if data can be loaded.
                 ),
                 'survey' => array(
                     'active' => ($survey['active'] == 'Y')
