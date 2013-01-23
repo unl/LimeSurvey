@@ -8,11 +8,14 @@ $json = json_encode($data, JSON_FORCE_OBJECT);
 echo "var LS = $json";
 
 // Disable logging.
-foreach (App()->log->routes as $route)
+if (isset(App()->log))
 {
-    if ($route instanceof CWebLogRoute)
+    foreach (App()->log->routes as $route)
     {
-        $route->enabled = false;
+        if ($route instanceof CWebLogRoute)
+        {
+            $route->enabled = false;
+        }
     }
 }
 ?>
