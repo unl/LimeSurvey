@@ -4,10 +4,6 @@
      */
     class PluginsController extends LSYii_Controller 
     {
-        protected $helpers = array(
-            'PluginSettings'
-        );
-        
         /**
          * Stored dynamic properties set and unset via __get and __set.
          * @var array of mixed.
@@ -117,14 +113,6 @@
          
          public function beforeRender($view) {
              parent::beforeRender($view);
-             // Load configured helpers.
-             foreach ($this->helpers as $helper)
-             {
-                 $class = "{$helper}Helper";
-                 Yii::import("application.helpers.$class");
-                 $this->$helper = new $class;
-             }
-             
              return true;
          }
          

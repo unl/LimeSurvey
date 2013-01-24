@@ -17,6 +17,7 @@ class Example extends PluginBase {
     public function registerEvents() {
         $this->subscribe('dummyEvent', 'helloWorld');
         $this->subscribe('afterAdminMenuLoaded');
+        $this->subscribe('beforeSurveySettings');
     }
     
     /*
@@ -42,6 +43,26 @@ class Example extends PluginBase {
         $count++;
         Yii::app()->session['flashmessage'] = $this->get('message') . $count;
         $this->set('count', $count);
+    }
+    
+    
+    /**
+     * This event is fired by the administration panel to gather extra settings
+     * available for a survey.
+     * The plugin should return setting meta data.
+     * @param PluginEvent $event
+     */
+    public function beforeSurveySettings(PluginEvent $event)
+    {
+        $event->set("surveysettings.{$this->id}", array(
+            'name' => get_class($this),
+            'settings' => array(
+                'message' => array(
+                    'type' => 'string',
+                    'label' => 'Message to show to users:'
+                )
+            )
+         ));
     }
 
 }

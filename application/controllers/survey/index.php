@@ -277,6 +277,8 @@ class index extends CAction {
             $data['sitename'] = Yii::app()->getConfig("sitename");
             $data['languagechanger'] = makeLanguageChanger($sDisplayLanguage);
 
+            
+            
             //A nice exit
             sendCacheHeaders();
             doHeader();

@@ -59,13 +59,39 @@ class PluginEvent
      * @param mixed $default
      * @return mixed
      */
-    public function get($key, $default = null)
+    public function get($key = null, $default = null)
     {
-        if (!array_key_exists($key, $this->_parameters))
+        if ($key != null)
         {
-            return $default;
-        } else {
-            return $this->_parameters[$key];
+            $keys = explode('.', $key);
+            $array = $this->_parameters;
+
+            // Retrieve using dot notation.
+            while (count($keys) > 1)
+            {
+                $first = array_shift($keys);
+                if  (isset($array[$first]))
+                {
+                    $array = $array[$first];
+                }
+                else
+                {
+                    return $default;
+                }
+            }
+
+            if (isset($array[$keys[0]]))
+            {
+                return $array[$keys[0]];
+            }
+            else
+            {
+                return $default;
+            }
+        }
+        else
+        {
+            return $this->_parameters;
         }
     }
     
@@ -104,7 +130,13 @@ class PluginEvent
      */
     public function set($key, $value)
     {
-        $this->_parameters[$key] = $value;
+        // Split by . to allow for arrays using dotnotation.
+        $keys = explode('.', $key);
+        while (count($keys) > 1)
+        {
+            $value = array(array_pop($keys) => $value);
+        }
+        $this->_parameters[$keys[0]] = $value;
         
         return $this;
     }

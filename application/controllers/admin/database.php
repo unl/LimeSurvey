@@ -820,7 +820,6 @@ class database extends Survey_Common_Action
             $languagelist[]=Survey::model()->findByPk($surveyid)->language;
 
             Yii::app()->loadHelper('database');
-
             foreach ($languagelist as $langname)
             {
                 if ($langname)
@@ -891,6 +890,16 @@ class database extends Survey_Common_Action
 
         if (($action == "updatesurveysettingsandeditlocalesettings" || $action == "updatesurveysettings") && hasSurveyPermission($surveyid,'surveysettings','update'))
         {
+            // Save plugin settings.
+            $pluginSettings = App()->request->getPost('plugin', array());
+            var_dump($pluginSettings);
+            App()->getPluginManager()->s
+            die();
+            foreach($pluginSettings as $plugin => $settings)
+            {
+                
+            }
+            
             Yii::app()->loadHelper('surveytranslator');
             Yii::app()->loadHelper('database');
             $formatdata=getDateFormatData(Yii::app()->session['dateformat']);
@@ -926,7 +935,6 @@ class database extends Survey_Common_Action
             {
                 $tokenlength = 15;
             }
-
             cleanLanguagesFromSurvey($surveyid,Yii::app()->request->getPost('languageids'));
 
             fixLanguageConsistency($surveyid,Yii::app()->request->getPost('languageids'));

@@ -34,6 +34,25 @@
             
             return $out;
         }
+        
+        
+        public function renderBoolean($name, array $metaData, $form = null)
+        {
+            $out = '';
+            $id = $name;
+            $value = isset($metaData['current']) ? $metaData['current'] : '';
+            if (isset($metaData['label']))
+            {
+                $out .= CHtml::label($metaData['label'], $id);
+            }
+            $out .= CHtml::radioButtonList($id, $value, array(
+                0 => 'False',
+                1 => 'True'
+            ), array('id' => $id, 'form' => $form));
+            
+            
+            return $out;
+        }
     }
 
 ?>
