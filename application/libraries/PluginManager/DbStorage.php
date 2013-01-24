@@ -45,7 +45,8 @@ class DbStorage implements iPluginStorage {
             'plugin_id' => $plugin->getId(),
             'model'     => $model,
             'model_id'  => $id,
-            'key'       => $key);
+            'key'       => $key
+        );
         $record = $this->model->findByAttributes($attributes);
         if (is_null($record)) {
             // New setting

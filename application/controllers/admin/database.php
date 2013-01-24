@@ -892,12 +892,12 @@ class database extends Survey_Common_Action
         {
             // Save plugin settings.
             $pluginSettings = App()->request->getPost('plugin', array());
-            var_dump($pluginSettings);
-            App()->getPluginManager()->s
-            die();
             foreach($pluginSettings as $plugin => $settings)
             {
-                
+                $settingsEvent = new PluginEvent('newSurveySettings');
+                $settingsEvent->set('settings', $settings);
+                $settingsEvent->set('survey', $surveyid);
+                App()->getPluginManager()->dispatchEvent($settingsEvent, $plugin);
             }
             
             Yii::app()->loadHelper('surveytranslator');

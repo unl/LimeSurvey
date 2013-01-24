@@ -63,7 +63,7 @@
                 {
                     foreach ($plugin['settings'] as $name => $setting)
                     {
-                        $name = "plugin[$id][$name]";
+                        $name = "plugin[{$plugin['name']}][$name]";
                         echo CHtml::tag('li', array(), $PluginSettings->renderSetting($name, $setting, null, true));
                     }
                 }

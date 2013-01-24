@@ -18,6 +18,7 @@ class Example extends PluginBase {
         $this->subscribe('dummyEvent', 'helloWorld');
         $this->subscribe('afterAdminMenuLoaded');
         $this->subscribe('beforeSurveySettings');
+        $this->subscribe('newSurveySettings');
     }
     
     /*
@@ -59,10 +60,20 @@ class Example extends PluginBase {
             'settings' => array(
                 'message' => array(
                     'type' => 'string',
-                    'label' => 'Message to show to users:'
+                    'label' => 'Message to show to users:',
+                    'current' => $this->get('message', 'Survey', $event->get('survey'))
                 )
             )
          ));
+    }
+    
+    public function newSurveySettings(PluginEvent $event)
+    {
+        foreach ($event->get('settings') as $name => $value)
+        {
+            
+            $this->set($name, $value, 'Survey', $event->get('survey'));
+        }
     }
 
 }
