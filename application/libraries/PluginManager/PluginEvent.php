@@ -142,21 +142,18 @@ class PluginEvent
     }
     
     /**
-     * Returns true when event is stopped by one of the plugins
-     * 
-     * When a plugin needs to stop execution of the event by other plguins listening
-     * to the same event, the plugin can call this method with value true. The 
-     * PluginManager will no longer hand this event to plugins when this returns 
-     * true.
-     * 
-     * @param boolean $bool
-     * @return boolean 
+     * Halt execution of this event by other plugins
      */
     public function stop()
     {
         $this->_stop = true;
     }
     
+    /**
+     * Returns true when execution of this event was stopped using $this->stop()
+     * 
+     * @return boolean
+     */
     public function isStopped()
     {
         return $this->_stop;
