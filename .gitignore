@@ -8,5 +8,6 @@
 /tmp/*.lss
 /tmp/*.png
 /tmp/*.xls
+/assets/*
 /upload/.htaccess
 /nbproject/*
