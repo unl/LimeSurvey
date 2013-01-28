@@ -7,11 +7,13 @@
         $PluginSettings = new PluginSettingsHelper();
         
         echo CHtml::beginForm('', 'post', array('id' => "pluginsettings-{$plugin['name']}"));
-
+        echo CHtml::openTag('ol');
         foreach ($settings as $name => $setting)
         {
-            $PluginSettings->renderSetting($name, $setting, "pluginsettings-{$plugin['name']}");
+            echo CHtml::tag('li', array(), $PluginSettings->renderSetting($name, $setting, "pluginsettings-{$plugin['name']}", true));
+            
         }
+        echo CHtml::closeTag('ol');
         echo CHtml::submitButton('Save plugin settings');
         echo CHtml::endForm();
 

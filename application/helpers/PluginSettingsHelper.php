@@ -48,7 +48,7 @@
             $out .= CHtml::radioButtonList($id, $value, array(
                 0 => 'False',
                 1 => 'True'
-            ), array('id' => $id, 'form' => $form));
+            ), array('id' => $id, 'form' => $form, 'container'=>'div'));
             
             
             return $out;
