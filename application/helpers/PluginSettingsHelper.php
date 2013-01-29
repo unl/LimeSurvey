@@ -53,6 +53,20 @@
             
             return $out;
         }
+        
+        public function renderInt($name, array $metaData, $form = null)
+        {
+            $out = '';
+            $id = $name;
+            $value = isset($metaData['current']) ? $metaData['current'] : '';
+            if (isset($metaData['label']))
+            {
+                $out .= CHtml::label($metaData['label'], $id);
+            }
+            $out .= CHtml::textField($id, $value, array('id' => $id, 'form' => $form));
+            
+            return $out;
+        }
     }
 
 ?>
