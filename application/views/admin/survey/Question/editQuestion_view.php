@@ -18,7 +18,11 @@
 
 </div>
 
-<div id='tabs'>
+<?php
+$this->renderPartial('/admin/survey/Question/editQuestion_nonlocalized', compact('clang', 'eqrow', 'groupList'));
+?>
+
+<div class='tabs'>
     <ul>
 
         <li><a href="#<?php echo $eqrow['language']; ?>"><?php echo getLanguageNameFromCode($eqrow['language'],false); ?>
@@ -42,8 +46,6 @@
             <div id="<?php echo $eqrow['language']; ?>">
             <?php $eqrow  = array_map('htmlspecialchars', $eqrow); ?>
                 <ul><li>
-                        <label for='title'> <?php $clang->eT("Code:"); ?></label><input type='text' size='20' maxlength='20' id='title' name='title' value="<?php echo $eqrow['title']; ?>" /> <?php if ($copying) $clang->eT("Note: You MUST enter a new question code!"); ?>
-                    </li><li>
                         <label for='question_<?php echo $eqrow['language']; ?>'><?php $clang->eT("Question:"); ?></label>
                         <div class="htmleditor">
                         <textarea cols='50' rows='4' id='question_<?php echo $eqrow['language']; ?>' name='question_<?php echo $eqrow['language']; ?>'><?php echo $eqrow['question']; ?></textarea>

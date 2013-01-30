@@ -21,19 +21,6 @@
         }
         
         
-        public function renderString($name, array $metaData, $form = null)
-        {
-            $out = '';
-            $id = $name;
-            $value = isset($metaData['current']) ? $metaData['current'] : '';
-            if (isset($metaData['label']))
-            {
-                $out .= CHtml::label($metaData['label'], $id);
-            }
-            $out .= CHtml::textField($id, $value, array('id' => $id, 'form' => $form));
-            
-            return $out;
-        }
         
         
         public function renderBoolean($name, array $metaData, $form = null)
@@ -55,6 +42,34 @@
         }
         
         public function renderInt($name, array $metaData, $form = null)
+        {
+            $out = '';
+            $id = $name;
+            $value = isset($metaData['current']) ? $metaData['current'] : '';
+            if (isset($metaData['label']))
+            {
+                $out .= CHtml::label($metaData['label'], $id);
+            }
+            $out .= CHtml::textField($id, $value, array('id' => $id, 'form' => $form));
+            
+            return $out;
+        }
+        
+        public function renderSelect($name, array $metaData, $form = null)
+        {
+            $out = '';
+            $id = $name;
+            $value = isset($metaData['current']) ? $metaData['current'] : '';
+            if (isset($metaData['label']))
+            {
+                $out .= CHtml::label($metaData['label'], $id);
+            }
+            $out .= CHtml::dropDownList($name, $metaData['current'], $metaData['options']);
+            
+            return $out;
+        }
+        
+        public function renderString($name, array $metaData, $form = null)
         {
             $out = '';
             $id = $name;

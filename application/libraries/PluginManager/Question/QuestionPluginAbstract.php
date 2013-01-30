@@ -3,7 +3,7 @@ abstract class QuestionPluginAbstract extends PluginBase implements iQuestionPlu
            
     public function registerEvents() 
     {
-        $this->subscribe('getAvailablePlugin');
+        $this->subscribe('getAvailablePlugins');
     }
     
     /**
@@ -14,7 +14,7 @@ abstract class QuestionPluginAbstract extends PluginBase implements iQuestionPlu
      * 
      * @param PluginEvent $event
      */
-    public function getAvailablePlugin(PluginEvent $event)
+    public function getAvailablePlugins(PluginEvent $event)
     {
         $event->questionPlugins[] = get_class($this);
     }

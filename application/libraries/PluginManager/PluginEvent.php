@@ -132,12 +132,20 @@ class PluginEvent
     {
         // Split by . to allow for arrays using dotnotation.
         $keys = explode('.', $key);
-        while (count($keys) > 1)
+        while (count($keys) > 0)
         {
-            $value = array(array_pop($keys) => $value);
+            $key = array_pop($keys);
+            if ($key == '')
+            {
+                $value = array($value);
+            }
+            else
+            {
+                $value = array($key => $value);
+            }
+            
         }
-        $this->_parameters[$keys[0]] = $value;
-        
+        $this->_parameters = array_merge($this->_parameters, $value);
         return $this;
     }
     

@@ -1,7 +1,12 @@
-<div id="plugin-<?php echo $plugin['name']; ?>">
-    <h1>Settings for plugin "<?php echo $plugin['name']; ?>".</h1>
+<div id="plugin-<?php echo isset($plugin['name']) ? $plugin['name'] : ''; ?>">
+    
+    
     <div class="pluginsettings">
     <?php
+        if (isset($plugin['name']))
+        {
+            echo CHtml::tag('h1', "Settings for plugin {$plugin['name']}");
+        }
 
         Yii::import("application.helpers.PluginSettingsHelper");
         $PluginSettings = new PluginSettingsHelper();

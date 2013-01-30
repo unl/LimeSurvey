@@ -125,11 +125,6 @@ class LSYii_Application extends CWebApplication
         // Now initialize the plugin manager
         $this->initPluginManager(); 
         
-        // And load the active plugins
-        $this->pluginManager->loadPlugins();
-        
-        // @TODO: REMOVE TEST CODE BELOW
-        $this->getPluginManager()->dispatchEvent(new PluginEvent('dummyEvent', $this));
     }
     
     /**
@@ -141,7 +136,12 @@ class LSYii_Application extends CWebApplication
     public function initPluginManager()
     {
         Yii::import('application.libraries.PluginManager.*');
+        Yii::import('application.libraries.PluginManager.Storage.*');
+        Yii::import('application.libraries.PluginManager.Question.*');
         $this->pluginManager = new PluginManager();
+        
+        // And load the active plugins
+        $this->pluginManager->loadPlugins();
     }
 
     /**

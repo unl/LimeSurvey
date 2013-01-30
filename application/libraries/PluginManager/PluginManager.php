@@ -4,11 +4,19 @@
      */
     class PluginManager {
 
-        private $stores = array();
-
-        private $subscriptions = array();
+        /**
+         * Array mapping guids to question object class names.
+         * @var type 
+         */
+        protected $guidToQuestion = array();
         
-        protected $_plugins = array();
+        protected $plugins = array();
+        
+        protected $loadQuestionObjects = false;
+        protected $stores = array();
+
+        protected $subscriptions = array();
+        
 
         /**
          * Returns the storage instance of type $storageClass.
@@ -153,15 +161,32 @@
          * Returns the instantiated plugin
          *
          * @param string $pluginName
+         * @param int $id Identifier used for identifying a specific plugin instance. 
+         * If ommitted will return the first instantiated plugin with the given name.
          * @return iPlugin
          */
-        public function loadPlugin($pluginName, $id)
+        public function loadPlugin($pluginName, $id = null)
         {
-            if (!isset($this->_plugins[$id]) || get_class($this->_plugins[$id]) !== $pluginName) {
-                Yii::import("webroot.plugins.{$pluginName}.{$pluginName}");
-                $this->_plugins[$id] = new $pluginName($this, $id);
+            // If the id is not set we search for the plugin.
+            if (!isset($id))
+            {
+                foreach ($this->plugins as $plugin)
+                {
+                    if (get_class($plugin) == $pluginName)
+                    {
+                        return $plugin;
+                    }
+                }
             }
-            return $this->_plugins[$id];
+            else
+            { 
+                if ((!isset($this->plugins[$id]) || get_class($this->plugins[$id]) !== $pluginName))
+                {
+                    Yii::import("webroot.plugins.{$pluginName}.{$pluginName}");
+                    $this->plugins[$id] = new $pluginName($this, $id);
+                }
+                return $this->plugins[$id];
+            }
         }
 
         /**
@@ -184,6 +209,7 @@
             } catch (Exception $exc) {
                 // Something went wrong, maybe no database was present so we load no plugins
             }
+            
             foreach ($plugins as $id => $pluginName)
             {
                 $this->loadPlugin($pluginName, $id);
@@ -191,5 +217,65 @@
             
             $this->dispatchEvent(new PluginEvent('afterPluginLoad', $this));    // Alow plugins to do stuff after all plugins are loaded
         }
+        
+        /**
+         * Get a list of question objects and load some information about them.
+         * This registers the question object classes with Yii.
+         */
+        public function loadQuestionObjects($forceReload = false)
+        {
+            if (!$this->loadQuestionObjects || $forceReload)
+            {
+                $event = new PluginEvent('listQuestionPlugins');
+                $this->dispatchEvent($event);
+
+
+                foreach ($event->get('questionplugins') as $pluginClass => $paths)
+                {
+                    foreach ($paths as $path)
+                    {
+
+                        Yii::import("webroot.plugins.$pluginClass.$path");
+                        $parts = explode('.', $path);
+
+                        // Get the class name.
+                        $className = array_pop($parts);
+
+                        // Get the GUID for the question object.
+                        $guid = forward_static_call(array($className, 'getGUID'));
+
+                        // Save the GUID-class mapping.
+                        $this->guidToQuestion[$guid] = array(
+                            'class' => $className,
+                            'guid' => $guid,
+                            'plugin' => $pluginClass,
+                            'name' => $className::$info['name']
+                        );
+                    }
+                }
+            }
+            
+            return $this->guidToQuestion;
+        }
+        
+        /**
+         * Construct a question object from a GUID.
+         * @param string $guid
+         * @param int $questionId,
+         * @param int $responseId
+         * @return iQuestion
+         */
+        public function constructQuestionFromGUID($guid, $questionId = null, $responseId = null)
+        {
+            $this->loadQuestionObjects();
+            if (isset($this->guidToQuestion[$guid]))
+            {
+                $questionClass = $this->guidToQuestion[$guid]['class'];
+                $questionObject = new $questionClass($this->loadPlugin($this->guidToQuestion[$guid]['plugin']), $questionId, $responseId);
+                return $questionObject;
+            }
+        }
+        
+        
     }
 ?>

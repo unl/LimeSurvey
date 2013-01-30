@@ -6579,8 +6579,16 @@ function getBrowserLanguage()
 
 function tidToQuestion($tid, $data=array())
 {
-    $type = Question_types::model()->findByPk($tid);
-    return createQuestion($type['class'], $data);
+    if (is_numeric($tid))
+    {
+        $type = Question_types::model()->findByPk($tid);
+        return createQuestion($type['class'], $data);
+    }
+    elseif (is_string($tid) && strlen($tid) == 32)
+    { // The new question objects use GUIDs.
+        // @todo Add more parameters in case applicable.
+        return App()->getPluginManager()->constructQuestionFromGUID($tid);
+    }
 }
 
 function createQuestion($name, $data=array())

@@ -25,11 +25,10 @@
          * @param PluginManager $manager    The plugin manager instantiating the object
          * @param int           $id         The id for storage
          */
-        public function __construct(PluginManager $pluginManager, $id)
+        public function __construct(PluginManager $manager, $id)
         {
-            $this->pluginManager = $pluginManager;
+            $this->pluginManager = $manager;
             $this->id = $id;
-            $this->registerEvents();
         }
         
         /**
@@ -99,6 +98,8 @@
             
             return $this->store;
         }
+        
+        
           /**
          * 
          * @param string $name Name of the setting.         
@@ -149,7 +150,7 @@
         /**
          * Here you should handle subscribing to the events your plugin will handle
          */
-        abstract public function registerEvents();
+        //abstract public function registerEvents();
         
         /**
          * This function subscribes the plugin to receive an event.

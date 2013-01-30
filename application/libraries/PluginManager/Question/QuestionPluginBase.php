@@ -1,18 +1,41 @@
 <?php
 
 
-    abstract class QuestionPluginBase extends PluginBase implements iQuestionPlugin {
+    abstract class QuestionPluginBase extends PluginBase{
         
+        
+        
+        /**
+         * Lists the question objects supported by the plugin.
+         * Use dot notation for indicating subdirectories.
+         * Example 1: 'subdirectory.questionobject'
+         * Example 2: 'questionobject'
+         * @var array of string
+         */
+        protected $questionTypes = array(
+        );
         
         /**
          * 
          * @param PluginManager $pluginManager
          * @param string $id
-         * @param bool $live True if we plan to display the question, false during administration.
+         * @param int $responseId Pass a response id to load results.
          */
         
-        public function __construct(PluginManager $pluginManager, $id, $live = false) {
-            parent::__construct($pluginManager, $id);
+        public function __construct(PluginManager $manager, $id) {
+            parent::__construct($manager, $id);
+            $this->subscribe('listQuestionPlugins');
+        }
+        
+        /**
+         * @param PluginEvent $event
+         */
+        public function listQuestionPlugins(PluginEvent $event)
+        {
+            if (!empty($this->questionTypes))
+            {
+                $event->set('questionplugins.' . get_class($this), $this->questionTypes);
+            }
         }
         
         /** 
@@ -61,10 +84,13 @@
             
         }
                 
-        protected function registerCss($filenName)
+        protected function registerCss($fileName)
         {
             App()->getClientScript()->registerCssFile($this->publish($fileName));
         }
+        
+       
+        
         
     }
 ?>

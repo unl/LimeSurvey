@@ -758,8 +758,27 @@ class question extends Survey_Common_Action
                 $selections[$type['class']] = $q->availableOptions();
             }
             $aData['qTypeOutput'] = "$qDescToCode 'null':'null' };$qScreenshots 'null':'null' };";
+            
+            
+            // Added plugin manager types.
+            $pluginObjects = array();
+            foreach (App()->getPluginManager()->loadQuestionObjects() as $questionObjectInfo)
+            {
+                $pluginObjects[] = array(
+                    'tid' => $questionObjectInfo['guid'],
+                    'class' => 'test',
+                    'name' => $questionObjectInfo['name']
+                );
+            }
+            $typegroups = array_merge(array('Plugins' => $pluginObjects), $typegroups);
+            //$typegroups['Plugin question types'] =
             $aData['qTypeGroups'] = $typegroups;
 
+            // Load group list.
+            // @todo Implement correct ordering. Limit fields to gid + name.
+            $aData['groupList'] = CHtml::listData(Groups::model()->findAllByAttributes(array(
+                'sid' => $surveyid
+            )), 'gid', 'group_name');
             if (!$adding)
             {
                 $eqrow = array_merge($eqresult->attributes, $eqresult->groups->attributes, $eqresult->question_types->attributes);
@@ -929,41 +948,55 @@ class question extends Survey_Common_Action
      */
     public function ajaxquestionattributes()
     {
-        $q = createQuestion($_POST['class'], array('surveyid' => (int) $_POST['sid'], 'id' => (int) $_POST['qid']));
+        // Get the question type id.
+        $surveyId = intval($_REQUEST['sid']);
+        $data = array(
+            'surveyid' => $surveyId,
+            'id' => intval($_REQUEST['qid']),
+            
+        );
+        $q = tidToQuestion($_REQUEST['questionType_id'], $data);
+        $aLanguages = array_merge(array(Survey::model()->findByPk($surveyId)->language), Survey::model()->findByPk($surveyId)->additionalLanguages);
+        $thissurvey = getSurveyInfo($surveyId);
 
-        $aLanguages = array_merge(array(Survey::model()->findByPk($q->surveyid)->language), Survey::model()->findByPk($q->surveyid)->additionalLanguages);
-        $thissurvey = getSurveyInfo($q->surveyid);
-
-        $aAttributesWithValues = Questions::model()->getAdvancedSettingsWithValues($q);
-        uasort($aAttributesWithValues, 'categorySort');
-
-        $aAttributesPrepared = array();
-        foreach ($aAttributesWithValues as $iKey => $aAttribute)
+        if ($q instanceof iQuestion)
         {
-            if ($aAttribute['i18n'] == false)
-                $aAttributesPrepared[] = $aAttribute;
-            else
+            $settings = $q->getAttributes();
+            $this->getController()->render('/admin/survey/Question/advanced_settings_view2', compact('settings'));
+        }
+        else
+        {
+            $aAttributesWithValues = Questions::model()->getAdvancedSettingsWithValues($q);
+            uasort($aAttributesWithValues, 'categorySort');
+
+            $aAttributesPrepared = array();
+            foreach ($aAttributesWithValues as $iKey => $aAttribute)
             {
-                foreach ($aLanguages as $sLanguage)
+                if ($aAttribute['i18n'] == false)
+                    $aAttributesPrepared[] = $aAttribute;
+                else
                 {
-                    $aAttributeModified = $aAttribute;
-                    $aAttributeModified['name'] = $aAttributeModified['name'] . '_' . $sLanguage;
-                    $aAttributeModified['language'] = $sLanguage;
-                    if ($aAttributeModified['readonly'] == true && $thissurvey['active'] == 'N')
-                        $aAttributeModified['readonly'] == false;
+                    foreach ($aLanguages as $sLanguage)
+                    {
+                        $aAttributeModified = $aAttribute;
+                        $aAttributeModified['name'] = $aAttributeModified['name'] . '_' . $sLanguage;
+                        $aAttributeModified['language'] = $sLanguage;
+                        if ($aAttributeModified['readonly'] == true && $thissurvey['active'] == 'N')
+                            $aAttributeModified['readonly'] == false;
 
-                    if (isset($aAttributeModified[$sLanguage]['value']))
-                        $aAttributeModified['value'] = $aAttributeModified[$sLanguage]['value'];
-                    else
-                        $aAttributeModified['value'] = $aAttributeModified['default'];
+                        if (isset($aAttributeModified[$sLanguage]['value']))
+                            $aAttributeModified['value'] = $aAttributeModified[$sLanguage]['value'];
+                        else
+                            $aAttributeModified['value'] = $aAttributeModified['default'];
 
-                    $aAttributesPrepared[] = $aAttributeModified;
+                        $aAttributesPrepared[] = $aAttributeModified;
+                    }
                 }
             }
+            $aData['bIsActive'] = ($thissurvey['active']=='Y');
+            $aData['attributedata'] = $aAttributesPrepared;
+            $this->getController()->render('/admin/survey/Question/advanced_settings_view', $aData);
         }
-        $aData['bIsActive'] = ($thissurvey['active']=='Y');
-        $aData['attributedata'] = $aAttributesPrepared;
-        $this->getController()->render('/admin/survey/Question/advanced_settings_view', $aData);
     }
 
     /**

@@ -202,12 +202,17 @@ $(document).ready(function(){
     $('#MaximizeGroupWindow').click(function(){
         $('#groupdetails').show();
     });
+    // This works only for a single tabbed interface.
     $('#tabs').tabs();
+    
+    // This also works for multiple tabbed interfaces, allowing nesting.
+    $('.tabs').tabs(); 
+    
     $("#flashmessage").notify().notify('create','themeroller',{},{custom:true,
         speed: 500,
         expires: 5000
     });
-
+/*
     if ($("#question_type").not('.none').length > 0 && $("#question_type").attr('type')!='hidden'){
         $("#question_type").msDropDown({onInit:qTypeDropdownInit});
 
@@ -216,6 +221,7 @@ $(document).ready(function(){
             OtherSelection(selected_value);
         });
     }
+    */
     $("#question_type.none").change(function(event){
         var selected_value = qDescToCode[''+$("#question_type option:selected").text()];
         OtherSelection(selected_value);
@@ -286,12 +292,12 @@ function updatequestionattributes()
 {
     $('.loader').show();
     $('#advancedquestionsettings').html('');
-    var selected_value = qDescToCode[''+$("#question_type_child .selected").text()];
-    if (selected_value==undefined) selected_value = qDescToCode[''+$("#question_type option:selected").text()];
-    if (selected_value==undefined) selected_value = $("#question_class").val();
-    $('#advancedquestionsettings').load(attr_url,{qid:$('#qid').val(),
-        class:selected_value,
-        sid:$('#sid').val()
+
+    $('#advancedquestionsettings').load(attr_url,
+    {
+        'qid': $('#qid').val(),
+        'questionType_id' : $('#question_type').val(),
+        'sid': $('#sid').val()
     }, function(){
         // Loads the tooltips for the toolbars
 
@@ -313,7 +319,7 @@ function updatequestionattributes()
             },
             show: {effect: {length:50}}
         });}
-    );
+    );    
 }
 
 function validatefilename (form, strmessage )
