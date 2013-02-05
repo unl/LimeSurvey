@@ -5,7 +5,7 @@
     <?php
         if (isset($plugin['name']))
         {
-            echo CHtml::tag('h1', "Settings for plugin {$plugin['name']}");
+            echo CHtml::tag('h1', array(), "Settings for plugin {$plugin['name']}");
         }
 
         Yii::import("application.helpers.PluginSettingsHelper");

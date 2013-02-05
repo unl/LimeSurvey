@@ -3,8 +3,8 @@
 <head>
     <?php echo $meta;?>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <script type="text/javascript" src="<?php echo Yii::app()->getConfig('generalscripts');?>jquery/jquery.js"></script>
-    <script type="text/javascript" src="<?php echo Yii::app()->getConfig('generalscripts');?>jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="<?php echo Yii::app()->getConfig('third_party');?>jquery/jquery.js"></script>
+    <script type="text/javascript" src="<?php echo Yii::app()->getConfig('third_party');?>jqueryui/js/jquery-ui-1.10.0.custom.js"></script>
     <script type="text/javascript" src="<?php echo Yii::app()->getConfig('generalscripts');?>jquery/jquery.ui.touch-punch.min.js"></script>
     <script type="text/javascript" src="<?php echo Yii::app()->getConfig('generalscripts');?>jquery/jquery.qtip.js"></script>
     <script type="text/javascript" src="<?php echo Yii::app()->getConfig('generalscripts');?>jquery/jquery.notify.js"></script>

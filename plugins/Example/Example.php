@@ -11,15 +11,19 @@ class Example extends PluginBase {
         )
     );
     
-    /**
-     * Here you should handle subscribing to the events your plugin will handle
-     */
-    public function registerEvents() {
-        $this->subscribe('dummyEvent', 'helloWorld');
+    public function __construct(PluginManager $manager, $id) {
+        parent::__construct($manager, $id);
+        
+        
+        /**
+         * Here you should handle subscribing to the events your plugin will handle
+         */
+        $this->subscribe('afterPluginLoad', 'helloWorld');
         $this->subscribe('afterAdminMenuLoaded');
         $this->subscribe('beforeSurveySettings');
         $this->subscribe('newSurveySettings');
     }
+    
     
     /*
      * Below are the actual methods that handle events
@@ -42,7 +46,7 @@ class Example extends PluginBase {
         $count = (int) $this->get('count');
         if ($count === false) $count = 0;
         $count++;
-        Yii::app()->session['flashmessage'] = $this->get('message') . $count;
+        $this->pluginManager->getAPI()->setFlash($this->get('message') . $count);
         $this->set('count', $count);
     }
     

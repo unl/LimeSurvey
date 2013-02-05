@@ -66,6 +66,16 @@
         
         public function getAttributes() 
         {
+            // Merge with defaults.
+            $defaults = array(
+                'localized' => false, // Indicates a setting should be localized.
+                'advanced' => false // Indicates a localized setting is advanced.
+            );
+            foreach ($this->attributes as $name => &$settings)
+            {
+                $settings = array_merge($defaults, $settings);
+            }
+            
             return $this->attributes;
         }
         

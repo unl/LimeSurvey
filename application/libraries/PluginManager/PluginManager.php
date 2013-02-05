@@ -5,6 +5,11 @@
     class PluginManager {
 
         /**
+         * Object containing any API that the plugins can use.
+         * @var object
+         */
+        protected $api = null;
+        /**
          * Array mapping guids to question object class names.
          * @var type 
          */
@@ -17,7 +22,23 @@
 
         protected $subscriptions = array();
         
-
+        /**
+         * Creates the plugin manager.
+         * 
+         * @param mixed $api The class name of the API class to load, or
+         * a reference to an already constructed reference.
+         */
+        public function __construct($api) 
+        {
+            if (is_object($api))
+            {
+                $this->api = $api;
+            }
+            else 
+            {
+                $this->api = new $api();
+            }
+        }
         /**
          * Returns the storage instance of type $storageClass.
          * If needed initializes the storage object.
@@ -32,6 +53,16 @@
             return $this->stores[$storageClass];
         }
 
+        
+        /**
+         * This function returns an API object, exposing an API to each plugin.
+         * In the current case this is the LimeSurvey API.
+         * @return LimesurveyApi
+         */
+        public function getAPI()
+        {
+            return $this->api;
+        }
         /**
          * Registers a plugin to be notified on some event.
          * @param iPlugin $plugin Reference to the plugin.
@@ -198,6 +229,7 @@
          */
         public function loadPlugins()
         {
+            
             $plugins = array();
             try {
                 $pluginModel = Plugin::model();    
@@ -214,7 +246,6 @@
             {
                 $this->loadPlugin($pluginName, $id);
             }
-            
             $this->dispatchEvent(new PluginEvent('afterPluginLoad', $this));    // Alow plugins to do stuff after all plugins are loaded
         }
         

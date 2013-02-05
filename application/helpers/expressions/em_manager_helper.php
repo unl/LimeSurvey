@@ -3432,7 +3432,18 @@
                     }
                     else
                     {
-                        $finished = true;
+                        // This event allows plugins to prevent survey completion.
+                        $event = new PluginEvent('beforeSurveyCompleted');
+                        $event->set('responseId', $_SESSION[$this->sessid]['srid']);
+                        App()->getPluginManager()->dispatchEvent($event);
+                        if (!$event->isStopped())
+                        {
+                            $finished = true;
+                        }
+                        else
+                        {
+                            $finished = false;
+                        }
                     }
                     $message .= $LEM->_UpdateValuesInDatabase($updatedValues,$finished);
                     $LEM->runtimeTimings[] = array(__METHOD__,(microtime(true) - $now));
@@ -3806,6 +3817,15 @@
                 if (($this->debugLevel & LEM_DEBUG_VALIDATION_SUMMARY) == LEM_DEBUG_VALIDATION_SUMMARY) {
                     $message .= $query;
                 }
+            }
+            if ($finished)
+            {
+                // @todo Remove direct session access.
+                $event = new PluginEvent('afterSurveyCompleted');
+                $event->set('responseId', $_SESSION[$this->sessid]['srid']);
+                $event->set('surveyId', $this->sid);
+                App()->getPluginManager()->dispatchEvent($event);
+                $message = 'test123';
             }
             return $message;
         }

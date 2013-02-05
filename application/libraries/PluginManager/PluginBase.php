@@ -41,9 +41,9 @@
          * @param int $id
          * @return boolean
          */
-        protected function get($key = null, $model = null, $id = null)
+        protected function get($key = null, $model = null, $id = null, $default = null)
         {
-            return $this->getStore()->get($this, $key, $model, $id);
+            return $this->getStore()->get($this, $key, $model, $id, $default);
         }
         
         /**

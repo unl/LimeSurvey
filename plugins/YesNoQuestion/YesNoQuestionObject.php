@@ -2,12 +2,9 @@
     class YesNoQuestionObject extends QuestionBase implements iQuestion 
     {
         protected $attributes = array(
-            'code' => array(
-                'type' => 'string',
-                'label' => 'Question code:'
-            ),
-            'title' => array(
-                'type' => 'string',
+            'question' => array(
+                'type' => 'html',
+                'localized' => true,
                 'label' => 'Question text:'
             )
         );

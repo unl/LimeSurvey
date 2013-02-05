@@ -841,9 +841,9 @@ class question extends Survey_Common_Action
 
             if ($adding)
             {
-                // Get the questions for this group
-                $baselang = Survey::model()->findByPk($surveyid)->language;
                 $oqresult = Questions::model()->findAllByAttributes(array('sid' => $surveyid, 'gid' => $gid, 'language' => $baselang, 'parent_qid'=> 0), array('order' => 'question_order'));
+                
+                
                 $aData['oqresult'] = $oqresult;
             }
             $this->getController()->_js_admin_includes(Yii::app()->getConfig('adminscripts') . 'questions.js');
@@ -940,6 +940,26 @@ class question extends Survey_Common_Action
         }
     }
 
+    
+    public function ajaxLocalizedAttributes()
+    {
+        // Get the question type id.
+        $surveyId = intval($_REQUEST['sid']);
+        $data = array(
+            'surveyid' => $surveyId,
+            'id' => intval($_REQUEST['qid']),
+            
+        );
+        $q = tidToQuestion($_REQUEST['questionType_id'], $data);
+        $settings = $q->getAttributes();
+        $localized = true;
+        $aLanguages = array_merge(array(Survey::model()->findByPk($surveyId)->language), Survey::model()->findByPk($surveyId)->additionalLanguages);
+        $language = $_REQUEST['language'];
+        if (in_array($language, $aLanguages))
+        {
+            $this->getController()->render('/admin/survey/Question/advanced_settings_view2', compact('settings', 'localized', 'language'));
+        }
+    }
     /**
      * This function prepares the data for the advanced question attributes view
      *

@@ -9,7 +9,7 @@
          * @param int $id Id of the model for which the data is retreived
          * @return mixed The data stored.
          */
-        public function get($plugin, $key = null, $model = null, $id = null);
+        public function get($plugin, $key = null, $model = null, $id = null, $default = null);
 
         /**
          * Stores plugin data.

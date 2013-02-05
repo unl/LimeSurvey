@@ -16,7 +16,7 @@ class DbStorage implements iPluginStorage {
      * @param int $id
      * @return mixed Returns the value from the database or null if not set.
      */
-    function get($plugin, $key = null, $model = null, $id = null) {
+    function get($plugin, $key = null, $model = null, $id = null, $default = null) {
         $attributes = array(
             'plugin_id' => $plugin->getId(),
             'model'     => $model,
@@ -26,7 +26,7 @@ class DbStorage implements iPluginStorage {
         if (!is_null($record)) {
             return unserialize($record->value);
         } else {
-            return null;
+            return $default;
         }        
     }
 

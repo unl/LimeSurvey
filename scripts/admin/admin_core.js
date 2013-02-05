@@ -208,9 +208,11 @@ $(document).ready(function(){
     // This also works for multiple tabbed interfaces, allowing nesting.
     $('.tabs').tabs(); 
     
-    $("#flashmessage").notify().notify('create','themeroller',{},{custom:true,
+    $(".flashmessage").each(function() {
+        $(this).notify().notify('create','themeroller',{},{custom:true,
         speed: 500,
         expires: 5000
+        });
     });
 /*
     if ($("#question_type").not('.none').length > 0 && $("#question_type").attr('type')!='hidden'){
@@ -290,10 +292,17 @@ function getToolTip(desc){
 
 function updatequestionattributes()
 {
-    $('.loader').show();
-    $('#advancedquestionsettings').html('');
+    if (LS.updatequestions_question_type == $('#question_type').val())
+    {
+        return;
+    }
+    else
+    {
+        LS.updatequestions_question_type = $('#question_type').val();
+    }
+    $('#advanced').html('');
 
-    $('#advancedquestionsettings').load(attr_url,
+    $('#advanced').load(attr_url,
     {
         'qid': $('#qid').val(),
         'questionType_id' : $('#question_type').val(),
@@ -302,7 +311,6 @@ function updatequestionattributes()
         // Loads the tooltips for the toolbars
 
         // Loads the tooltips for the toolbars
-        $('.loader').hide();
         $('label[title]').qtip({
             style: {name: 'cream',
                 tip: true,

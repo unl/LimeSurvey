@@ -446,7 +446,7 @@ class tokens extends Survey_Common_Action
             $action = "";
             if ($token['token'] != "" && ($token['completed'] == "N" || $token['completed'] == "")) {
                 $action .= viewHelper::getImageLink('do_16.png', "survey/index/sid/{$iSurveyId}/token/{$token['token']}", $clang->gT("Do survey"), '_blank');
-            } elseif ($token['completed'] != "N" && $token['completed'] != "" && $prow['anonymized'] == "N") {
+            } elseif ($token['completed'] != "N" && $token['completed'] != "" && getSurveyInfo($iSurveyId)['anonymized'] == "N") {
                 //Get the survey response id of the matching entry
                 $id = Survey_dynamic::model($iSurveyId)->findAllByAttributes(array('token' => $token['token']));
                 if (count($id) > 0) {
@@ -2094,7 +2094,7 @@ class tokens extends Survey_Common_Action
             'title' => $clang->gT("Create tokens"),
             'message' => $clang->gT("Clicking 'Yes' will generate tokens for all those in this token list that have not been issued one. Continue?") . "<br /><br />\n"
             . "<input type='submit' value='"
-            . $clang->gT("Yes") . "' onclick=\"" . convertGETtoPOST($this->getController()->createUrl("admin/tokens/sa/tokenify/surveyid/$iSurveyId") . "?ok=Y") . "\" />\n"
+            . $clang->gT("Yes") . "' onclick=\"" . convertGETtoPOST($this->getController()->createUrl("admin/tokens/sa/tokenify/surveyid/$iSurveyId", array('ok' => 'Y'))) . "\" />\n"
             . "<input type='submit' value='"
             . $clang->gT("No") . "' onclick=\"window.open('" . $this->getController()->createUrl("admin/tokens/sa/index/surveyid/$iSurveyId") . "', '_top')\" />\n"
             . "<br />\n"

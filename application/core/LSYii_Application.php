@@ -138,7 +138,7 @@ class LSYii_Application extends CWebApplication
         Yii::import('application.libraries.PluginManager.*');
         Yii::import('application.libraries.PluginManager.Storage.*');
         Yii::import('application.libraries.PluginManager.Question.*');
-        $this->pluginManager = new PluginManager();
+        $this->pluginManager = new PluginManager('LimesurveyApi');
         
         // And load the active plugins
         $this->pluginManager->loadPlugins();
