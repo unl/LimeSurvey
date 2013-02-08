@@ -5,12 +5,21 @@
         
         public function renderSetting($name, array $metaData, $form = null, $return = false)
         {
+            $defaults = array(
+                'class' => array(),
+                'type' => 'string'
+            );
+            $metaData = array_merge($defaults, $metaData);
+            if (is_string($metaData['class']))
+            {
+                $metaData['class'] = array($metaData['class']);
+            }
             if (isset($metaData['type']))
             {
                 $function = "render{$metaData['type']}";
                 if (isset($metaData['localized']) && $metaData['localized'] == true)
                 {
-                    $name = "{$name}_{$metaData['language']}";
+                    $name = "{$name}[{$metaData['language']}]";
                 }
                 $result = $this->$function($name, $metaData, $form);
                 if ($return)
@@ -65,8 +74,19 @@
         
         public function renderHtml($name, array $metaData, $form = null)
         {
-            return $this->renderString($name, $metaData, $form);
+            $out = '';
+            $id = $name;
+            $value = isset($metaData['current']) ? $metaData['current'] : '';
+            $metaData['class'][] = 'htmleditor';
+            $readOnly = isset($metaData['readOnly']) ? $metaData['readOnly'] : false;
+            if (isset($metaData['label']))
+            {
+                $out .= CHtml::label($metaData['label'], $id);
+            }
+            $out .= Chtml::tag('div', array('class' => implode(' ', $metaData['class'])), CHtml::textArea($id, $value, array('id' => $id, 'form' => $form, 'readonly' => $readOnly)));
+            return $out;
         }
+        
         public function renderInt($name, array $metaData, $form = null)
         {
             $out = '';
@@ -85,12 +105,16 @@
             return $out;
         }
         
+        public function renderLogo($name, array $metaData)
+        {
+            return CHtml::image($metaData['path']);
+        }
         public function renderRelevance($name, array $metaData, $form = null)
         {
             $out = '';
-            $metaData['class'] = 'relevance';
+            $metaData['class'][] = 'relevance';
             $id = $name;
-            $class = isset($metaData['class']) ? $metaData['class'] : '';
+            
             
             if (isset($metaData['label']))
             {
@@ -98,7 +122,7 @@
             }
             $value = isset($metaData['current']) ? $metaData['current'] : '';
             
-            $out .= CHtml::textArea($name, $value, array('id' => $id, 'form' => $form, 'class' => $class));
+            $out .= CHtml::textArea($name, $value, array('id' => $id, 'form' => $form, 'class' => implode(' ', $metaData['class'])));
             
             return $out;
         }
@@ -112,7 +136,7 @@
             {
                 $out .= CHtml::label($metaData['label'], $id);
             }
-            $out .= CHtml::dropDownList($name, $metaData['current'], $metaData['options']);
+            $out .= CHtml::dropDownList($name, $metaData['current'], $metaData['options'], array('form' => $form));
             
             return $out;
         }
@@ -122,13 +146,12 @@
             $out = '';
             $id = $name;
             $value = isset($metaData['current']) ? $metaData['current'] : '';
-            $class = isset($metaData['class']) ? $metaData['class'] : '';
             $readOnly = isset($metaData['readOnly']) ? $metaData['readOnly'] : false;
             if (isset($metaData['label']))
             {
                 $out .= CHtml::label($metaData['label'], $id);
             }
-            $out .= CHtml::textField($id, $value, array('id' => $id, 'form' => $form, 'class' => $class, 'readonly' => $readOnly));
+            $out .= CHtml::textField($id, $value, array('id' => $id, 'form' => $form, 'class' => implode(' ', $metaData['class']), 'readonly' => $readOnly));
             
             return $out;
         }

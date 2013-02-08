@@ -261,7 +261,7 @@
                 $this->dispatchEvent($event);
 
 
-                foreach ($event->get('questionplugins') as $pluginClass => $paths)
+                foreach ($event->get('questionplugins', array()) as $pluginClass => $paths)
                 {
                     foreach ($paths as $path)
                     {

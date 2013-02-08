@@ -75,11 +75,15 @@
         {
             
             $settings = $this->settings;
-            if ($getValues)
+            foreach ($settings as $name => &$setting)
             {
-                foreach ($settings as $name => &$setting)
+                if ($getValues)
                 {
                     $setting['current'] = $this->get($name);
+                }
+                if ($setting['type'] == 'logo')
+                {
+                    $setting['path'] = $this->publish($setting['path']);
                 }
             }
             return $settings;
@@ -90,7 +94,7 @@
          * 
          * @return iPluginStorage
          */
-        protected function getStore()
+        public function getStore()
         {
             if (is_null($this->store)) {
                 $this->store = $this->pluginManager->getStore($this->storage);
@@ -99,8 +103,38 @@
             return $this->store;
         }
         
+        /** 
+         * Publishes plugin assets.
+         */
+        public function publish($fileName)
+        {
+            // Check if filename is relative.
+            if (strpos('//', $fileName) === false)
+            {
+                // This is a limesurvey relative path.
+                if (strpos('/', $fileName) === 0)
+                {
+                    $url = Yii::getPathOfAlias('webroot') . $fileName;
+                    
+                }
+                else // This is a plugin relative path.
+                {
+                    $path = Yii::getPathOfAlias('webroot.plugins.' . get_class($this)) . DIRECTORY_SEPARATOR . $fileName;
+                    /*
+                     * By using the asset manager the assets are moved to a publicly accessible path.
+                     * This approach allows a locked down plugin directory that is not publicly accessible.
+                     */
+                    $url = App()->assetManager->publish($path);
+                }
+            }
+            else
+            {
+                $url = $fileName;
+            }
+            return $url;
+        }
         
-          /**
+        /**
          * 
          * @param string $name Name of the setting.         
          * The type of the setting is either a basic type or choice.

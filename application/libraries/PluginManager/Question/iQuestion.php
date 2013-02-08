@@ -26,6 +26,13 @@
         public function render($twig, $name, $return = false);
         
         
+        /**
+         * This function must save the custom question attributes for a question.
+         * The default implementation just iterates over the array and saves each property.
+         * @param $attributes A array containing the value for each attribute filled in.
+         */
+        public function saveAttributes($qid, array $attributes);
+        
         
         
     }

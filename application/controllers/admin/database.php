@@ -472,7 +472,7 @@ class database extends Survey_Common_Action
                     } else {
                         $q = tidToQuestion(Yii::app()->request->getPost('type'));
                         $aLanguages=array_merge(array(Survey::model()->findByPk($surveyid)->language),Survey::model()->findByPk($surveyid)->additionalLanguages);
-
+                        var_dump($_POST);
                         foreach ($q->availableAttributes() as $validAttribute)
                         {
                             if ($validAttribute['i18n'])

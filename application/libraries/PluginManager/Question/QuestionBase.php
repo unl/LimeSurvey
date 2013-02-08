@@ -64,6 +64,24 @@
             
         }
         
+        /**
+         * This function retrieves question data. Do not cache this data; the plugin storage
+         * engine will handling caching. After the first call to this function, subsequent 
+         * calls will only consist of a few function calls and array lookups. 
+         * 
+         * @param string $key
+         * @param int $qid Question id.
+         * @return boolean
+         */
+        protected function get($qid, $key = null, $default = null)
+        {
+            $model = 'Question';
+            $keyPrefix = get_class($this);
+            
+                
+            return $this->plugin->getStore()->get($this->plugin, $key, $model, $qid, $default);
+        }
+        
         public function getAttributes() 
         {
             // Merge with defaults.
@@ -111,7 +129,52 @@
             }
         }
         
+        public function saveAttributes($qid, array $attributeValues) 
+        {
+            $attributes = $this->getAttributes();
+            foreach ($attributeValues as $key => $value)
+            {
+                // Check if the attribute is valid for the question.
+                if (isset($attributes[$key]))
+                {
+                    // If the attribute is localized, save each language.
+                    if ($attributes[$key]['localized'])
+                    {
+                        foreach ($value as $language => $localizedValue)
+                        {
+                            $this->set($qid, $key, $language, $localizedValue);
+                        }
+                    }
+                    else
+                    {
+                        $this->set($qid, $key, null, $value);
+                    }
+                        
+                    
+                }
+            }
+        }
         
+        /**
+         * This function saves question data. 
+         * @param int $qid Question id.
+         * @param string $key
+         * @param string $language
+         * @param mixed $value
+         * @return boolean
+         */
+        protected function set($qid, $key = null, $language = null, $value)
+        {
+            $model = 'Question';
+            $keyPrefix = get_class($this);
+            $key = "$keyPrefix-$key";
+            if (isset($language))
+            {
+                $key .= ".$language";
+            }
+            return $this->plugin->getStore()->set($this->plugin, $key, $value, $model, $qid);
+        }
+                
         
         
     }

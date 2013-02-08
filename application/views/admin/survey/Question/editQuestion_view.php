@@ -21,8 +21,9 @@
 </div>
 
 <?php
-    $this->renderPartial('/admin/survey/Question/editQuestion_nonlocalized', compact('selectormodeclass', 'clang', 'eqrow', 'groupList', 'questionList', 'qTypeGroups', 'oqresult'));
-$this->renderPartial('/admin/survey/Question/editQuestion_localized', compact('surveyid', 'clang', 'eqrow', 'gid', 'qid', 'action', 'activated', 'aqresult', 'adding', 'copying'));
+    $form = 'frmeditquestion';
+    $this->renderPartial('/admin/survey/Question/editQuestion_nonlocalized', compact('form', 'selectormodeclass', 'clang', 'eqrow', 'groupList', 'questionList', 'qTypeGroups', 'questionOrderList'));
+    $this->renderPartial('/admin/survey/Question/editQuestion_localized', compact('form', 'surveyid', 'clang', 'eqrow', 'gid', 'qid', 'action', 'activated', 'aqresult', 'adding', 'copying'));
 ?>
 
 
@@ -31,7 +32,12 @@ $this->renderPartial('/admin/survey/Question/editQuestion_localized', compact('s
 
 <?php if ($adding)
     {
-
+        echo CHtml::form(array("questions/create"), 'post',array(
+            'id'=> $form,
+            'name'=> $form,
+            'onsubmit'=>"return isEmpty(document.getElementById('title'), '".$clang->gT("Error: You have to enter a question code.",'js')."');"
+        ));
+        echo CHtml::endForm();
 
         if (hasSurveyPermission($surveyid,'surveycontent','import'))
         { ?>

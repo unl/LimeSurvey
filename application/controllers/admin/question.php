@@ -842,9 +842,17 @@ class question extends Survey_Common_Action
             if ($adding)
             {
                 $oqresult = Questions::model()->findAllByAttributes(array('sid' => $surveyid, 'gid' => $gid, 'language' => $baselang, 'parent_qid'=> 0), array('order' => 'question_order'));
-                
-                
-                $aData['oqresult'] = $oqresult;
+                $questionOrderList = array(
+                    'first' => $clang->gT("At beginning")
+                );
+                foreach ($oqresult as $oqr)
+                {
+                    $questionOrderList[$oqr->attributes['question_order']] = $clang->gT('After:') . ' '. $oqr->attributes['title'];
+                    
+                }
+                // Change text of last entry.
+                $questionOrderList['last'] = $clang->gT("At end");
+                $aData['questionOrderList'] = $questionOrderList;
             }
             $this->getController()->_js_admin_includes(Yii::app()->getConfig('adminscripts') . 'questions.js');
 
@@ -951,7 +959,27 @@ class question extends Survey_Common_Action
             
         );
         $q = tidToQuestion($_REQUEST['questionType_id'], $data);
-        $settings = $q->getAttributes();
+        if ($q instanceof iQuestion)
+        {
+            $settings = $q->getAttributes();
+        }
+        else
+        {
+            // Static localized settings for "old" question objects.
+            $settings = array(
+                'question' => array(
+                    'type' => 'html',
+                    'localized' => 'true',
+                    'label' => 'Question:'
+                ),
+                'help' => array(
+                    'type' => 'html',
+                    'localized' => 'true',
+                    'label' => 'Help:'
+                ),
+                
+            );
+        }
         $localized = true;
         $aLanguages = array_merge(array(Survey::model()->findByPk($surveyId)->language), Survey::model()->findByPk($surveyId)->additionalLanguages);
         $language = $_REQUEST['language'];

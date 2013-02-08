@@ -30,4 +30,10 @@ interface iPlugin {
      * @return array
      */
     public function getPluginSettings($getValues = true);
+    
+    /**
+     * Returns a reference to the storage interface for the plugin.
+     * @return iPluginStorage 
+     */
+    public function getStore();
 }

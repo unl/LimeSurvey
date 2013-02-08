@@ -6,6 +6,15 @@
                 'type' => 'html',
                 'localized' => true,
                 'label' => 'Question text:'
+            ),
+            'help' => array(
+                'type' => 'html',
+                'localized' => true,
+                'label' => 'Help text:'
+            ),
+            'mandatory' => array(
+                'type' => 'boolean',
+                'label' => 'Mandatory:'
             )
         );
         

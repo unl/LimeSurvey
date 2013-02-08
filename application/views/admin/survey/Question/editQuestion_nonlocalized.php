@@ -8,7 +8,7 @@
     <div id="basic" class="form30">
         <ul>
             <li><label for='question_type'><?php $clang->eT("Question Type:"); ?></label>
-                <select id='question_type' style='margin-bottom:5px' name='type' class='<?php echo $selectormodeclass; ?>'>
+                <select id='question_type' form="<?php echo $form; ?>" style='margin-bottom:5px' name='type' class='<?php echo $selectormodeclass; ?>'>
                     <?php
                         foreach ($qTypeGroups as $group => $members)
                         {
@@ -45,6 +45,12 @@
                    'relevance' => array(
                        'type' => 'relevance',
                        'label' => $clang->gT('Relevance equation:')
+                   ),
+                   'position' => array(
+                       'type' => 'select',
+                       'label' => $clang->gT("Position:"),
+                       'current' => 'last',
+                       'options' => $questionOrderList
                    )
                );
 
@@ -52,24 +58,10 @@
                $PluginSettings = new PluginSettingsHelper();
                foreach ($basicSettings as $name => $setting)
                {
-                   echo CHtml::tag('li', array(), $PluginSettings->renderSetting($name, $setting, null, true)); 
+                   echo CHtml::tag('li', array(), $PluginSettings->renderSetting($name, $setting, $form, true)); 
                }
             ?>
-            <li>
-                            <label for='questionposition'><?php $clang->eT("Position:"); ?></label>
-                            <select name='questionposition' id='questionposition'>
-                                <option value=''><?php $clang->eT("At end"); ?></option>
-                                <option value='0'><?php $clang->eT("At beginning"); ?></option>
-                                <?php foreach ($oqresult as $oq)
-                                    {
-                                        
-                                        $question_order_plus_one = $oq->question_order+1; 
-                                        echo CHtml::tag('option', array('value' => $question_order_plus_one), $clang->gT("After") . ': ' . $oq->title);
-                                    } 
-                                ?>
-                            </select>
-                        </li>
-            
+           
         </ul>
     </div>
     <div id="advanced" class="form30">

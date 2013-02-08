@@ -2,6 +2,10 @@
 
 class DbStorage implements iPluginStorage {
 
+    /** 
+     * Contains a reference to the active record object used for storing data.
+     * @var PluginSetting
+     */
     protected $model = null;
 
     public function __construct() {
@@ -41,6 +45,11 @@ class DbStorage implements iPluginStorage {
      * @return boolean
      */
     public function set($plugin, $key, $data, $model = null, $id = null) {
+        
+        if ($id == null && $model != null)
+        {
+            new Exception("DbStorage::set cannot store setting for model $model without valid id.");
+        }
         $attributes = array(
             'plugin_id' => $plugin->getId(),
             'model'     => $model,

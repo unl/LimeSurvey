@@ -38,36 +38,7 @@
             }
         }
         
-        /** 
-         * Publishes plugin assets.
-         */
-        private function publish($fileName)
-        {
-            // Check if filename is relative.
-            if (strpos('//', $fileName) === false)
-            {
-                // This is a limesurvey relative path.
-                if (strpos('/', $fileName) === 0)
-                {
-                    $url = Yii::getPathOfAlias('webroot') . $fileName;
-                    
-                }
-                else // This is a plugin relative path.
-                {
-                    $path = Yii::getPathOfAlias('webroot.plugins.' . get_class()) . $fileName;
-                    /*
-                     * By using the asset manager the assets are moved to a publicly accessible path.
-                     * This approach allows a locked down plugin directory that is not publicly accessible.
-                     */
-                    $url = App()->assetManager->publish($path);
-                }
-            }
-            else
-            {
-                $url = $fileName;
-            }
-            return $url;
-        }
+        
         
         /**
          * This function registers a javascript file to be included in the page.

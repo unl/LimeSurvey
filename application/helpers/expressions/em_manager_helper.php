@@ -3818,15 +3818,6 @@
                     $message .= $query;
                 }
             }
-            if ($finished)
-            {
-                // @todo Remove direct session access.
-                $event = new PluginEvent('afterSurveyCompleted');
-                $event->set('responseId', $_SESSION[$this->sessid]['srid']);
-                $event->set('surveyId', $this->sid);
-                App()->getPluginManager()->dispatchEvent($event);
-                $message = 'test123';
-            }
             return $message;
         }
 

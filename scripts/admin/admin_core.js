@@ -674,3 +674,8 @@ function removeCSRFDivs()
        parent.remove();
     });
 }
+
+function initializeHtmlEditors()
+{
+    $('.htmleditor textarea').ckeditor({'customConfig' : '/scripts/admin/ckeditor-config.js'});
+}
