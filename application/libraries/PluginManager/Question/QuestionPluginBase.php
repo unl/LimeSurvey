@@ -5,6 +5,7 @@
         
         
         
+        
         /**
          * Lists the question objects supported by the plugin.
          * Use dot notation for indicating subdirectories.
@@ -15,6 +16,8 @@
         protected $questionTypes = array(
         );
         
+        
+        protected $storage = 'DbStorage';
         /**
          * 
          * @param PluginManager $pluginManager

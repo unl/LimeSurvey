@@ -78,6 +78,23 @@ function App()
     return Yii::app();
 }
 
+
+/**
+ * Translation helper function.
+ * @param string $string
+ * @param string $escapemode
+ */
+function gT($string, $escapemode = 'html')
+{
+    if (isset(App()->lang))
+    {
+        return App()->lang->gT($string, $escapemode);
+    }
+    else
+    {
+        return $string;
+    }
+}
 /**
 * isStandardTemplate returns true if a template is a standard template
 * This function does not check if a template actually exists
@@ -1888,6 +1905,7 @@ function createFieldMap($surveyid, $force_refresh=false, $questionid=false, $sLa
 
     foreach ($aresult as $arow) //With each question, create the appropriate field(s))
     {
+        var_dump($arow->attributes);
         ++$questionSeq;
 
         // fix fact taht group_order may have gaps
@@ -1907,35 +1925,38 @@ function createFieldMap($surveyid, $force_refresh=false, $questionid=false, $sLa
 
         $fieldname="{$arow['sid']}X{$arow['gid']}X{$arow['qid']}";
         $class = empty($arow->question_types['class']) ? $aresult[$arow->parent_qid]->question_types['class'] : $arow->question_types['class'];
-        $pq = createQuestion($class, array('surveyid'=>$surveyid,
-            'id'=>$arow['qid'], 'fieldname'=>$fieldname,
-            'title'=>$arow['title'], 'text'=>$arow['question'],
-            'gid'=>$arow['gid'], 'mandatory'=>$arow['mandatory'],
-            'conditionsexist'=>$conditions, 'usedinconditions'=>$usedinconditions,
-            'questioncount'=>$questionSeq, 'language'=>$sLanguage));
-        $pq->aid = '';
-        if(isset($defaults[$arow['qid']])) $pq->defaults = $defaults[$arow['qid']];
-
-        $pq->haspreg = $arow['preg'];
-        $pq->isother = $arow['other'];
-        $pq->groupname = $arow->groups['group_name'];
-        $pq->groupcount = $groupSeq;
-        $add = $pq->createFieldmap();
-
-        if (count($add))
+        if (isset($class))
         {
-            $tmp=array_values($add);
-            $q = $tmp[count($add)-1];
-            $q->relevance=$arow['relevance'];
-            $q->grelevance=$arow->groups['grelevance'];
-            $q->preg=$arow['preg'];
-            $q->other=$arow['other'];
-            $q->help=$arow['help'];
-            $fieldmap=array_merge($fieldmap, $add);
-        }
-        else
-        {
-            --$questionSeq; // didn't generate a valid $fieldmap entry, so decrement the question counter to ensure they are sequential
+            $pq = createQuestion($class, array('surveyid'=>$surveyid,
+                'id'=>$arow['qid'], 'fieldname'=>$fieldname,
+                'title'=>$arow['title'], 'text'=>$arow['question'],
+                'gid'=>$arow['gid'], 'mandatory'=>$arow['mandatory'],
+                'conditionsexist'=>$conditions, 'usedinconditions'=>$usedinconditions,
+                'questioncount'=>$questionSeq, 'language'=>$sLanguage));
+            $pq->aid = '';
+            if(isset($defaults[$arow['qid']])) $pq->defaults = $defaults[$arow['qid']];
+
+            $pq->haspreg = $arow['preg'];
+            $pq->isother = $arow['other'];
+            $pq->groupname = $arow->groups['group_name'];
+            $pq->groupcount = $groupSeq;
+            $add = $pq->createFieldmap();
+
+            if (count($add))
+            {
+                $tmp=array_values($add);
+                $q = $tmp[count($add)-1];
+                $q->relevance=$arow['relevance'];
+                $q->grelevance=$arow->groups['grelevance'];
+                $q->preg=$arow['preg'];
+                $q->other=$arow['other'];
+                $q->help=$arow['help'];
+                $fieldmap=array_merge($fieldmap, $add);
+            }
+            else
+            {
+                --$questionSeq; // didn't generate a valid $fieldmap entry, so decrement the question counter to ensure they are sequential
+            }
         }
     }
 
@@ -6593,9 +6614,19 @@ function tidToQuestion($tid, $data=array())
 
 function createQuestion($name, $data=array())
 {
-    $class = $name.'Question';
-    Yii::import('application.modules.*');
-    return new $class($data);
+    /**
+     * @todo Remove ugly fix that assumes "old" question object names are not 32 chars long.
+     */
+    if (strlen($name) == 32)
+    {
+        return App()->getPluginManager()->constructQuestionFromGUID($name);
+    }
+    else
+    {
+        $class = $name.'Question';
+        Yii::import('application.modules.*');
+        return new $class($data);
+    }
 }
 
 /**

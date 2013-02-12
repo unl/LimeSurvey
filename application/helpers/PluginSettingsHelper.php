@@ -20,6 +20,14 @@
                 if (isset($metaData['localized']) && $metaData['localized'] == true)
                 {
                     $name = "{$name}[{$metaData['language']}]";
+                    if (is_array($metaData['current']) && isset($metaData['current'][$metaData['language']]))
+                    {
+                        $metaData['current'] = $metaData['current'][$metaData['language']];
+                    }
+                    else
+                    {
+                        unset($metaData['current']);
+                    }
                 }
                 $result = $this->$function($name, $metaData, $form);
                 if ($return)
@@ -74,6 +82,8 @@
         
         public function renderHtml($name, array $metaData, $form = null)
         {
+            // Register CKEditor library for inclusion.
+            App()->getClientScript()->registerCoreScript('ckeditor');
             $out = '';
             $id = $name;
             $value = isset($metaData['current']) ? $metaData['current'] : '';
@@ -136,7 +146,7 @@
             {
                 $out .= CHtml::label($metaData['label'], $id);
             }
-            $out .= CHtml::dropDownList($name, $metaData['current'], $metaData['options'], array('form' => $form));
+            $out .= CHtml::dropDownList($name, $value, $metaData['options'], array('form' => $form));
             
             return $out;
         }

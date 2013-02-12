@@ -17,7 +17,6 @@
         
         protected $plugins = array();
         
-        protected $loadQuestionObjects = false;
         protected $stores = array();
 
         protected $subscriptions = array();
@@ -255,7 +254,7 @@
          */
         public function loadQuestionObjects($forceReload = false)
         {
-            if (!$this->loadQuestionObjects || $forceReload)
+            if (empty($this->guidToQuestion) || $forceReload)
             {
                 $event = new PluginEvent('listQuestionPlugins');
                 $this->dispatchEvent($event);

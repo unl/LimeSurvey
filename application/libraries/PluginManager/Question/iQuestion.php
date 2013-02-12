@@ -10,7 +10,7 @@
          * for the question type.
          * 
          */
-        public function getAttributes();
+        public function getAttributes($language = null);
         
         /**
          * This function derives a unique identifier for identifying a question type.

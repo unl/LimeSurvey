@@ -6,6 +6,12 @@
 
     class QuestionsController extends LSYii_Controller
     {
+        
+        public function __construct($id, $module = null) {
+            parent::__construct($id, $module);
+            Yii::import('application.libraries.Limesurvey_lang');
+            Yii::import('application.helpers.surveytranslator_helper', true);
+        }
         /**
          * Creates a new question object.
          */
@@ -43,19 +49,40 @@
             
             $attributes = $_POST;
             unset($attributes['sid'], $attributes['gid'], $attributes['relevance'], $attributes['type'], $attributes['title'], $attributes['position']);
-            if (true || $question->save())
+            if ($question->save())
             {
-                // @var $question iQuestion
-                
-                echo '<pre>';
                 $questionObject = tidToQuestion($_POST['type']);
                 $questionObject->saveAttributes($question->qid, $attributes);
-                //$question->save();
-
-                echo '</pre>';
-                die();
             }
+            
+            $this->redirect(array('admin/survey', 'sa' => 'view', 'surveyid' => $question->sid, 'gid' => $question->gid, 'qid' => $question->qid));
         }
+        
+        
+        public function actionUpdate($qid)
+        {
+            /**
+             * @todo Remove language column from question table; make qid the primary key.
+             */
+            $question = Questions::model()->findByAttributes(array('qid' => $qid));
+            if (isset($question))
+            {
+                $question = $question->attributes;
+                
+                $attributes = App()->getPluginManager()->constructQuestionFromGUID($question['questiontype'], $question['qid'])->getAttributes('*');
+                $this->navData['surveyId'] = $question['sid'];
+                $survey = Survey::model()->findByPk($question['sid']);
+                $languages = $survey->getLanguages();
+                $groups = Groups::model()->findListByAttributes(array('sid' => $question['sid']), 'group_name');
+                $questions = Questions::model()->findListByAttributes(array('sid' => $question['sid']), 'code', null, array('order'=> 'sortorder'));
+                $questiontypes = App()->getPluginManager()->loadQuestionObjects();
+                $this->render('/questions/update', compact('question', 'languages', 'groups', 'questions', 'questiontypes', 'attributes'));
+                
+            }
+            
+        }
+        
+        
     }
 
 ?>

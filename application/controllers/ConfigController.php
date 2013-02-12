@@ -19,7 +19,7 @@ class ConfigController extends LSYii_Controller {
         $data['urlFormat'] = Yii::app()->urlManager->urlFormat;
         $data['layoutPath']    = Yii::app()->getLayoutPath();
         $data['adminImageUrl'] = Yii::app()->getConfig('adminimageurl');
-
+        $data['replacementFields']['path'] = $this->createUrl("admin/limereplacementfields/sa/index/");
         $this->layout = false;
         $this->render('/config/script', compact('data'));
     }

@@ -1,6 +1,7 @@
 //$Id: admin_core.js 10154 2011-05-31 11:45:24Z c_schmitz $
 
 $(document).ready(function(){
+    initializeHtmlEditors();
     if(typeof(userdateformat) !== 'undefined')
         {
         $(".popupdate").each(function(i,e) {
@@ -677,5 +678,21 @@ function removeCSRFDivs()
 
 function initializeHtmlEditors()
 {
-    $('.htmleditor textarea').ckeditor({'customConfig' : '/scripts/admin/ckeditor-config.js'});
+    $('.htmleditor textarea').each(function() {
+        if (typeof(CKEDITOR.instances[$(this).attr('name')]) != 'undefined')
+        {
+            CKEDITOR.instances[$(this).attr('name')].destroy(true);
+        }
+        
+        $(this).ckeditor({
+            'customConfig' : '/scripts/admin/ckeditor-config.js',
+            'LimeReplacementFieldsType' : '',
+            'LimeReplacementFieldsSID' : 0,
+            'LimeReplacementFieldsGID' : 0,
+            'LimeReplacementFieldsQID' : 0,
+            'LimeReplacementFieldsPath' : LS.replacementFields.path
+            
+        });
+    })
+    
 }

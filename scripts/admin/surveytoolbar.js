@@ -3,7 +3,7 @@
 
 $(document).ready(function(){
     // Load the superfish menu
-    $('ul.sf-menu').superfish({
+     $('ul.sf-menu').superfish({
         speed:'fast'
     });
     //Load the special tooltips for the surveybar

@@ -15,6 +15,8 @@
 
 abstract class LSYii_Controller extends CController
 {
+    
+    public $navData = array();
     /**
      * Basic initialiser to the base controller class
      *

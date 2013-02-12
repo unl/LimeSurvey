@@ -1,11 +1,11 @@
 <div id="nonlocalized" class="nonlocalized tabs">
-<ul>
+    <ul>
     <?php
         echo CHtml::tag('li', array('id' => 'basic_tabheader'), CHtml::link($clang->gT("Basic settings"), '#basic'));
         echo CHtml::tag('li', array('id' => 'advanced_tabheader'), CHtml::link($clang->gT("Advanced settings"), '#advanced'));
     ?>
-</ul>
-    <div id="basic" class="form30">
+    </ul>
+    <div id="basic" class="">
         <ul>
             <li><label for='question_type'><?php $clang->eT("Question Type:"); ?></label>
                 <select id='question_type' form="<?php echo $form; ?>" style='margin-bottom:5px' name='type' class='<?php echo $selectormodeclass; ?>'>
@@ -33,24 +33,28 @@
                $basicSettings = array(
                    'title' => array(
                        'type' => 'string',
-                       'label' => $clang->gT('Question code:'),
-                       'current' => $eqrow['title']
+                       'label' => gT('Question code:'),
+                       'current' => $question['title']
                    ),
                    'gid' => array(
                        'type' => 'select',
-                       'label' => $clang->gT('Question group:'),
-                       'current' => $eqrow['gid'],
+                       'label' => gT('Question group:'),
+                       'current' => $question['gid'],
                        'options' => $groupList
                    ),
                    'relevance' => array(
                        'type' => 'relevance',
-                       'label' => $clang->gT('Relevance equation:')
+                       'label' => gT('Relevance equation:')
                    ),
                    'position' => array(
                        'type' => 'select',
-                       'label' => $clang->gT("Position:"),
+                       'label' => gT("Position:"),
                        'current' => 'last',
                        'options' => $questionOrderList
+                   ),
+                   'randomgroup' => array(
+                       'type' => 'string',
+                       'label' => gT('Randomization group:')
                    )
                );
 
@@ -64,21 +68,7 @@
            
         </ul>
     </div>
-    <div id="advanced" class="form30">
+    <div id="advanced">
         
     </div>
 </div>
-<script type="text/javascript">
-    $(document).ready(function() {
-        $( "#nonlocalized").tabs( "option", "collapsible", true );
-        $('#nonlocalized').on('tabsbeforeactivate', function(event, ui)
-        {
-            if (ui.newTab.attr('id') == 'advanced_tabheader')
-            {
-                updatequestionattributes();
-            }
-        });
-        
-    });
-    
-</script>

@@ -63,4 +63,28 @@ class LSActiveRecord extends CActiveRecord
         $criteria = $this->getCommandBuilder()->createCriteria($condition, $params);
         return $this->query($criteria, true, false);  //Notice the third parameter 'false'
     }
+    
+    
+    
+        /** 
+         * Returns a key value array.
+         * 
+         * @param type $attributes Any conditions you want applied.
+         * @param type $title The field to use for the array values.
+         * @param string $key The field to use for the array keys, defaults to the primary key.
+         * @param string $condition Specify optional conditions.
+         */
+        public function findListByAttributes($attributes, $title, $key = null, $condition = '')
+        {
+            $records = $this->findAllByAttributes($attributes, $condition);
+            if (!isset($key))
+            {
+                $key = $this->primaryKey();
+            }
+            foreach ($records as $record)
+            {
+                $result[$record->$key] = $record->$title;
+            }
+            return $result;
+        }
 }

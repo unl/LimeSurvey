@@ -77,8 +77,6 @@ CKEDITOR.editorConfig = function( config )
 
 
     config.extraPlugins = "ajax,limereplacementfields";
-
-    
     config.toolbarStartupExpanded = true;
     config.toolbar = 'inline';
     config.smiley_path = "/upload/images/smiley/msn";

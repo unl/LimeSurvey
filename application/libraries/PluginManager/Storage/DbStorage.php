@@ -2,49 +2,180 @@
 
 class DbStorage implements iPluginStorage {
 
-    /** 
-     * Contains a reference to the active record object used for storing data.
-     * @var PluginSetting
+    
+    public function __construct() 
+    {
+    }
+    /**
+     * 
+     * @param iPlugin $plugin
+     * @param string $key Key for the setting; passing null will return all keys.
+     * @param string $model Optional model name to which the data was attached.
+     * @param int $id Optional id of the model instance to which the data was attached.
+     * @param mixed $default Default value to return if key could not be found.
+     * @param string $language Optional language identifier used for retrieving the setting.
+     * @return mixed Returns the value from the database or null if not set.
      */
-    protected $model = null;
-
-    public function __construct() {
-        $this->model = PluginSetting::model();
+    public function get(iPlugin $plugin, $key = null, $model = null, $id = null, $default = null, $language = null) 
+    {
+        $functionName = 'get' . ucfirst($model);
+        if ($model == null || !method_exists($this, $functionName))
+        {
+            return $this->getGeneric($plugin, $key, $model, $id, $default);
+        }
+        else
+        {
+            return $this->$functionName($plugin, $key, $model, $id, $default, $language);
+        }
     }
 
     /**
      * 
      * @param iPlugin $plugin
      * @param string $key
-     * @param string $model
-     * @param int $id
+     * @param string $model Optional model name to which the data was attached.
+     * @param int $id Optional id of the model instance to which the data was attached.
+     * @param mixed $default Default value to return if key could not be found.
+     * @param string $language Optional language identifier used for retrieving the setting.
      * @return mixed Returns the value from the database or null if not set.
      */
-    function get($plugin, $key = null, $model = null, $id = null, $default = null) {
+    protected function getGeneric(iPlugin $plugin, $key, $model, $id, $default) 
+    {
         $attributes = array(
             'plugin_id' => $plugin->getId(),
             'model'     => $model,
             'model_id'  => $id,
-            'key'       => $key);
-        $record = $this->model->findByAttributes($attributes);
-        if (!is_null($record)) {
-            return unserialize($record->value);
-        } else {
-            return $default;
-        }        
+        );
+        if ($key != null)
+        {
+            $attributes['key'] = $key;
+        }
+    
+        $records = PluginSetting::model()->findAllByAttributes($attributes);
+        if (count($records) > 1)
+        {
+            foreach ($records as $record)
+            {
+                $result[] = unserialize($record->value);
+            }
+        }
+        elseif (count($records) == 1)
+        {
+            $result = unserialize($records[0]->value);
+        }
+        else 
+        {
+            $result = $default;
+        }
+        return $result;
+    }
+
+    /**
+     * This function retrieves plugin data related to the Question model.
+     * LS saves this data in a question_attributes EAV table; therefore
+     * the 'Question' model is treated specially.
+     * @param iPlugin $plugin
+     * @param type $key
+     * @param type $model
+     * @param type $id
+     * @param type $default
+     * @param type $language
+     */
+    protected function getQuestion(iPlugin $plugin, $key, $model, $id, $default, $language)
+    {
+        $attributes = array('qid' => $id);
+        // If * is passed we retrieve all languages.
+        if ($language != '*')
+        {
+             $attributes['language'] = $language;
+        }
+        if ($key != null)
+        {
+            $attributes['attribute'] = $key;
+        }
+
+        $records = Question_attributes::model()->findAllByAttributes($attributes);
+        if (count($records) > 0)
+        {
+            foreach ($records as $record)
+            {
+                if ($record->serialized)
+                {
+                    $value = unserialize($record->value);
+                }
+                else
+                {
+                    $value = $record->value;
+                }
+                if ($record->language != null && ($language == '*' || is_array($language)))
+                {
+                    $result[$record->language][] = $value;
+                }
+                else
+                {
+                    $result[] = $value;
+                }
+            }
+            if ($language == '*' || is_array($language) && is_array($result))
+            {
+                foreach ($result as &$item)
+                {
+                    if (count($item) == 1)
+                    {
+                        $item = $item[0];
+                    }
+                }
+            }
+            elseif (count($result) == 1)
+            {
+                $result = $result[0];
+            }
+        }
+        else
+        {
+            $result = $default;
+        }
+
+        return $result;
     }
 
     /**
      * 
      * @param iPlugin $plugin
-     * @param type $key
-     * @param type $data
-     * @param type $model
-     * @param type $id
+     * @param string $key
+     * @param mixed data Default value to return if key could not be found.
+     * @param string $model Optional model name to which the data was attached.
+     * @param int $id Optional id of the model instance to which the data was attached.
+     * @param string $language Optional language identifier used for storing the setting.
+     * 
+     * @return boolean
+     */    
+    public function set(iPlugin $plugin, $key, $data, $model = null, $id = null, $language = null) 
+    {
+        
+        $functionName = 'set' . ucfirst($model);
+        if ($model == null || !method_exists($this, $functionName))
+        {
+            return $this->setGeneric($plugin, $key, $data, $model, $id, $language);
+        }
+        else
+        {
+            return $this->$functionName($plugin, $key, $data, $model, $id, $language);
+        }
+    }
+    /**
+     * 
+     * @param iPlugin $plugin
+     * @param string $key
+     * @param mixed data Default value to return if key could not be found.
+     * @param string $model Optional model name to which the data was attached.
+     * @param int $id Optional id of the model instance to which the data was attached.
+     * @param string $language Optional language identifier used for storing the setting.
      * 
      * @return boolean
      */
-    public function set($plugin, $key, $data, $model = null, $id = null) {
+    protected function setGeneric(iPlugin $plugin, $key, $data, $model, $id, $language) 
+    {
         
         if ($id == null && $model != null)
         {
@@ -56,17 +187,62 @@ class DbStorage implements iPluginStorage {
             'model_id'  => $id,
             'key'       => $key
         );
-        $record = $this->model->findByAttributes($attributes);
+        $record = PluginSetting::model()->findByAttributes($attributes);
         if (is_null($record)) {
             // New setting
-            $record = $this->model->populateRecord($attributes);
+            $record = PluginSetting::model()->populateRecord($attributes);
             $record->setIsNewRecord(true);
         } 
-        
         $record->value = serialize($data);              
         $result = $record->save();
                
         return $result;
     }
-
+    
+    
+        /**
+     * 
+     * @param iPlugin $plugin
+     * @param string $key
+     * @param mixed data Default value to return if key could not be found.
+     * @param string $model Optional model name to which the data was attached.
+     * @param int $id Optional id of the model instance to which the data was attached.
+     * @param string $language Optional language identifier used for storing the setting.
+     * 
+     * @return boolean
+     */
+    protected function setQuestion(iPlugin $plugin, $key, $data, $model, $id, $language) 
+    {
+        
+        if ($id == null && $model != null)
+        {
+            new Exception("DbStorage::set cannot store setting for model $model without valid id.");
+        }
+        $attributes = array(
+            'qid'  => $id,
+            'attribute'       => $key,
+            'language' => $language
+        );
+        $record = Question_attributes::model()->findByAttributes($attributes);
+        if (is_null($record)) {
+            // New setting
+            $record = Question_attributes::model()->populateRecord($attributes);
+            $record->setIsNewRecord(true);
+        } 
+        
+        // Serialize arrays and objects only for question attributes..
+        if (is_array($data) || is_object($data))
+        {
+            $record->value = serialize($data);           
+            $record->serialized = true;
+        }
+        else
+        {
+            $record->value = $data;
+            $record->serialized = false;
+        }
+        $result = $record->save();
+               
+        return $result;
+    }
 }

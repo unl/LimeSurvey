@@ -192,18 +192,37 @@ class SurveyAdmin extends Survey_Common_Action
         $questions=array();
         foreach ($oResult as $result)
         {
-            $q = createQuestion(empty($result->question_types['class']) ? $oResult[$result['parent_qid']]->question_types['class'] : $result->question_types['class'] );
-            if ($q->questionProperties('subquestions') && $result['parent_qid'])
+            if (isset($result->questiontype_id))
             {
-                $questions[] = array('qid' => $result['parent_qid'], 'sqid' => $result['qid'], 'title' => $result->parents['title'], 'question' => $result->parents['question'], 'sqquestion' => $result['question']);
+                $questions[] = array(
+                    'qid' => $result['qid'],
+                    'title' => $result['title'],
+                    /**
+                     * @todo Remove dependency on optional property "question".
+                     * In the future this column will be removed from the database.
+                     */
+                    'question' => $result['question']
+                );
+                
+                /**
+                 * @todo Add support for subquestions.
+                 */
             }
-            else if ($q->questionProperties('hasdefaultvalues') && !$q->questionProperties('subquestions'))
+            else
             {
-                $questions[] = array('qid' => $result['qid'], 'title' => $result['title'], 'question' => $result['question']);
+                $q = createQuestion(empty($result->question_types['class']) ? $oResult[$result['parent_qid']]->question_types['class'] : $result->question_types['class']);
+                if ($q->questionProperties('subquestions') && $result['parent_qid'])
+                {
+                    $questions[] = array('qid' => $result['parent_qid'], 'sqid' => $result['qid'], 'title' => $result->parents['title'], 'question' => $result->parents['question'], 'sqquestion' => $result['question']);
+                }
+                else if ($q->questionProperties('hasdefaultvalues') && !$q->questionProperties('subquestions'))
+                {
+                    $questions[] = array('qid' => $result['qid'], 'title' => $result['title'], 'question' => $result['question']);
+                }
             }
         }
-
         $aData['questions'] = $questions;
+        
         $aData['display']['menu_bars']['surveysummary'] = "editsurveysettings";
         $tempData = $aData;
         $aData['data'] = $tempData;

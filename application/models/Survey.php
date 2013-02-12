@@ -197,6 +197,14 @@ class Survey extends CActiveRecord
     }
 
     /**
+     * Returns al languages this survey uses in an array.
+     * The default language is the first one in the array.
+     */
+    public function getLanguages()
+    {
+        return  array_merge(array($this->language), explode(' ', trim($this->additional_languages)));
+    }
+    /**
     * Returns the additional token attributes
     *
     * @access public

@@ -14,7 +14,7 @@
     *   Files Purpose: lots of common functions
     */
 
-    class Groups extends CActiveRecord
+    class Groups extends LSActiveRecord
     {
         /**
         * Returns the static model of Settings table
@@ -22,7 +22,7 @@
         * @static
         * @access public
         * @param string $class
-        * @return CActiveRecord
+        * @return LSActiveRecord
         */
         public static function model($class = __CLASS__)
         {

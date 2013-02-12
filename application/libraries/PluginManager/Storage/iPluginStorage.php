@@ -9,7 +9,7 @@
          * @param int $id Id of the model for which the data is retreived
          * @return mixed The data stored.
          */
-        public function get($plugin, $key = null, $model = null, $id = null, $default = null);
+        public function get(iPlugin $plugin, $key = null, $model = null, $id = null, $default = null, $language = null);
 
         /**
          * Stores plugin data.
@@ -19,7 +19,7 @@
          * @param string $model Name of a model in case its model specific plugin data, like for a specific question or survey.
          * @param int $id Id of the model for which the data is retreived
          */  
-        public function set ($plugin, $key, $data, $model = null, $id = null);
+        public function set (iPlugin $plugin, $key, $data, $model = null, $id = null, $language = null);
 
         
         /**
