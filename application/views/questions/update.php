@@ -31,7 +31,7 @@
 </div>
 
 <?php
-    echo CHtml::beginForm('', 'post', array('id' => $form));
+    echo CHtml::beginForm('', 'post', array('id' => $form, 'class' => 'modern'));
     echo CHtml::submitButton(gT('Save'));
     echo CHtml::endForm();
     

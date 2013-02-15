@@ -36,7 +36,14 @@ class LSActiveRecord extends CActiveRecord
         return $this->query($criteria, true, false);  //Notice the third parameter 'false'
     }
 
-
+    /**
+     * Retrieves a single field from the database.
+     * @todo This should be improved to actually query just the required column.
+     * 
+     * @param type $pk
+     * @param type $field
+     * @return mixed
+     */
     public function findFieldByPk($pk, $field)
     {
         $record = $this->findByPk($pk);

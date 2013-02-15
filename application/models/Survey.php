@@ -16,7 +16,7 @@ if (!defined('BASEPATH'))
 *   $Id$
 */
 
-class Survey extends CActiveRecord
+class Survey extends LSActiveRecord
 {
     /**
      * This is a static cache, it lasts only during the active request. If you ever need

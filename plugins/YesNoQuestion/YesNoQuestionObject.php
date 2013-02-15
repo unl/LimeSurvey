@@ -63,7 +63,8 @@
             
             $value = $this->getResponse();
             
-            $out = CHtml::label($questionText, $name);
+            
+            $out = CHtml::label($this->api->EMevaluateExpression($questionText), $name);
             
             $data = array(
                 1 => 'Yes',
