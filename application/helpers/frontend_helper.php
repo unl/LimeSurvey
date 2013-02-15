@@ -1253,11 +1253,11 @@ function submitfailed($errormsg='')
 */
 function buildsurveysession($surveyid,$previewGroup=false)
 {
-    global $thissurvey, $secerror, $clienttoken;
     global $tokensexist;
     //global $surveyid;
     global $templang, $move, $rooturl;
 
+    $thissurvey = getSurveyInfo($surveyid);
     $clang = Yii::app()->lang;
 
     if (empty($templang))
@@ -1333,7 +1333,7 @@ function buildsurveysession($surveyid,$previewGroup=false)
             exit;
         }
     }
-
+    
     //BEFORE BUILDING A NEW SESSION FOR THIS SURVEY, LET'S CHECK TO MAKE SURE THE SURVEY SHOULD PROCEED!
     // TOKEN REQUIRED BUT NO TOKEN PROVIDED
     if ($tokensexist == 1 && !$clienttoken && !$previewGroup)
@@ -1353,7 +1353,7 @@ function buildsurveysession($surveyid,$previewGroup=false)
         // DISPLAY CAPTCHA if needed
         sendCacheHeaders();
         doHeader();
-
+        
         $redata = compact(array_keys(get_defined_vars()));
             echo templatereplace(file_get_contents($sTemplatePath."startpage.pstpl"),array(),$redata,'frontend_helper[1594]');
         //echo makedropdownlist();
@@ -1624,7 +1624,7 @@ function buildsurveysession($surveyid,$previewGroup=false)
     {
         $language_to_set = $thissurvey['language'];
     }
-
+        
     if (!isset($_SESSION['survey_'.$surveyid]['s_lang']))
     {
         SetSurveyLanguage($surveyid, $language_to_set);
@@ -1635,7 +1635,10 @@ function buildsurveysession($surveyid,$previewGroup=false)
 
     $unique = array();
     $display = array();
+       
     $fieldmap = createFieldMap($surveyid, false, false, $_SESSION['survey_'.$surveyid]['s_lang']);
+ 
+    
     foreach ($fieldmap as $q)
     {
         if ((int) $q->id > 0 && ($q->displayOnly() || $q->isEquation())) $display[$q->id] = true;
@@ -1648,10 +1651,9 @@ function buildsurveysession($surveyid,$previewGroup=false)
     // Fix totalquestions by substracting Test Display questions
     $iNumberofQuestions=dbExecuteAssoc("SELECT count(*)\n"
     ." FROM {{questions}}"
-    ." WHERE type in ('X','*')\n"
-    ." AND sid={$surveyid}"
-    ." AND language='".$_SESSION['survey_'.$surveyid]['s_lang']."'"
-    ." AND parent_qid=0")->read();
+    ." WHERE sid={$surveyid}"
+    ." AND parent_id=null")->read();
+
 
     $_SESSION['survey_'.$surveyid]['totalquestions'] = $totalquestions - (int) reset($iNumberofQuestions);
 

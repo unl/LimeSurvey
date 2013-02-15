@@ -326,7 +326,6 @@ class SurveyAdmin extends Survey_Common_Action
         LimeExpressionManager::SetEMLanguage(Survey::model()->findByPk($iSurveyID)->language);
         LimeExpressionManager::SetSurveyId($iSurveyID);
         LimeExpressionManager::StartProcessingPage(false,true);
-
         $aData['surveyid'] = $iSurveyID;
         $aData['gid'] = $gid;
         $aData['qid'] = $qid;

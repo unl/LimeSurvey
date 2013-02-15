@@ -149,7 +149,7 @@
             $questions = Yii::app()->db->createCommand()
             ->select('qid')
             ->from('{{questions}} q')
-            ->join('{{groups}} g', 'g.gid=q.gid AND g.gid=:groupid AND q.parent_qid=0')
+            ->join('{{groups}} g', 'g.gid=q.gid AND g.gid=:groupid AND q.parent_id=0')
             ->group('qid')
             ->bindParam(":groupid", $groupId, PDO::PARAM_INT)
             ->queryAll();

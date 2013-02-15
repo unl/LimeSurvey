@@ -50,18 +50,18 @@ class DbStorage implements iPluginStorage {
         {
             $attributes['key'] = $key;
         }
-    
+        
         $records = PluginSetting::model()->findAllByAttributes($attributes);
         if (count($records) > 1)
         {
             foreach ($records as $record)
             {
-                $result[] = unserialize($record->value);
+                $result[] = json_decode($record->value);
             }
         }
         elseif (count($records) == 1)
         {
-            $result = unserialize($records[0]->value);
+            $result = json_decode($records[0]->value);
         }
         else 
         {
@@ -83,62 +83,97 @@ class DbStorage implements iPluginStorage {
      */
     protected function getQuestion(iPlugin $plugin, $key, $model, $id, $default, $language)
     {
-        $attributes = array('qid' => $id);
-        // If * is passed we retrieve all languages.
-        if ($language != '*')
+        $baseAttributes = array(
+            'sid',
+            'code',
+            'qid',
+            'gid',
+            'sortorder',
+            'relevance',
+            'questiontype',
+            'randomization'
+        );
+        
+        // Some keys are stored in the actual question table not in the attributes table.
+        if (in_array($key, $baseAttributes))
         {
-             $attributes['language'] = $language;
+            $result = $this->getQuestionBase($id, $key, $default);
         }
-        if ($key != null)
+        else 
         {
-            $attributes['attribute'] = $key;
-        }
-
-        $records = Question_attributes::model()->findAllByAttributes($attributes);
-        if (count($records) > 0)
-        {
-            foreach ($records as $record)
+            $attributes = array('qid' => $id);
+            // If * is passed we retrieve all languages.
+            if ($language != '*')
             {
-                if ($record->serialized)
-                {
-                    $value = unserialize($record->value);
-                }
-                else
-                {
-                    $value = $record->value;
-                }
-                if ($record->language != null && ($language == '*' || is_array($language)))
-                {
-                    $result[$record->language][] = $value;
-                }
-                else
-                {
-                    $result[] = $value;
-                }
+                 $attributes['language'] = $language;
             }
-            if ($language == '*' || is_array($language) && is_array($result))
+            if ($key != null)
             {
-                foreach ($result as &$item)
+                $attributes['attribute'] = $key;
+            }
+
+            $records = Question_attributes::model()->findAllByAttributes($attributes);
+            if (count($records) > 0)
+            {
+                foreach ($records as $record)
                 {
-                    if (count($item) == 1)
+                    if ($record->serialized)
                     {
-                        $item = $item[0];
+                        $value = json_decode($record->value);
+                    }
+                    else
+                    {
+                        $value = $record->value;
+                    }
+                    if ($record->language != null && ($language == '*' || is_array($language)))
+                    {
+                        $result[$record->language][] = $value;
+                    }
+                    else
+                    {
+                        $result[] = $value;
                     }
                 }
+                if ($language == '*' || is_array($language) && is_array($result))
+                {
+                    foreach ($result as &$item)
+                    {
+                        if (count($item) == 1)
+                        {
+                            $item = $item[0];
+                        }
+                    }
+                }
+                elseif (count($result) == 1)
+                {
+                    $result = $result[0];
+                }
             }
-            elseif (count($result) == 1)
+            else
             {
-                $result = $result[0];
+                $result = $default;
             }
         }
-        else
-        {
-            $result = $default;
-        }
-
         return $result;
     }
 
+    /**
+     * Gets a field from the question table.
+     * @param int $questionId
+     * @param string $key
+     * @param mixed $default Default value in case key could not be found.
+     */
+    protected function getQuestionBase($questionId, $key, $default)
+    {
+        $question = Questions::model()->findByPk($questionId);
+        if ($question != null && isset($question->attributes[$key]))
+        {
+            return $question->attributes[$key];
+        }
+        
+        return $default;
+    }
+    
     /**
      * 
      * @param iPlugin $plugin
@@ -179,7 +214,7 @@ class DbStorage implements iPluginStorage {
         
         if ($id == null && $model != null)
         {
-            new Exception("DbStorage::set cannot store setting for model $model without valid id.");
+            throw new Exception("DbStorage::set cannot store setting for model $model without valid id.");
         }
         $attributes = array(
             'plugin_id' => $plugin->getId(),
@@ -193,14 +228,15 @@ class DbStorage implements iPluginStorage {
             $record = PluginSetting::model()->populateRecord($attributes);
             $record->setIsNewRecord(true);
         } 
-        $record->value = serialize($data);              
+        $record->value = json_encode($data);
         $result = $record->save();
                
         return $result;
     }
     
     
-        /**
+    
+    /**
      * 
      * @param iPlugin $plugin
      * @param string $key
@@ -213,36 +249,64 @@ class DbStorage implements iPluginStorage {
      */
     protected function setQuestion(iPlugin $plugin, $key, $data, $model, $id, $language) 
     {
-        
-        if ($id == null && $model != null)
-        {
-            new Exception("DbStorage::set cannot store setting for model $model without valid id.");
-        }
-        $attributes = array(
-            'qid'  => $id,
-            'attribute'       => $key,
-            'language' => $language
+        $baseAttributes = array(
+            'sid',
+            'code',
+            'qid',
+            'gid',
+            'sortorder',
+            'relevance',
+            'questiontype',
+            'randomization'
         );
-        $record = Question_attributes::model()->findByAttributes($attributes);
-        if (is_null($record)) {
-            // New setting
-            $record = Question_attributes::model()->populateRecord($attributes);
-            $record->setIsNewRecord(true);
-        } 
-        
-        // Serialize arrays and objects only for question attributes..
-        if (is_array($data) || is_object($data))
+        // Some keys are stored in the actual question table not in the attributes table.
+        if (in_array($key, $baseAttributes))
         {
-            $record->value = serialize($data);           
-            $record->serialized = true;
+            $result = $this->setQuestionBase($id, $key, $data);
         }
-        else
+        else 
         {
-            $record->value = $data;
-            $record->serialized = false;
+            $attributes = array(
+                'qid'  => $id,
+                'attribute'       => $key,
+                'language' => $language
+            );
+            $record = Question_attributes::model()->findByAttributes($attributes);
+            if (is_null($record)) {
+                // New setting
+                $record = Question_attributes::model()->populateRecord($attributes);
+                $record->setIsNewRecord(true);
+            } 
+
+            // Serialize arrays and objects only for question attributes..
+            if (is_array($data) || is_object($data))
+            {
+                $record->value = json_encode($data);           
+                $record->serialized = true;
+            }
+            else
+            {
+                $record->value = $data;
+                $record->serialized = false;
+            }
+            $result = $record->save();
         }
-        $result = $record->save();
-               
         return $result;
+    }
+    
+     /**
+     * Sets a field from the question table.
+     * @param int $questionId
+     * @param string $key
+     * @param mixed $data Data to be saved.
+     */
+    protected function setQuestionBase($questionId, $key, $data)
+    {
+        $question = Questions::model()->findByPk($questionId);
+        if ($question != null && $question->setAttribute($key, $data))
+        {
+            return $question->save();
+        }
+        return false;
     }
 }

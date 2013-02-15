@@ -2,6 +2,7 @@
 
 $(document).ready(function(){
     initializeHtmlEditors();
+    initializeAjaxProgress();
     if(typeof(userdateformat) !== 'undefined')
         {
         $(".popupdate").each(function(i,e) {
@@ -695,4 +696,35 @@ function initializeHtmlEditors()
         });
     })
     
+    // If we initialize ck editors we should make sure that all text areas are before any forms are submitted.
+    
+    $('form').bind('submit', function() {
+        for (var i in CKEDITOR.instances)
+        {
+            CKEDITOR.instances[i].updateElement();
+        }
+    });
+    
+    
+}
+
+function initializeAjaxProgress()
+{
+    $('#ajaxprogress').dialog({
+            'modal' : true,
+            'closeOnEscape' : false,
+            'title' : $('#ajaxprogress').attr('title'),
+            'autoOpen' : false,
+            'minHeight': 0,
+            'resizable': false
+        });
+    $('#ajaxprogress').bind('ajaxStart', function()
+    {
+        $(this).dialog('open');
+    });
+    $('#ajaxprogress').bind('ajaxStop', function()
+    {
+        
+        $(this).dialog('close');
+    });
 }

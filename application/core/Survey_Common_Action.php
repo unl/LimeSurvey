@@ -233,9 +233,8 @@ class Survey_Common_Action extends CAction
             {
 
                 LimeExpressionManager::StartProcessingPage(false, Yii::app()->baseUrl,true);  // so can click on syntax highlighting to edit questions
-
                 $this->_surveybar($aData['surveyid'], !empty($aData['gid']) ? $aData['gid'] : null);
-
+                
                 if (isset($aData['display']['menu_bars']['surveysummary']))
                 {
 
@@ -245,7 +244,7 @@ class Survey_Common_Action extends CAction
                     }
                     $this->_surveysummary($aData['surveyid'], !empty($aData['display']['menu_bars']['surveysummary']) ? $aData['display']['menu_bars']['surveysummary'] : null, !empty($aData['gid']) ? $aData['gid'] : null);
                 }
-
+                
                 if (!empty($aData['gid']))
                 {
                     if (empty($aData['display']['menu_bars']['gid_action']) && !empty($aData['qid']))
@@ -254,7 +253,7 @@ class Survey_Common_Action extends CAction
                     }
 
                     $this->_questiongroupbar($aData['surveyid'], $aData['gid'], !empty($aData['qid']) ? $aData['qid'] : null, !empty($aData['display']['menu_bars']['gid_action']) ? $aData['display']['menu_bars']['gid_action'] : null);
-
+                    
                     if (!empty($aData['qid']))
                     {
                         $this->_questionbar($aData['surveyid'], $aData['gid'], $aData['qid'], !empty($aData['display']['menu_bars']['qid_action']) ? $aData['display']['menu_bars']['qid_action'] : null);
@@ -265,7 +264,6 @@ class Survey_Common_Action extends CAction
 
             }
         }
-
         if (!empty($aData['display']['menu_bars']['browse']) && !empty($aData['surveyid']))
         {
             $this->_browsemenubar($aData['surveyid'], $aData['display']['menu_bars']['browse']);
@@ -347,10 +345,10 @@ class Survey_Common_Action extends CAction
         $aData['qct'] = $qct = count($qrr);
 
         //Count sub-questions for this question
-        $sqrq = Questions::model()->findAllByAttributes(array('parent_qid' => $qid, 'language' => $baselang));
+        $sqrq = Questions::model()->findAllByAttributes(array('parent_id' => $qid));
         $aData['sqct'] = $sqct = count($sqrq);
 
-            $qrrow = Questions::model()->with('question_types')->findByAttributes(array('qid' => $qid, 'gid' => $gid, 'sid' => $iSurveyID, 'language' => $baselang, 'parent_qid'=>0));
+            $qrrow = Questions::model()->with('question_types')->findByAttributes(array('qid' => $qid, 'gid' => $gid, 'sid' => $iSurveyID, 'parent_id'=> null));
 
         $questionsummary = "<div class='menubar'>\n";
 
@@ -446,14 +444,13 @@ class Survey_Common_Action extends CAction
 
         Yii::app()->loadHelper('replacements');
         // TODO: check that surveyid and thus baselang are always set here
-        $sumresult4 = Questions::model()->findAllByAttributes(array('sid' => $iSurveyID, 'gid' => $gid, 'language' => $baselang));
+        $sumresult4 = Questions::model()->findAllByAttributes(array('sid' => $iSurveyID, 'gid' => $gid));
         $sumcount4 = count($sumresult4);
 
         $grpresult = Groups::model()->findAllByAttributes(array('gid' => $gid, 'language' => $baselang));
-
         // Check if other questions/groups are dependent upon this group
         $condarray = getGroupDepsForConditions($iSurveyID, "all", $gid, "by-targgid");
-
+            
         $groupsummary = "<div class='menubar'>\n"
         . "<div class='menubar-title ui-widget-header'>\n";
 
@@ -475,7 +472,6 @@ class Survey_Common_Action extends CAction
             $aData['qid'] = $qid;
             $aData['QidPrev'] = $QidPrev = getQidPrevious($iSurveyID, $gid, $qid);
             $aData['QidNext'] = $QidNext = getQidNext($iSurveyID, $gid, $qid);
-
             if ($action == 'editgroup' || $action == 'addquestion' || $action == 'viewquestion' || $action == "editdefaultvalues")
             {
                 $gshowstyle = "style='display: none'";
@@ -494,11 +490,9 @@ class Survey_Common_Action extends CAction
             $aData['sumcount4'] = $sumcount4;
             $aData['iIconSize'] = Yii::app()->getConfig('adminthemeiconsize');
             $aData['imageurl'] = Yii::app()->getConfig('adminimageurl');
-
             $groupsummary .= $this->getController()->render('/admin/survey/QuestionGroups/questiongroupbar_view', $aData, true);
         }
         $groupsummary .= "\n</table>\n";
-
         $finaldata['display'] = $groupsummary;
         $this->getController()->render('/survey_view', $finaldata);
     }
@@ -539,7 +533,7 @@ class Survey_Common_Action extends CAction
         // ACTIVATE SURVEY BUTTON
         $aData['activated'] = $activated;
 
-        $condition = array('sid' => $iSurveyID, 'parent_qid' => 0, 'language' => $baselang);
+        $condition = array('sid' => $iSurveyID, 'parent_id' => 0);
 
         //$sumquery3 =  "SELECT * FROM ".db_table_name('questions')." WHERE sid={$iSurveyID} AND parent_qid=0 AND language='".$baselang."'"; //Getting a count of questions for this survey
         $sumresult3 = Questions::model()->findAllByAttributes($condition); //Checked
@@ -667,7 +661,7 @@ class Survey_Common_Action extends CAction
         //$surveyinfo = array_map('htmlspecialchars', $surveyinfo);
         $activated = $surveyinfo['active'];
 
-        $condition = array('sid' => $iSurveyID, 'parent_qid' => 0, 'language' => $baselang);
+        $condition = array('sid' => $iSurveyID, 'parent_id' => 0);
 
         $sumresult3 = Questions::model()->findAllByAttributes($condition); //Checked
         $sumcount3 = count($sumresult3);

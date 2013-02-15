@@ -11,76 +11,97 @@
             parent::__construct($id, $module);
             Yii::import('application.libraries.Limesurvey_lang');
             Yii::import('application.helpers.surveytranslator_helper', true);
+            
+            
         }
+        
         /**
          * Creates a new question object.
          */
-        public function actionCreate()
+        public function actionCreate($gid, $questiontype = 'd58fa4752cf173a50411b19a0243a0c8')
         {
-            $question = new Questions();
-            
-            
-            if ($_POST['position'] == 'last')
+            $questionObject = App()->getPluginManager()->constructQuestionFromGUID($questiontype);
+            $group = Groups::model()->findByAttributes(array('gid' => $gid))->attributes;
+            $attributes = $questionObject->getAttributes('*');
+            $this->navData['surveyId'] = $group['sid'];
+            $survey = Survey::model()->findByPk($group['sid']);
+            $languages = $survey->getLanguages();
+            $groups = Groups::model()->findListByAttributes(array('sid' => $group['sid']), 'group_name');
+            $questions = Questions::model()->findListByAttributes(array('sid' => $group['sid']), 'code', null, array('order'=> 'sortorder'));
+            if (App()->request->getIsAjaxRequest())
             {
-                $cmd = App()->db->createCommand();
-                $cmd->select(array('max(question_order) as max'));
-                $cmd->from(Questions::model()->tableName());
-                $cmd->where('sid = :sid', array('sid' =>$_POST['sid']));
-                $maxPosition =  intval($cmd->queryScalar());
-                $question->question_order = $maxPosition + 1;
-            }
-            elseif ($_POST['position'] == 'first') 
-            {
-                // We save the new question with order 0.
-                // After saving we will increase all ordering numbers by 1.
-                $question->question_order = 0;
+                $this->renderPartial('/questions/update', compact('question', 'languages', 'groups', 'questions', 'attributes'));
             }
             else
             {
-                $question->question_order = intval($_POST['position']) + 1;
+                $this->render('/questions/update', compact('question', 'languages', 'groups', 'questions', 'attributes'));
             }
-                
-            $question->title = $_POST['title'];
-            $question->relevance = $_POST['relevance'];
-            $question->questiontype_id = $_POST['type'];
-            $question->sid = $_POST['sid'];
-            $question->gid = $_POST['gid'];
+
             
-            
-            $attributes = $_POST;
-            unset($attributes['sid'], $attributes['gid'], $attributes['relevance'], $attributes['type'], $attributes['title'], $attributes['position']);
-            if ($question->save())
-            {
-                $questionObject = tidToQuestion($_POST['type']);
-                $questionObject->saveAttributes($question->qid, $attributes);
-            }
-            
-            $this->redirect(array('admin/survey', 'sa' => 'view', 'surveyid' => $question->sid, 'gid' => $question->gid, 'qid' => $question->qid));
         }
         
         
-        public function actionUpdate($qid)
+        public function actionPreview($qid, $language = 'en')
         {
-            /**
-             * @todo Remove language column from question table; make qid the primary key.
-             */
-            $question = Questions::model()->findByAttributes(array('qid' => $qid));
+            $question = Questions::model()->findByPk($qid);
+            
             if (isset($question))
             {
-                $question = $question->attributes;
+                $questionObject = App()->getPluginManager()->constructQuestionFromGUID($question->questiontype, $qid);
+                $questionObject->render("preview$qid", $language);
+            }
+        }
+        public function actionUpdate($qid, $questiontype = null)
+        {
+            $question = Questions::model()->findByPk($qid);
+            if ($questiontype == null)
+            {
+                $questiontype = $question->questiontype;
+            }
+            if (isset($question))
+            {
+                $questionObject = App()->getPluginManager()->constructQuestionFromGUID($questiontype, $qid);
+                // If post handle submitted data.
+                if (App()->request->getIsPostRequest())
+                {
+                    if ($questionObject->saveAttributes($_POST))
+                    {
+                        App()->user->setFlash('updateQuestion', gT('All question attributes updated.'));
+                    }
+                    else
+                    {
+                        App()->user->setFlash('updateQuestion', gT('Could not update question attributes.'));
+                    }
+                    
+                    // Always redirect to prevent reloading from resubmitting.
+                    $this->redirect(array($this->route, 'qid' => $qid));
                 
-                $attributes = App()->getPluginManager()->constructQuestionFromGUID($question['questiontype'], $question['qid'])->getAttributes('*');
+                }
+
+                /**
+                 * @todo Add support for save & close button; in case of close redirect to overview page.
+                 */
+
+                 
+                $question = $question->attributes;
+                $attributes = $questionObject->getAttributes('*');
                 $this->navData['surveyId'] = $question['sid'];
+                $this->navData['groupId'] = $question['gid'];
                 $survey = Survey::model()->findByPk($question['sid']);
                 $languages = $survey->getLanguages();
                 $groups = Groups::model()->findListByAttributes(array('sid' => $question['sid']), 'group_name');
                 $questions = Questions::model()->findListByAttributes(array('sid' => $question['sid']), 'code', null, array('order'=> 'sortorder'));
-                $questiontypes = App()->getPluginManager()->loadQuestionObjects();
-                $this->render('/questions/update', compact('question', 'languages', 'groups', 'questions', 'questiontypes', 'attributes'));
-                
+                if (App()->request->getIsAjaxRequest())
+                {
+                    $this->renderPartial('/questions/update', compact('question', 'languages', 'groups', 'questions', 'attributes'));
+                }
+                else
+                {
+                    $this->render('/questions/update', compact('question', 'languages', 'groups', 'questions', 'attributes'));
+                }
             }
-            
         }
+        
         
         
     }

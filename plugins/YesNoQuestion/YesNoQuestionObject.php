@@ -15,6 +15,18 @@
             'mandatory' => array(
                 'type' => 'boolean',
                 'label' => 'Mandatory:'
+            ),
+            'display' => array(
+                'label' => 'Display using:',
+                'type' =>  'select',
+                'options' => array(
+                    'radio' => 'Radio buttons',
+                    'dropdown' => 'Dropdown list'
+                    
+                ),
+                'localized' => false,
+                'advanced' => false,
+                'default' => 'dropdown'
             )
         );
         
@@ -40,25 +52,40 @@
         
         /**
          * 
-         * @param Twig_Environment $twig
          * @param boolean $return
          * @param string $name Unique string prefix to be used for all elements with a name and or id attribute.
          * @return null|html
          */
         
-        public function render($twig, $name, $return = false) 
+        public function render($name, $language, $return = false) 
         {
-            $context = array(
-                'default' => $this->default,
-                'name' => $name                
+            $questionText = $this->get('question', '', $language);
+            
+            $value = $this->getResponse();
+            
+            $out = CHtml::label($questionText, $name);
+            
+            $data = array(
+                1 => 'Yes',
+                0 => 'No'
             );
-            if (!$return)
+            if ($this->get('display') == 'dropdown')
             {
-                $twig->display('default.twig', $context);
+                $out .= CHtml::dropDownList($name, $value, $data);
+                
             }
             else
             {
-                return $twig->render('default.twig', $context);
+                $out .= CHtml::radioButtonList($name, $value, $data);
+            }
+            
+            if ($return)
+            {
+                return $out;
+            }
+            else
+            {
+                echo $out;
             }
         }
     }

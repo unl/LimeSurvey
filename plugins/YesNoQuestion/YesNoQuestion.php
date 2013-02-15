@@ -4,6 +4,7 @@
     {
        protected $questionTypes = array(
             'YesNoQuestionObject',
+            'FreeTextQuestionObject'
         );
                 
         

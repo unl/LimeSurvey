@@ -8,7 +8,7 @@
         'id' => 'title-' . $menu['role']
     ), $menu['title']);
 ?>
-<nav class="menubar menubar-<?php echo $menu["role"]; ?>">
+<nav class="menubar">
     <?php 
         if (isset($menu['items']))
         {

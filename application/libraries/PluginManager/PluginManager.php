@@ -301,7 +301,7 @@
             if (isset($this->guidToQuestion[$guid]))
             {
                 $questionClass = $this->guidToQuestion[$guid]['class'];
-                $questionObject = new $questionClass($this->loadPlugin($this->guidToQuestion[$guid]['plugin']), $questionId, $responseId);
+                $questionObject = new $questionClass($this->loadPlugin($this->guidToQuestion[$guid]['plugin']), $this->api, $questionId, $responseId);
                 return $questionObject;
             }
         }

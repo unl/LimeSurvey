@@ -42,7 +42,7 @@
          * @return null|html
          */
         
-        public function render($twig, $name, $return = false) 
+        public function render($name, $language, $return = false) 
         {
             $context = array(
                 'default' => $this->default,

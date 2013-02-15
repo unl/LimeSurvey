@@ -44,6 +44,7 @@ nav ol.level0 > li {
 }
 
 nav ol.level1 {
+    z-index: 1;
     position: absolute;
     display: block;
     visibility: hidden;

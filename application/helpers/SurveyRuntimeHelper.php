@@ -66,7 +66,6 @@ class SurveyRuntimeHelper {
         'timeadjust' => (isset($timeadjust) ? $timeadjust : 0),
         'token' => (isset($clienttoken) ? $clienttoken : NULL),
         );
-
         //Security Checked: POST, GET, SESSION, REQUEST, returnGlobal, DB
         $previewgrp = false;
         if ($surveyMode == 'group' && isset($param['action']) && ($param['action'] == 'previewgroup'))
@@ -93,6 +92,7 @@ class SurveyRuntimeHelper {
             //RUN THIS IF THIS IS THE FIRST TIME , OR THE FIRST PAGE ########################################
             if (!isset($_SESSION[$LEMsessid]['step'])) // || !$_SESSION[$LEMsessid]['step']) - don't do this for step0, else rebuild the session
             {
+                
                 buildsurveysession($surveyid);
                 $sTemplatePath = $_SESSION[$LEMsessid]['templatepath'];
 
@@ -308,6 +308,7 @@ class SurveyRuntimeHelper {
             //Now, we check mandatory questions if necessary
             //CHECK IF ALL CONDITIONAL MANDATORY QUESTIONS THAT APPLY HAVE BEEN ANSWERED
             global $notanswered;
+
 
             if (isset($moveResult) && !$moveResult['finished'])
             {
@@ -545,7 +546,6 @@ class SurveyRuntimeHelper {
                 exit;
             }
         }
-
         $redata = compact(array_keys(get_defined_vars()));
 
         // IF GOT THIS FAR, THEN DISPLAY THE ACTIVE GROUP OF QUESTIONSs

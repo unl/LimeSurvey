@@ -20,7 +20,7 @@
                 if (isset($metaData['localized']) && $metaData['localized'] == true)
                 {
                     $name = "{$name}[{$metaData['language']}]";
-                    if (is_array($metaData['current']) && isset($metaData['current'][$metaData['language']]))
+                    if (isset($metaData['current']) && is_array($metaData['current']) && isset($metaData['current'][$metaData['language']]))
                     {
                         $metaData['current'] = $metaData['current'][$metaData['language']];
                     }
@@ -141,7 +141,7 @@
         {
             $out = '';
             $id = $name;
-            $value = isset($metaData['current']) ? $metaData['current'] : '';
+            $value = isset($metaData['current']) ? $metaData['current'] : (isset($metaData['default']) ? $metaData['default'] : null);
             if (isset($metaData['label']))
             {
                 $out .= CHtml::label($metaData['label'], $id);

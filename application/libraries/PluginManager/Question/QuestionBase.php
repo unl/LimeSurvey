@@ -3,6 +3,11 @@
 
     abstract class QuestionBase implements iQuestion {
         /**
+         * @var LimesurveyApi
+         */
+        protected $api;
+        
+        /**
          * Array containing meta data for supported question attributes.
          * @var array
          */
@@ -14,13 +19,27 @@
          * The supported keys for column meta data are:
          * - type
          * - name
-         * - dbname
+         * - description
          * 
          * @var array
          */
         protected $columns;
         
+        /**
+         * Array containing attributes that all question types share.
+         * @var array
+         */
+        private $defaultAttributes;
         
+        /**
+         * Array containing default attributes that are merged into the attribute
+         * arrays.
+         * @var array
+         */
+        protected $defaultAttributeProperties = array(
+            'localized' => false,
+            'advanced' => false
+        );
         public static $info = array();
         
         /**
@@ -64,15 +83,49 @@
          * @param int $responseId Pass a response id to load results.
          */
         
-        public function __construct(iPlugin $plugin, $questionId = null, $responseId = null) {
+        public function __construct(iPlugin $plugin, LimesurveyApi $api, $questionId = null, $responseId = null) {
             $this->plugin = $plugin;
+            $this->api = $api;
             $this->responseId = $responseId;
             $this->questionId = $questionId;
             if (isset($questionId))
             {
                 $this->loadSubQuestions($questionId);
             }
-            
+            $this->defaultAttributes = array(
+                'questiontype' => array(
+                    'type' => 'select',
+                    'localized' => false,
+                    'advanced' => false,
+                    'label' => gt('Question type:'),
+                    'options' => CHtml::listData(App()->getPluginManager()->loadQuestionObjects(), 'guid', 'name')
+                ),
+                'code' => array(
+                    'type' => 'string',
+                    'localized' => false,
+                    'advanced' => false,
+                    'label' => gT('Question code:')
+                ),
+                'gid' => array(
+                    'type' => 'select',
+                    'localized' => false,
+                    'advanced' => false,
+                    'label' => gT('Question group:'),
+                    'options' => function($this) { return $this->api->getGroupList($this->get('sid')); }
+                ),
+                'relevance' => array(
+                    'type' => 'relevance',
+                    'localized' => false,
+                    'advanced' => false,
+                    'label' => gT('Relevance equation:')
+                ),
+                'randomization' => array(
+                    'type' => 'string',
+                    'localized' => false,
+                    'advanced' => false,
+                    'label' => gT("Randomization group:")
+                )
+            );
         }
         
         /**
@@ -88,7 +141,7 @@
          */
         protected function get($key = null, $default = null, $language = null, $questionId = null)
         {
-            if (!isset($qid) && isset($this->questionId))
+            if (!isset($questionId) && isset($this->questionId))
             {
                 $questionId = $this->questionId;
                 return $this->plugin->getStore()->get($this->plugin, $key, 'Question', $questionId, $default, $language);
@@ -108,14 +161,15 @@
          */
         public function getAttributes($languages = null) 
         {
-            // Merge with defaults.
-            $defaults = array(
-                'localized' => false, // Indicates a setting should be localized.
-                'advanced' => false // Indicates a localized setting is advanced.
-            );
-            foreach ($this->attributes as $name => &$metaData)
+            $allAttributes = array_merge($this->defaultAttributes, $this->attributes);
+            if (count($allAttributes) != count($this->defaultAttributes) + count($this->attributes))
             {
-                $metaData = array_merge($defaults, $metaData);
+                throw new Exception(get_class($this) . " must not redefine default attributes");
+            }
+            
+            foreach ($allAttributes as $name => &$metaData)
+            {
+                $metaData = array_merge($this->defaultAttributeProperties, $metaData);
                 if (isset($this->questionId))
                 {
                     if (is_array($languages))
@@ -129,10 +183,15 @@
                     {
                         $metaData['current'] = $this->get($name, null, $languages);
                     }
+                    
+                    // Populate select fields with a list.
+                    if ($metaData['type'] == 'select' && is_callable($metaData['options']))
+                    {
+                        $metaData['options'] = call_user_func($metaData['options'], $this);
+                    }
                 }
             }
-            
-            return $this->attributes;
+            return $allAttributes;
         }
         
         public function getColumns()
@@ -140,6 +199,11 @@
             return $this->columns;
         }
         
+        
+        public function getCount()
+        {
+            return 1;
+        }
         /**
          * This function derives a unique identifier for identifying a question type.
          */
@@ -149,6 +213,27 @@
             return md5(json_encode(static::$signature));
         }
         
+        /**
+         * Gets the response for the current response id.
+         * @return type
+         */
+        public function getResponse()
+        {
+            if (isset($this->responseId))
+            {
+                $surveyId = Questions::model()->findFieldByPk($this->questionId, 'sid');
+                $response = Survey_dynamic::model($surveyId)->findByPk($this->responseId);
+                $columns = $this->getColumns();
+                foreach ($columns as &$column)
+                {
+                    if (isset($response->$column))
+                    {
+                        $column['response'] = $response->$column;
+                    }
+                }
+                return $columns;
+            }
+        }
         /**
          * Load the question data from the questions model.
          * @param type $questionId
@@ -167,7 +252,7 @@
             }
         }
         
-        public function saveAttributes($qid, array $attributeValues) 
+        public function saveAttributes(array $attributeValues, $qid = null) 
         {
             $attributes = $this->getAttributes();
             $result = true;
@@ -181,7 +266,7 @@
                     {
                         foreach ($value as $language => $localizedValue)
                         {
-                            if (!$this->set($qid, $key, $localizedValue, $language))
+                            if (!$this->set($key, $localizedValue, $language, $qid))
                             {
                                 $result = false;
                             }
@@ -189,7 +274,7 @@
                     }
                     else
                     {
-                        if (!$this->set($qid, $key, $value))
+                        if (!$this->set($key, $value, $qid))
                         {
                             $result = false;
                         }
@@ -210,9 +295,19 @@
          * @param mixed $value
          * @return boolean
          */
-        protected function set($qid, $key, $value, $language = null)
+        protected function set($key, $value, $language = null, $questionId = null)
         {
-            return $this->plugin->getStore()->set($this->plugin, $key, $value, 'Question', $qid, $language);
+            if (!isset($questionId) && isset($this->questionId))
+            {
+                $questionId = $this->questionId;
+                return $this->plugin->getStore()->set($this->plugin, $key, $value, 'Question', $questionId, $language);
+            }
+            else
+            {
+                return false;
+            }
+            
+            
         }
                 
         

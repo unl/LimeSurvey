@@ -4,7 +4,12 @@
      * Base class for plugins.
      */
     abstract class PluginBase implements iPlugin {
-
+        /**
+         *
+         * @var LimesurveyApi
+         */
+        protected $api = null;
+        
         protected $id = null;
         protected $storage = 'DummyStorage';
         
@@ -29,6 +34,7 @@
         {
             $this->pluginManager = $manager;
             $this->id = $id;
+            $this->api = $manager->getAPI();
         }
         
         /**

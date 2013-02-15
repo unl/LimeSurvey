@@ -2301,7 +2301,6 @@
             // TODO - do I need to force refresh, or trust that createFieldMap will cache langauges properly?
             $fieldmap=createFieldMap($surveyid,$forceRefresh,false,$_SESSION['LEMlang']);
             $this->sid= $surveyid;
-
             $this->runtimeTimings[] = array(__METHOD__ . '.createFieldMap',(microtime(true) - $now));
             //      LimeExpressionManager::ShowStackTrace();
 
@@ -3153,7 +3152,6 @@
             //        $LEM->runtimeTimings[] = array(__METHOD__,(microtime(true) - $now));
 
             $LEM->initialized=true;
-
             if ($initializeVars)
             {
                 $LEM->em->StartProcessingGroup(
@@ -6202,10 +6200,7 @@ EOD;
                 else {
                     $where = " a.qid=b.qid";
             }
-            if (!is_null($lang)) {
-                $lang = " and a.language='".$lang."' and b.language='".$lang."'";
-            }
-
+            
 
             $databasetype = Yii::app()->db->getDriverName();
             if ($databasetype=='mssql' || $databasetype=="sqlsrv")
@@ -6219,7 +6214,6 @@ EOD;
 
             $query .= " from {{question_attributes}} as a, {{questions}} as b"
             ." where " . $where
-            .$lang
             ." order by a.qid, a.attribute";
 
             $data = dbExecuteAssoc($query);
@@ -6257,14 +6251,10 @@ EOD;
         {
             $qans = array();
 
-            if (!is_null($lang)) {
-                $lang = " and a.language='".$lang."' and q.language='".$lang."'";
-            }
-
+            
             $query = "SELECT a.qid, a.code, a.answer, a.scale_id, a.assessment_value"
             ." FROM {{answers}} AS a, {{questions}} as q"
             ." WHERE a.qid = q.qid and q.sid = ".$surveyid
-            .$lang
             ." ORDER BY a.qid, a.scale_id, a.sortorder";
 
             $data = dbExecuteAssoc($query);

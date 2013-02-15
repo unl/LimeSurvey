@@ -55,7 +55,6 @@ class index extends CAction {
         $redata = compact(array_keys(get_defined_vars()));
 
         $clang = $this->_loadLimesurveyLang($surveyid);
-
         if ( $this->_isClientTokenDifferentFromSessionToken($clienttoken,$surveyid) )
         {
             $aMessage = array(
@@ -75,7 +74,6 @@ class index extends CAction {
             );
             $this->_createNewUserSessionAndRedirect($surveyid, $redata, __LINE__, $aMessage);
         }
-
 
         if (isset($param['action']) && (in_array($param['action'],array('previewgroup','previewquestion'))) && !$this->_canUserPreviewSurvey($surveyid))
         {
@@ -142,7 +140,7 @@ class index extends CAction {
         {
             $sTempLanguage='';
         }
-
+        
         //CHECK FOR REQUIRED INFORMATION (sid)
         if ($surveyid && $surveyExists)
         {
@@ -625,6 +623,7 @@ class index extends CAction {
         }
 
         // Preview action : Preview right already tested before
+        
         if (isset($param['action']) && (in_array($param['action'],array('previewgroup','previewquestion'))))
         {
             // Unset all SESSION: be sure to have the last version

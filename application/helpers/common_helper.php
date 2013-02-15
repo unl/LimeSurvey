@@ -408,14 +408,14 @@ function getQuestions($surveyid,$gid,$selectedqid)
 {
     $clang = Yii::app()->lang;
     $s_lang = Survey::model()->findByPk($surveyid)->language;
-    $qrows = Questions::model()->findAllByAttributes(array('sid' => $surveyid, 'gid' => $gid, 'language' => $s_lang, 'parent_qid' => 0),array('order'=>'question_order'));
+    $qrows = Questions::model()->findAllByAttributes(array('sid' => $surveyid, 'gid' => $gid, 'parent_id' => null),array('order'=>'sortorder'));
 
     if (!isset($sQuestionselecter)) {$sQuestionselecter="";}
     foreach ($qrows as $qrow)
     {
         $qrow = $qrow->attributes;
-        $qrow['title'] = strip_tags($qrow['title']);
-        $link = Yii::app()->getController()->createUrl("/admin/survey/sa/view/surveyid/".$surveyid."/gid/".$gid."/qid/".$qrow['qid']);
+        $qrow['title'] = strip_tags($qrow['code']);
+        $link = Yii::app()->getController()->createUrl("/questions/update/", array('qid' =>  $qrow['qid']));
         $sQuestionselecter .= "<option value='{$link}'";
         if ($selectedqid == $qrow['qid'])
         {
@@ -491,7 +491,7 @@ function getQidPrevious($surveyid, $gid, $qid)
 {
     $clang = Yii::app()->lang;
     $s_lang = Survey::model()->findByPk($surveyid)->language;
-    $qrows = Questions::model()->findAllByAttributes(array('gid' => $gid, 'sid' => $surveyid, 'language' => $s_lang, 'parent_qid'=>0),array('order'=>'question_order'));
+    $qrows = Questions::model()->findAllByAttributes(array('gid' => $gid, 'sid' => $surveyid, 'parent_id'=>null),array('order'=>'sortorder'));
 
     $i = 0;
     $iPrev = -1;
@@ -560,7 +560,7 @@ function getQidNext($surveyid, $gid, $qid)
 {
     $clang = Yii::app()->lang;
     $s_lang = Survey::model()->findByPk($surveyid)->language;
-    $qrows = Questions::model()->findAllByAttributes(array('gid' => $gid, 'sid' => $surveyid, 'language' => $s_lang, 'parent_qid' => 0), array('order'=>'question_order'));
+    $qrows = Questions::model()->findAllByAttributes(array('gid' => $gid, 'sid' => $surveyid, 'parent_id' => null), array('order'=>'sortorder'));
 
 
     $i = 0;
@@ -1748,6 +1748,7 @@ function createCompleteSGQA($iSurveyID, $sLanguage, $public  = false)
 */
 
 function createFieldMap($surveyid, $force_refresh=false, $questionid=false, $sLanguage) {
+    
     $sLanguage = sanitize_languagecode($sLanguage);
     $surveyid = sanitize_int($surveyid);
     $clang = new Limesurvey_lang($sLanguage);
@@ -1800,10 +1801,9 @@ function createFieldMap($surveyid, $force_refresh=false, $questionid=false, $sLa
     $q->text=$clang->gT("Start language");
     $q->group_name="";
     $fieldmap["startlanguage"] = $q;
-
+    return $fieldmap;
     //Check for any additional fields for this survey and create necessary fields (token and datestamp and ipaddr)
     $prow = Survey::model()->findByPk($surveyid)->getAttributes(); //Checked
-
     if ($prow['anonymized'] == "N" && Survey::model()->hasTokens($surveyid)) 
     {
         $q = new StdClass;
@@ -1869,43 +1869,18 @@ function createFieldMap($surveyid, $force_refresh=false, $questionid=false, $sLa
         $fieldmap["refurl"] = $q;
     }
 
-    // Collect all default values once so don't need separate query for each question with defaults
-    $baseLanguage = getBaseLanguageFromSurveyID($surveyid);
-    $defaultsQuery = "SELECT a.qid, a.sqid, a.scale_id, a.specialtype, a.defaultvalue"
-    . " FROM {{defaultvalues}} as a, {{questions}} as b"
-    . " WHERE a.qid = b.qid"
-    . " AND a.language = b.language"
-    . " AND b.sid = ".$surveyid
-    . " AND ((b.same_default=0"
-    . " AND a.language = '{$sLanguage}')"
-    . " OR (b.same_default=1"
-    . " AND a.language = '{$baseLanguage}'))";
-    $defaultResults = Yii::app()->db->createCommand($defaultsQuery)->queryAll();
-
-    foreach($defaultResults as $dv)
-    {
-        if ($dv['specialtype'] != '') {
-            $sq = $dv['specialtype'];
-        }
-        else {
-            $sq = $dv['sqid'];
-        }
-        $defaults[$dv['qid']][$sq] = $dv['defaultvalue'];
-    }
-
-    $cond = "t.sid=$surveyid AND t.language='$sLanguage' AND groups.language='$sLanguage'";
+    $cond = "t.sid=$surveyid AND groups.language='$sLanguage'";
     if ($questionid!==false)
     {
         $cond.=" AND t.qid=$questionid";
     }
-    $aresult = Questions::model()->with('groups')->with('question_types')->findAll(array('condition'=>$cond, 'order'=>'groups.group_order, question_order', 'index' => 'qid'));
+    $aresult = Questions::model()->with('groups')->findAll(array('condition'=>$cond, 'order'=>'groups.group_order, sortorder', 'index' => 'qid'));
     $questionSeq=-1; // this is incremental question sequence across all groups
     $groupSeq=-1;
     $_groupOrder=-1;
 
     foreach ($aresult as $arow) //With each question, create the appropriate field(s))
     {
-        var_dump($arow->attributes);
         ++$questionSeq;
 
         // fix fact taht group_order may have gaps
@@ -1924,10 +1899,10 @@ function createFieldMap($surveyid, $force_refresh=false, $questionid=false, $sLa
         // Implicit (subqestion intermal to a question type ) or explicit qubquestions/answer count starts at 1
 
         $fieldname="{$arow['sid']}X{$arow['gid']}X{$arow['qid']}";
-        $class = empty($arow->question_types['class']) ? $aresult[$arow->parent_qid]->question_types['class'] : $arow->question_types['class'];
-        if (isset($class))
+        if (isset($arow->questiontype))
         {
-            $pq = createQuestion($class, array('surveyid'=>$surveyid,
+            $pq = createQuestion($arow->questiontype);
+            /*, array('surveyid'=>$surveyid,
                 'id'=>$arow['qid'], 'fieldname'=>$fieldname,
                 'title'=>$arow['title'], 'text'=>$arow['question'],
                 'gid'=>$arow['gid'], 'mandatory'=>$arow['mandatory'],
@@ -1941,7 +1916,7 @@ function createFieldMap($surveyid, $force_refresh=false, $questionid=false, $sLa
             $pq->groupname = $arow->groups['group_name'];
             $pq->groupcount = $groupSeq;
             $add = $pq->createFieldmap();
-
+            */
             if (count($add))
             {
                 $tmp=array_values($add);
@@ -5671,11 +5646,10 @@ function getGroupDepsForConditions($sid,$depgid="all",$targgid="all",$indexby="b
     . "{{questions}} AS tq2, "
     . "{{groups}} AS tg ,"
     . "{{groups}} AS tg2 "
-    . "WHERE tq.language='{$baselang}' AND tq2.language='{$baselang}' AND tg.language='{$baselang}' AND tg2.language='{$baselang}' AND tc.qid = tq.qid AND tq.sid=$sid "
+    . "WHERE tg.language='{$baselang}' AND tg2.language='{$baselang}' AND tc.qid = tq.qid AND tq.sid=$sid "
     . "AND tq.gid = tg.gid AND tg2.gid = tq2.gid "
     . "AND tq2.qid=tc.cqid AND tq.gid != tg2.gid $sqldepgid $sqltarggid";
     $condresult = Yii::app()->db->createCommand($condquery)->query()->readAll();
-
     if (count($condresult) > 0) {
         foreach ($condresult as $condrow)
         {

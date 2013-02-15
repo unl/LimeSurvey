@@ -51,6 +51,19 @@
             return Survey_dynamic::model($surveyId)->findByPk($responseId)->attributes;
         }
         
+        
+        
+        /**
+         * Gets a key value list using the group name as value and the group id
+         * as key.
+         * @param type $surveyId
+         * @return type
+         */
+        public function getGroupList($surveyId)
+        {
+            return Groups::model()->findListByAttributes(array('sid' => $surveyId), 'group_name');
+        }
+            
     }
 
 ?>

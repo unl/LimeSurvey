@@ -84,8 +84,8 @@
         {
             return array(
                 array('code','required'),
-                array('title','LSYii_Validators'),
-                array('question_order','numerical', 'integerOnly'=>true,'allowEmpty'=>true),
+                array('code','LSYii_Validators'),
+                array('sortorder','numerical', 'integerOnly'=>true,'allowEmpty'=>true),
             );
         }
 

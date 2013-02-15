@@ -30,6 +30,10 @@
             {
                 $this->render('adminmenu', array('menu' => $this->menuSurvey($this->surveyId)));
             }
+            if (isset($this->groupId))
+            {
+                $this->render('adminmenu', array('menu' => $this->menuGroup($this->groupId)));
+            }
         }
 
         
@@ -46,12 +50,12 @@
             $menu['items']['left'][] = 'separator';
             $menu['items']['left'][] = array(
                 'href' => array('admin/user'),
-                'alt' => $this->gT('Manage survey administrators'),
+                'alt' => gT('Manage survey administrators'),
                 'image' => 'security.png',
             );
             $menu['items']['left'][] = array(
                 'href' => array('admin/usergroups/sa/index'),
-                'alt' => $this->gT('Create/edit user groups'),
+                'alt' => gT('Create/edit user groups'),
                 'image' => 'usergroup.png'
             );
 
@@ -66,7 +70,7 @@
             $menu['items']['left'][] = $this->participantDatabase();
             $menu['items']['left'][] = array(
                 'href' => array('/plugins'),
-                'alt' => $this->gT('Plugin manager'),
+                'alt' => gT('Plugin manager'),
                 'image' => 'share.png'
             );
 
@@ -75,19 +79,19 @@
             foreach ($surveys as $survey)
             {
                 $surveyList[] = array(
-                    'sid' => $survey['sid'],
-                    'title' => $survey['surveyls_title'],
-                    'active' => $survey['active'] == 'Y'
+                    'id' => $survey['sid'],
+                    'title' => $survey['surveyls_title']
                 );
             }
             $menu['items']['right'][] = array(
                 'title' => 'Surveys:',
                 'type' => 'select',
+                'name' => 'surveylist',
                 'values' => $surveyList
             );
             $menu['items']['right'][] = array(
-                'href' => array('admin/survey/sa/index'),
-                'alt' => $this->gT('Detailed list of surveys'),
+                'href' => array('/surveys'),
+                'alt' => gT('Detailed list of surveys'),
                 'image' => 'surveylist.png'
             );
             
@@ -97,18 +101,18 @@
             
             $menu['items']['right'][] = array(
                 'href' => array('admin/user/sa/personalsettings'),
-                'alt' => $this->gT('Edit your personal preferences'),
+                'alt' => gT('Edit your personal preferences'),
                 'image' => 'edit.png'
             );
             $menu['items']['right'][] = array(
                 'href' => array('admin/authentication/sa/logout'),
-                'alt' => $this->gT('Logout'),
+                'alt' => gT('Logout'),
                 'image' => 'logout.png'
             );
             
             $menu['items']['right'][] = array(
                 'href' => "http://docs.limesurvey.org",
-                'alt' => $this->gT('LimeSurvey online manual'),
+                'alt' => gT('LimeSurvey online manual'),
                 'image' => 'showhelp.png'
             );
 
@@ -182,20 +186,61 @@
                         'type' => 'sub',
                         'items' => $subitems,
                         'href' => array('survey/index', 'sid' => $surveyId, 'newtest' => 'Y'),
-                        'title' => $this->gt('Test this survey'),
+                        'title' => gT('Test this survey'),
                         'image' => 'do_30.png'
                     )
                 )
             );
-            
-            
+            $menu['items']['right'][] = array(
+                'title' => 'Groups:',
+                'type' => 'select',
+                'name' => 'grouplist',
+                'values' => Groups::model()->findListByAttributes(array('sid' => $surveyId), 'group_name', 'gid')
+            );
+            $menu['items']['right'][] = array(
+                'alt' => gT('Add new group to survey'),
+                'type' => 'link',
+                'image' => 'add.png',
+                'href' => array('admin/questiongroup', 'sa' =>  'add', 'surveyid' => $surveyId)
                 
+            );
             
-            
+            http://ls20.befound.nl/index.php?r=admin/questiongroup/sa/add/surveyid/597865
             return $menu;
         }
         
-        
+        protected function menuGroup($groupId)
+        {
+            $group = Groups::model()->findByAttributes(array('gid' => $groupId));
+            $menu['title'] = "Group {$group->group_name} (id: {$groupId})";
+            $menu['role'] = 'group';
+            $menu['imageUrl'] = App()->getConfig('adminimageurl');
+            
+            $menu['items']['left'][] = array(
+                'alt' => gT('Preview this group'),
+                'type' => 'link',
+                'image' => 'preview.png',
+                'href' => array('survey/index/', 'action' => 'previewgroup', 'sid' => $group->sid, 'gid' => $groupId)
+            );
+            $menu['items']['left'][] = 'separator';
+            $menu['items']['left'][] = array(
+                'alt' => gT('Edit current question group'),
+                'type' => 'link',
+                'image' => 'edit.png',
+                'href' => array('admin/questiongroup', 'sa' => 'edit', 'surveyid' => $group->sid, 'gid' => $groupId)
+            );
+            $menu['items']['left'][] = 'separator';
+            
+            $menu['items']['left'][] = 'separator';
+
+            $menu['items']['right'][] = array(
+                'type' => 'select',
+                'title' => gT('Questions'),
+                'name' => 'questionlist',
+                'values' => Questions::model()->findListByAttributes(array('sid' => $group->sid, 'gid' => $groupId), 'code', 'qid')
+            );
+            return $menu;
+        }
         
         protected function renderItem($item, &$allowSeparator, $imageUrl, $level = 0)
         {
@@ -256,9 +301,17 @@
         
         protected function renderSelect($item)
         {
-            $result = CHtml::label($item['title'],  'surveylist');
-            $result .= CHtml::dropDownList('surveylist', null, CHtml::listData($item['values'], 'sid', 'title'), array(
-                'id' => 'surveylist'
+            $result = CHtml::label($item['title'],  $item['name']);
+            if (is_array(current($item['values'])))
+            {
+                $listData = CHtml::listData($item['values'], 'id', 'title');
+            }
+            else
+            {
+                $listData = $item['values'];
+            }
+            $result .= CHtml::dropDownList($item['name'], null, $listData, array(
+                'id' => $item['name']
             ));
             
             return $result;
@@ -298,7 +351,7 @@
                 return array(
                     'href' => array('admin/globalsettings'),
                     'image' => 'global.png',
-                    'alt' => $this->gT('Global Settings')
+                    'alt' => gT('Global Settings')
                 );
             }
         }
@@ -310,7 +363,7 @@
                 return array(
                     'href' => array('admin/checkintegrity'),
                     'image' => 'checkdb.png',
-                    'alt' => $this->gT('Check Data Integrity')
+                    'alt' => gT('Check Data Integrity')
                 );
             }
         }
@@ -323,7 +376,7 @@
                 return array(
                     'href' => array("admin/survey/sa/newsurvey"),
                     'image' => 'add.png',
-                    'alt' => $this->gT('Create, import, or copy a survey')
+                    'alt' => gT('Create, import, or copy a survey')
                 );
             }
         }
@@ -336,14 +389,14 @@
                     return array(
                         'image' => 'backup.png',
                         'href' => array("admin/dumpdb"),
-                        'alt' => $this->gT('Backup Entire Database')
+                        'alt' => gT('Backup Entire Database')
                     );
                 }
                 else
                 {
                     return array(
                         'image' => 'backup_disabled.png',
-                        'alt' => $this->gT('The database export is only available for MySQL databases. For other database types please use the according backup mechanism to create a database dump.'),
+                        'alt' => gT('The database export is only available for MySQL databases. For other database types please use the according backup mechanism to create a database dump.'),
                         'type' => 'image'
                     );
                 }
@@ -357,7 +410,7 @@
                 return array(
                     'href' => array('admin/labels'),
                     'image' => 'labels.png',
-                    'alt' => $this->gT('Edit label sets')
+                    'alt' => gT('Edit label sets')
                 );
             }
         }
@@ -368,7 +421,7 @@
             {
                 return array(
                     'href' => array('admin/templates/'),
-                    'alt' => $this->gT('Template Editor'),
+                    'alt' => gT('Template Editor'),
                     'image' => 'templates.png'
                 );
             }
@@ -379,32 +432,10 @@
             if ($this->hasRight('USER_RIGHT_PARTICIPANT_PANEL'))
             {
                 return array(
-                    'alt' => $this->gT('Central participant database/panel'),
+                    'alt' => gT('Central participant database/panel'),
                     'href' => array('admin/participants'),
                     'image' => 'cpdb.png'
                  );
-            }
-        }
-        protected function eT($msg)
-        {
-            echo $this->gT($msg);
-        }
-
-        /**
-         * Wrapper function for localization.
-         * This way we dont need the language object in the view and
-         * can run the widget even without a language object.
-         * @param string $msg
-         */
-        public function gT($msg)
-        {
-            if (isset($this->clang) && method_exists($this->clang, 'gT'))
-            {
-                return $this->clang->gT($msg);
-            }
-            else
-            {
-                return $msg;
             }
         }
 
