@@ -41,7 +41,7 @@
         }
         
         
-        public function actionPreview($qid, $language = 'en')
+        public function actionPreview($id, $language = 'en')
         {
             $question = Questions::model()->findByPk($qid);
             
@@ -51,16 +51,16 @@
                 $questionObject->render("preview$qid", $language);
             }
         }
-        public function actionUpdate($qid, $questiontype = null)
+        public function actionUpdate($id, $questiontype = null)
         {
-            $question = Questions::model()->findByPk($qid);
+            $question = Questions::model()->findByPk($id);
             if ($questiontype == null)
             {
                 $questiontype = $question->questiontype;
             }
             if (isset($question))
             {
-                $questionObject = App()->getPluginManager()->constructQuestionFromGUID($questiontype, $qid);
+                $questionObject = App()->getPluginManager()->constructQuestionFromGUID($questiontype, $id);
                 // If post handle submitted data.
                 if (App()->request->getIsPostRequest())
                 {
@@ -74,7 +74,7 @@
                     }
                     
                     // Always redirect to prevent reloading from resubmitting.
-                    $this->redirect(array($this->route, 'qid' => $qid));
+                    $this->redirect(array($this->route, 'qid' => $id));
                 
                 }
 
@@ -87,6 +87,7 @@
                 $attributes = $questionObject->getAttributes('*');
                 $this->navData['surveyId'] = $question['sid'];
                 $this->navData['groupId'] = $question['gid'];
+                $this->navData['questionId'] = $id;
                 $survey = Survey::model()->findByPk($question['sid']);
                 $languages = $survey->getLanguages();
                 $groups = Groups::model()->findListByAttributes(array('sid' => $question['sid']), 'group_name');

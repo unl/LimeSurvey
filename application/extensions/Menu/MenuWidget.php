@@ -22,6 +22,7 @@
         
         public $surveyId = null;
         public $groupId = null;
+        public $questionId = null;
         
         public function run()
         {
@@ -87,7 +88,8 @@
                 'title' => 'Surveys:',
                 'type' => 'select',
                 'name' => 'surveylist',
-                'values' => $surveyList
+                'values' => $surveyList,
+                'value' => $this->surveyId
             );
             $menu['items']['right'][] = array(
                 'href' => array('/surveys'),
@@ -195,7 +197,8 @@
                 'title' => 'Groups:',
                 'type' => 'select',
                 'name' => 'grouplist',
-                'values' => Groups::model()->findListByAttributes(array('sid' => $surveyId), 'group_name', 'gid')
+                'values' => Groups::model()->findListByAttributes(array('sid' => $surveyId), 'group_name', 'gid'),
+                'value' => $this->groupId
             );
             $menu['items']['right'][] = array(
                 'alt' => gT('Add new group to survey'),
@@ -237,7 +240,8 @@
                 'type' => 'select',
                 'title' => gT('Questions'),
                 'name' => 'questionlist',
-                'values' => Questions::model()->findListByAttributes(array('sid' => $group->sid, 'gid' => $groupId), 'code', 'qid')
+                'values' => Questions::model()->findListByAttributes(array('sid' => $group->sid, 'gid' => $groupId), 'code', 'qid'),
+                'value' => $this->questionId
             );
             return $menu;
         }
@@ -310,8 +314,9 @@
             {
                 $listData = $item['values'];
             }
-            $result .= CHtml::dropDownList($item['name'], null, $listData, array(
-                'id' => $item['name']
+            $result .= CHtml::dropDownList($item['name'], $item['value'], $listData, array(
+                'id' => $item['name'],
+                'prompt' => gT('Please choose...')
             ));
             
             return $result;

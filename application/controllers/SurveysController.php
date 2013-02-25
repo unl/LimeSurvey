@@ -62,14 +62,14 @@
         
         /**
          * Survey overview. 
-         * @param int $sid
+         * @param int $id
          */
-        public function actionView($sid)
+        public function actionView($id)
         {
-            $survey = Survey::model()->findByPk($sid);
+            $survey = Survey::model()->findByPk($id);
             if ($survey != null)
             {
-                $this->navData['surveyId'] = $sid;
+                $this->navData['surveyId'] = $id;
                 $this->render('/surveys/view', compact('survey'));
             }
             else

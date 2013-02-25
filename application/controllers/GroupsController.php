@@ -30,5 +30,20 @@
             $this->layout = 'survey';
             $this->render('/groups/preview', compact('renderedQuestions'));
         }
+        
+        
+        
+        public function actionView($id)
+        {
+            
+                
+            $group = Groups::model()->findByAttributes(array(
+                'gid' => $id
+            ))->attributes;
+            
+            $this->navData['groupId'] = $id;
+            $this->navData['surveyId'] = $group['sid'];
+            $this->render('/groups/view', compact('group'));
+        }
     }
 ?>

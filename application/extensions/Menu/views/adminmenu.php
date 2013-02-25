@@ -1,8 +1,9 @@
 <?php 
     /* @var $this MenuWidget */
-
-    App()->getClientScript()->registerCssFile(App()->getConfig('adminstyleurl') .  'nav.css');
-
+    
+    App()->getClientScript()->registerCssFile(App()->getAssetManager()->publish(Yii::getPathOfAlias('ext.Menu.assets'). '/nav.css'));
+    App()->getClientScript()->registerScriptFile(App()->getAssetManager()->publish(Yii::getPathOfAlias('ext.Menu.assets'). '/nav.js'));
+    
     echo CHtml::tag('div', array(
         'class' => 'titlebar',
         'id' => 'title-' . $menu['role']
