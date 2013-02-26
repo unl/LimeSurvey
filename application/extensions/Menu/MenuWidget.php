@@ -360,6 +360,13 @@
                 'values' => Questions::model()->findListByAttributes(array('sid' => $group->sid, 'gid' => $groupId), 'code', 'qid'),
                 'value' => $this->questionId
             );
+            $menu['items']['right'][] = array(
+                'alt' => gT('Add new question to group'),
+                'type' => 'link',
+                'image' => 'add.png',
+                'href' => array('questions/create', 'gid' => $groupId)
+                
+            );
             return $menu;
         }
         

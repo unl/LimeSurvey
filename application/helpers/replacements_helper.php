@@ -161,7 +161,7 @@ function templatereplace($line, $replacements = array(), &$redata = array(), $de
         }
         $_templatecss.= $template_jqueryui_css; // Template jquery ui after default css
         $_templatecss.= "<link rel='stylesheet' type='text/css' media='all' href='{$templateurl}template.css' />\n";
-        if (getLanguageRTL($clang->langcode))
+        if (getLanguageRTL(App()->lang->langcode))
         {
             $_templatecss.="<link rel='stylesheet' type='text/css' media='all' href='{$templateurl}template-rtl.css' />\n";
         }
@@ -228,7 +228,7 @@ function templatereplace($line, $replacements = array(), &$redata = array(), $de
     }
     elseif (isset($surveylist) && isset($thissurvey['admin']) && $thissurvey['admin']!="")
     {
-        $surveycontact=sprintf($clang->gT("Please contact %s ( %s ) for further assistance."),$thissurvey['admin'],$thissurvey['adminemail']);
+        $surveycontact=sprintf(gT("Please contact %s ( %s ) for further assistance."),$thissurvey['admin'],$thissurvey['adminemail']);
     }
     else
     {
@@ -337,15 +337,15 @@ function templatereplace($line, $replacements = array(), &$redata = array(), $de
     {
         if ($_totalquestionsAsked < 1)
         {
-            $_therearexquestions = $clang->gT("There are no questions in this survey"); // Singular
+            $_therearexquestions = gT("There are no questions in this survey"); // Singular
         }
         elseif ($_totalquestionsAsked == 1)
         {
-            $_therearexquestions = $clang->gT("There is 1 question in this survey"); //Singular
+            $_therearexquestions = gT("There is 1 question in this survey"); //Singular
         }
         else
         {
-            $_therearexquestions = $clang->gT("There are {NUMBEROFQUESTIONS} questions in this survey.");    //Note this line MUST be before {NUMBEROFQUESTIONS}
+            $_therearexquestions = gT("There are {NUMBEROFQUESTIONS} questions in this survey.");    //Note this line MUST be before {NUMBEROFQUESTIONS}
         };
     }
     else
@@ -380,7 +380,7 @@ function templatereplace($line, $replacements = array(), &$redata = array(), $de
         $_dateoutput = '-';
     }
 
-    $_submitbutton = "<input class='submit' type='submit' value=' " . $clang->gT("Submit") . " ' name='move2' onclick=\"javascript:document.limesurvey.move.value = 'movesubmit';\" />";
+    $_submitbutton = "<input class='submit' type='submit' value=' " . gT("Submit") . " ' name='move2' onclick=\"javascript:document.limesurvey.move.value = 'movesubmit';\" />";
 
     if (isset($thissurvey['surveyls_url']) and $thissurvey['surveyls_url'] != "")
     {
@@ -501,7 +501,7 @@ function templatereplace($line, $replacements = array(), &$redata = array(), $de
     }
     else
     {
-        $_strreview = $clang->gT("If you want to check any of the answers you have made, and/or change them, you can do that now by clicking on the [<< prev] button and browsing through your responses.");
+        $_strreview = gT("If you want to check any of the answers you have made, and/or change them, you can do that now by clicking on the [<< prev] button and browsing through your responses.");
     }
 
     if (isset($thissurvey['active']) and $thissurvey['active'] == "N")

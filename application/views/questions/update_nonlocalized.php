@@ -7,7 +7,7 @@
         <ul>
             <?php
                
-
+            
                foreach ($attributes as $name => $setting)
                {
                    if (!$setting['localized'] && !$setting['advanced'])

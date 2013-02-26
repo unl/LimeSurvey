@@ -61,7 +61,8 @@
          */
         public function getGroupList($surveyId)
         {
-            return Groups::model()->findListByAttributes(array('sid' => $surveyId), 'group_name');
+            $result = Groups::model()->findListByAttributes(array('sid' => $surveyId), 'group_name');
+            return $result;
         }
             
     }

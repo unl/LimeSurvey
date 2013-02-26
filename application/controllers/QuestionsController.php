@@ -20,13 +20,42 @@
          */
         public function actionCreate($gid, $questiontype = 'd58fa4752cf173a50411b19a0243a0c8')
         {
-            $questionObject = App()->getPluginManager()->constructQuestionFromGUID($questiontype);
             $group = Groups::model()->findByAttributes(array('gid' => $gid))->attributes;
+            
+            if (App()->request->getIsPostRequest())
+            {
+                // Create new question.
+                $question = new Questions();
+                $question->sid = $group['sid'];
+                $question->code = $_POST['code'];
+                $question->questiontype = $_POST['questiontype'];
+                $question->save();
+                $questionObject = App()->getPluginManager()->constructQuestionFromGUID($questiontype, $question->qid);
+                if ($questionObject->saveAttributes($_POST))
+                {
+                    App()->user->setFlash('updateQuestion', gT('All question attributes updated.'));
+                }
+                else
+                {
+                    App()->user->setFlash('updateQuestion', gT('Could not update question attributes.'));
+                }
+
+                // Always redirect to prevent reloading from resubmitting.
+                $this->redirect(array('questions/update', 'id' => $question->qid));
+
+            }
+            else
+            {
+                $questionObject = App()->getPluginManager()->constructQuestionFromGUID($questiontype);
+            }
+            
+            
             $attributes = $questionObject->getAttributes('*');
             $this->navData['surveyId'] = $group['sid'];
+            $this->navData['groupId'] = $gid;
             $survey = Survey::model()->findByPk($group['sid']);
             $languages = $survey->getLanguages();
-            $groups = Groups::model()->findListByAttributes(array('sid' => $group['sid']), 'group_name');
+            $attributes['gid']['options'] = Groups::model()->findListByAttributes(array('sid' => $group['sid']), 'group_name');
             $questions = Questions::model()->findListByAttributes(array('sid' => $group['sid']), 'code', null, array('order'=> 'sortorder'));
             if (App()->request->getIsAjaxRequest())
             {
@@ -43,13 +72,17 @@
         
         public function actionPreview($id, $language = 'en')
         {
+            App()->setLang(new Limesurvey_lang($language));
             $question = Questions::model()->findByPk($id);
-            
+            $template = Survey::model()->findFieldByPk($question->sid, 'template');
             if (isset($question))
             {
                 $questionObject = App()->getPluginManager()->constructQuestionFromGUID($question->questiontype, $id);
-                $questionObject->render("preview$id", $language);
+                $contents = $questionObject->render("preview$id", $language, true);
+                $this->layout = false;
+                $this->render('preview', compact('contents', 'template'));
             }
+            
         }
         public function actionUpdate($id, $questiontype = null)
         {

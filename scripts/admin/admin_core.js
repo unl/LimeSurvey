@@ -691,7 +691,7 @@ function initializeHtmlEditors()
             'LimeReplacementFieldsSID' : 0,
             'LimeReplacementFieldsGID' : 0,
             'LimeReplacementFieldsQID' : 0,
-            'LimeReplacementFieldsPath' : LS.replacementFields.path
+            'LimeReplacementFieldsPath' : LS.data.replacementFields.path
             
         });
     })

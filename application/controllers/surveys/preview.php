@@ -21,6 +21,11 @@
         }
         
         
+        /**
+         * This function should render the whole survey in a single page.
+         * @param type $id
+         * @param type $language
+         */
         protected function runAllInOne($id, $language)
         {
             
