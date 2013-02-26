@@ -340,7 +340,7 @@
                 'type' => 'link',
                 'image' => 'preview.png',
                 'target' => '_blank',
-                'href' => array('survey/index/', 'action' => 'previewgroup', 'sid' => $group->sid, 'gid' => $groupId)
+                'href' => array('groups/preview', 'id' => $groupId)
             );
             $menu['items']['left'][] = 'separator';
             $menu['items']['left'][] = array(

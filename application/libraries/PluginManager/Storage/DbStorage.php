@@ -262,6 +262,10 @@ class DbStorage implements iPluginStorage {
         // Some keys are stored in the actual question table not in the attributes table.
         if (in_array($key, $baseAttributes))
         {
+            if ($data == '')
+            {
+                $data = null;
+            }
             $result = $this->setQuestionBase($id, $key, $data);
         }
         else 

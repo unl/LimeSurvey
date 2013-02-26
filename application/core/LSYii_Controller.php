@@ -32,8 +32,11 @@ abstract class LSYii_Controller extends CController
 
         Yii::app()->session->init();
         $this->loadLibrary('LS.LS');
+        
         $this->loadHelper('globalsettings');
         $this->loadHelper('common');
+        
+        $this->loadLibrary('limesurvey_lang');
         $this->loadHelper('expressions.em_manager');
         $this->loadHelper('replacements');
         $this->_init();

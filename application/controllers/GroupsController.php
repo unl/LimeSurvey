@@ -2,10 +2,11 @@
 
     class GroupsController extends LSYii_Controller
     {
-        public function actionPreview($gid, $language = null)
+        public function actionPreview($id, $language = 'en')
         {
+            App()->setLang(new Limesurvey_lang($language));
             $group = Groups::model()->findByAttributes(array(
-                'gid' => $gid
+                'gid' => $id
             ));
             $renderedQuestions = array();
             if (isset($group))
@@ -17,7 +18,7 @@
                 }
                 
                 $questions = Questions::model()->findAllByAttributes(array(
-                    'gid' => $group->gid,
+                    'gid' => $id,
                     'parent_id' => null
                 ));
                 $renderedQuestions = array();
@@ -27,8 +28,9 @@
                     $renderedQuestions[] = $questionObject->render("{$group->group_name}-{$question->qid}", $language, true);
                 }
             }
+            $template = Survey::model()->findFieldByPk($group->sid, 'template');
             $this->layout = 'survey';
-            $this->render('/groups/preview', compact('renderedQuestions'));
+            $this->render('/groups/preview', compact('renderedQuestions', 'template'));
         }
         
         
