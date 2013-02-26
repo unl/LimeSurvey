@@ -2,17 +2,11 @@
 
     class MenuWidget extends CWidget
     {
-        /**
-         * @var Limesurvey_lang
-         */
-        public $clang = null;
-        
         public $menu = array();
         
         public function __construct($owner = null) {
             parent::__construct($owner);
             Yii::import('application.helpers.surveytranslator_helper', true);
-            $this->clang = App()->lang;
         }
         public $defaults = array(
             'title' => '',
@@ -34,6 +28,10 @@
             if (isset($this->groupId))
             {
                 $this->render('adminmenu', array('menu' => $this->menuGroup($this->groupId)));
+            }
+            if (isset($this->questionId))
+            {
+                $this->render('adminmenu', array('menu' => $this->menuQuestion($this->questionId)));
             }
         }
 
@@ -127,6 +125,26 @@
             return $menu;
         }
 
+        protected function menuQuestion($questionId)
+        {
+            $question = Questions::model()->findByPk($questionId);
+            
+            $menu['title'] = "Question {$question->code} (id: {$questionId})";
+            $menu['role'] = 'question';
+            $menu['imageUrl'] = App()->getConfig('adminimageurl');
+            
+            $menu['items']['left'][] = array(
+                'alt' => gT('Preview this question'),
+                'type' => 'link',
+                'image' => 'preview.png',
+                'target' => '_blank',
+                'href' => array('questions/preview/', 'id' => $questionId)
+            );
+            $menu['items']['left'][] = 'separator';
+            
+            return $menu;
+        }
+        
         protected function menuSurvey($surveyId)
         {
             /**
@@ -193,6 +211,104 @@
                     )
                 )
             );
+            
+            $menu['items']['left'][] = array(
+                'type' => 'sub',
+                'href' => array('surveys/view', 'id' => $surveyId),
+                'image' => 'edit.png',
+                'items' => array(
+                    array(
+                        'type' => 'link',
+                        'title' => gT('Edit text elements'),
+                        'image' => 'edit_30.png',
+                        'href' => array('admin/survey', 'sa' => 'editlocalsettings', 'surveyid' => $surveyId)
+                    ),
+                    array(
+                        'type' => 'link',
+                        'title' => gT('General settings'),
+                        'image' => 'survey_settings_30.png',
+                        'href' => array('admin/survey', 'sa' => 'editsurveysettings', 'surveyid' => $surveyId)
+                    ),
+                    array(
+                        'type' => 'link',
+                        'title' => gT('Survey permissions'),
+                        'image' => 'survey_security_30.png',
+                        'href' => array('admin/surveypermission', 'sa' => 'view', 'surveyid' => $surveyId)
+                    ),
+                    array(
+                        'type' => 'link',
+                        'title' => gT('Quotas'),
+                        'image' => 'quota_30.png',
+                        'href' => array('admin/quotas', 'sa' => 'index', 'surveyid' => $surveyId)
+                    ),
+                    array(
+                        'type' => 'link',
+                        'title' => gT('Assessments'),
+                        'image' => 'assessments_30.png',
+                        'href' => array('admin/assessments', 'sa' => 'index', 'surveyid' => $surveyId)
+                    ),
+                    array(
+                        'type' => 'link',
+                        'title' => gT('Email templates'),
+                        'image' => 'emailtemplates_30.png',
+                        'href' => array('admin/emailtemplates', 'sa' => 'index', 'surveyid' => $surveyId)
+                    ),
+                    array(
+                        'type' => 'link',
+                        'title' => gT('Survey logic file'),
+                        'image' => 'quality_assurance_30.png',
+                        'href' => array('admin/expressions', 'sa' => 'survey_logic_file', 'sid' => $surveyId)
+                    ),
+                    
+                )
+            );
+            $menu['items']['left'][] = array(
+                'type' => 'sub',
+                'href' => array('surveys/view', 'id' => $surveyId),
+                'image' => 'tools.png',
+                'items' => array(
+                    array(
+                        'type' => 'link',
+                        'title' => gT('Delete survey'),
+                        'image' => 'delete_30.png',
+                        'href' => array('admin/survey', 'sa' => 'delete', 'surveyid' => $surveyId)
+                    ),
+                    array(
+                        'type' => 'link',
+                        'title' => gT('Quick-translation'),
+                        'image' => 'translate_30.png',
+                        'href' => array('admin/translate', 'sa' => 'index', 'surveyid' => $surveyId)
+                    ),
+                    array(
+                        'type' => 'link',
+                        'title' => gT('Expression manager'),
+                        'image' => 'expressionmanager_30.png',
+                        'href' => array('admin/expressions')
+                    ),
+                    array(
+                        'type' => 'link',
+                        'title' => gT('Reset conditions'),
+                        'image' => 'resetsurveylogic_30.png'
+                    ),
+                    array(
+                        'type' => 'sub',
+                        'title' => gT('Regenerate question codes'),
+                        'image' => 'resetsurveylogic_30.png',
+                        'items' => array(
+                            array(
+                                'title' => gT('Straight'),
+                                'image' => 'resetsurveylogic_30.png',
+                                'href' => array('admin/survey', 'sa' => 'regenquestioncodes', 'surveyid' => $surveyId, 'subaction' => 'straight')
+                            ),
+                            array(
+                                'title' => gT('By group'),
+                                'image' => 'resetsurveylogic_30.png',
+                                'href' => array('admin/survey', 'sa' => 'regenquestioncodes', 'surveyid' => $surveyId, 'subaction' => 'bygroup')
+                            )
+                        )
+                    ),
+                )
+            );
             $menu['items']['right'][] = array(
                 'title' => 'Groups:',
                 'type' => 'select',
@@ -223,6 +339,7 @@
                 'alt' => gT('Preview this group'),
                 'type' => 'link',
                 'image' => 'preview.png',
+                'target' => '_blank',
                 'href' => array('survey/index/', 'action' => 'previewgroup', 'sid' => $group->sid, 'gid' => $groupId)
             );
             $menu['items']['left'][] = 'separator';
@@ -267,16 +384,23 @@
                     $result = $this->renderSelect($item);
                 }
                 
+                if (isset($item['href']))
+                {
+                    $options = array();
+                    if (isset($item['target']))
+                    {
+                        $options['target'] = $item['target'];
+                    }
+                    $result = CHtml::link($result, $item['href'], $options);
+                }
+                
                 if(isset($item['items']))
                 {
                     $result = $this->renderSub($item, $imageUrl, $level + 1);
                 }
                 
                 
-                if (isset($item['href']))
-                {
-                    $result = CHtml::link($result, $item['href']);
-                }
+                
             }
             elseif (is_string($item) && $item == 'separator' && $allowSeparator)
             {

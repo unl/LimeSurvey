@@ -7,10 +7,12 @@ nav {
 }
 
 nav ol {
+    background-color: white;
     list-style: none;
     padding: 0px;
     margin: 0px;
     display: inline-block;
+    box-shadow: 7px 7px 5px rgba(50, 50, 50, 0.75);
 }
 
 nav > ol.menubar-left {
@@ -21,17 +23,23 @@ nav > ol.menubar-right {
     float: right;
 }
 
+
 nav li {
-    padding: 2px;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
     white-space:nowrap;
+    padding: 5px;
 }
-    
+
+nav ol.level0 > li {
+    padding: 2px !important;
+}
 
 
 nav a {
     display: inline-block;
+    
+    width: 100%;
 }
 
 nav img {
@@ -39,6 +47,9 @@ nav img {
     vertical-align: middle;
 }
 
+nav ol.level0 {
+    box-shadow: none !important;
+}
 nav ol.level0 > li {
     display: inline-block;
 }
@@ -54,6 +65,11 @@ nav ol.level1 {
 nav ol.level1 > li {
     position: relative;
 }
+
+nav ol.level1 img {
+    margin-right: 10px;
+}
+
 nav ol.level2 {
     top: 0px;
     visibility: hidden;

@@ -43,12 +43,12 @@
         
         public function actionPreview($id, $language = 'en')
         {
-            $question = Questions::model()->findByPk($qid);
+            $question = Questions::model()->findByPk($id);
             
             if (isset($question))
             {
-                $questionObject = App()->getPluginManager()->constructQuestionFromGUID($question->questiontype, $qid);
-                $questionObject->render("preview$qid", $language);
+                $questionObject = App()->getPluginManager()->constructQuestionFromGUID($question->questiontype, $id);
+                $questionObject->render("preview$id", $language);
             }
         }
         public function actionUpdate($id, $questiontype = null)
@@ -74,7 +74,7 @@
                     }
                     
                     // Always redirect to prevent reloading from resubmitting.
-                    $this->redirect(array($this->route, 'qid' => $id));
+                    $this->redirect(array($this->route, 'id' => $id));
                 
                 }
 

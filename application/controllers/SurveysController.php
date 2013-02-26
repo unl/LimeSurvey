@@ -59,6 +59,24 @@
             $this->render('/surveys/index', compact('overview'));
         }
         
+        /**
+         * Previews a survey.
+         * @param type $id
+         */
+        public function actionPreview($id, $language = 'en')
+        {
+            $survey = Survey::model()->findByPk($id);
+            $format = $survey->attributes['format'];
+            var_dump($format);
+            switch ($format)
+            {
+                case 'G':
+                    
+                    
+                case 'Q':
+                default:
+            }
+        }
         
         /**
          * Survey overview. 
