@@ -5302,7 +5302,10 @@ function accessDenied($action,$sid='')
 */
 function cleanLanguagesFromSurvey($sid, $availlangs)
 {
-
+    /** 
+     * @todo Update to reflect changes to question localized attributes.
+     */
+    return;
     Yii::app()->loadHelper('database');
     //$clang = Yii::app()->lang;
     $sid=sanitize_int($sid);
@@ -5356,6 +5359,11 @@ function cleanLanguagesFromSurvey($sid, $availlangs)
 */
 function fixLanguageConsistency($sid, $availlangs='')
 {
+    /**
+     * @todo This must be updated to correctly handle the new database structure.
+     * Also these raw SQL queries should be removed, and the documentation should be made more precice.
+     */
+    return;
     $sid=sanitize_int($sid);
     $clang = Yii::app()->lang;
 

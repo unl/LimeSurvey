@@ -2,7 +2,16 @@
 
     class SurveysController extends LSYii_Controller
     {
-        
+
+        public function actions() 
+        {
+            $externalActions = array(
+                'preview' => 'application.controllers.surveys.preview'
+            );
+            
+            return array_merge(parent::actions(), $externalActions);
+        }
+
         public function actionIndex()
         {
             $overview = array();
@@ -59,24 +68,7 @@
             $this->render('/surveys/index', compact('overview'));
         }
         
-        /**
-         * Previews a survey.
-         * @param type $id
-         */
-        public function actionPreview($id, $language = 'en')
-        {
-            $survey = Survey::model()->findByPk($id);
-            $format = $survey->attributes['format'];
-            var_dump($format);
-            switch ($format)
-            {
-                case 'G':
-                    
-                    
-                case 'Q':
-                default:
-            }
-        }
+        
         
         /**
          * Survey overview. 

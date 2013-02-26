@@ -903,7 +903,6 @@ class database extends Survey_Common_Action
             Yii::app()->loadHelper('surveytranslator');
             Yii::app()->loadHelper('database');
             $formatdata=getDateFormatData(Yii::app()->session['dateformat']);
-
             $expires = $_POST['expires'];
             if (trim($expires)=="")
             {
@@ -936,7 +935,6 @@ class database extends Survey_Common_Action
                 $tokenlength = 15;
             }
             cleanLanguagesFromSurvey($surveyid,Yii::app()->request->getPost('languageids'));
-
             fixLanguageConsistency($surveyid,Yii::app()->request->getPost('languageids'));
             $template = Yii::app()->request->getPost('template');
 

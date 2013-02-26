@@ -699,9 +699,12 @@ function initializeHtmlEditors()
     // If we initialize ck editors we should make sure that all text areas are before any forms are submitted.
     
     $('form').bind('submit', function() {
-        for (var i in CKEDITOR.instances)
+        if (typeof CKEDITOR != 'undefined')
         {
-            CKEDITOR.instances[i].updateElement();
+            for (var i in CKEDITOR.instances)
+            {
+                CKEDITOR.instances[i].updateElement();
+            }
         }
     });
     
