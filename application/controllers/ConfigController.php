@@ -23,5 +23,71 @@ class ConfigController extends LSYii_Controller {
         $this->layout = false;
         $this->render('/config/script', compact('data'));
     }
+    
+    public function actionMap($id)
+    {
+        $array = array();
+        while (count($array) < 1000)
+        {
+            $array[] = mt_rand();
+        }
+        
+        $reps = 0;
+        srand(123);
+        $first = $array;
+        shuffle($first);
+            
+        $result = array();
+        $start = microtime(true);
+        $correct = 0;
+        while ($reps < 10000)
+        {
+            srand(123);
+            $array2 = $array;
+            shuffle($array2);
+            
+            if ($array2 == $first)
+            {
+                $correct++;
+            }
+            unset($array2);
+            $reps++;
+        }
+        debug("Correct: $correct");
+        $end = microtime(true);
+        $time = $end - $start;
+        debug("Time: $time seconds");
+        debug($result);
+        App()->loadHelper('survey');
+        $em = new ExpressionManager();
+        $expr = 'Q1.NAOK - Q2.NAOK';
+        debug($em->RDP_Evaluate($expr));
+        debug($em->GetErrors());
+        debug($em->GetJavaScriptEquivalentOfExpression());
+        debug($em->GetAllJsVarsUsed());
+        //debug(createFieldMap($id, true, false, 'en'));
+    }
+    
+    public function GetVarAttribute($name, $attr, $default)
+    {
+        
+        
+        debug('GetVarAttribute');
+        debug(func_get_args());
+        if ($attr == 'jsName') 
+        {
+            return $attr;
+        }
+        elseif ($attr == NULL)
+        {
+            return 'null';
+        }
+        elseif ($attr == 'varName')
+        {
+            return 'hippe shit';
+        }
+        return $default;
+    }
+            
    
 }

@@ -1801,7 +1801,6 @@ function createFieldMap($surveyid, $force_refresh=false, $questionid=false, $sLa
     $q->text=$clang->gT("Start language");
     $q->group_name="";
     $fieldmap["startlanguage"] = $q;
-    return $fieldmap;
     //Check for any additional fields for this survey and create necessary fields (token and datestamp and ipaddr)
     $prow = Survey::model()->findByPk($surveyid)->getAttributes(); //Checked
     if ($prow['anonymized'] == "N" && Survey::model()->hasTokens($surveyid)) 
@@ -1868,7 +1867,7 @@ function createFieldMap($surveyid, $force_refresh=false, $questionid=false, $sLa
         $q->group_name="";
         $fieldmap["refurl"] = $q;
     }
-
+    return $fieldmap;
     $cond = "t.sid=$surveyid AND groups.language='$sLanguage'";
     if ($questionid!==false)
     {
@@ -6174,6 +6173,14 @@ function getFooter()
         return $embedded_footerfunc();
 }
 
+/**
+ * Debugging function.
+ * @param type $msg
+ */
+function debug($msg)
+{
+    echo CHtml::tag('div', array('style' => 'white-space: pre; background-color: #FFFF99; padding: 10px; border: 2px solid black; margin-bottom: 5px;'), json_encode($msg,  JSON_FORCE_OBJECT+ JSON_PRETTY_PRINT));
+}
 function doFooter()
 {
     echo getFooter();
@@ -6629,3 +6636,4 @@ function header_includes($includes = false, $method = "js" )
     return $header_includes;
 }
 // Closing PHP tag intentionally omitted - yes, it is okay
+

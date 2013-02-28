@@ -234,6 +234,20 @@
                 return $columns;
             }
         }
+        
+        public function getVariables() 
+        {
+            if (isset($this->questionId))
+            {
+                return array(
+                    $this->get('code') => array(
+                        'id' => $this->questionId,
+                        'relevance' => $this->get('relevance')
+                    )
+                );
+            }
+            return array();
+        }
         /**
          * Load the question data from the questions model.
          * @param type $questionId

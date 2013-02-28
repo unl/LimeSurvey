@@ -26,6 +26,12 @@
         public static function getGUID();
         
         /**
+         * Returns the variables exposed by this question. 
+         * The returned array contains a key for each variable name and the value is an array with meta data.
+         * @return array
+         */
+        public function getVariables();
+        /**
          * @param Twig_Environment $twig A reference to configured Twig Environment.
          * This Twig environment will have a correctly configured translation environment.
          * This Twig environment will have the plugin view path configured in its loader.

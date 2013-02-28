@@ -2297,9 +2297,10 @@
             }
             $now = microtime(true);
             $this->em->SetSurveyMode($this->surveyMode);
-
             // TODO - do I need to force refresh, or trust that createFieldMap will cache langauges properly?
             $fieldmap=createFieldMap($surveyid,$forceRefresh,false,$_SESSION['LEMlang']);
+            $fieldlist = createFieldList($surveyid);
+            debug($fieldlist);
             $this->sid= $surveyid;
             $this->runtimeTimings[] = array(__METHOD__ . '.createFieldMap',(microtime(true) - $now));
             //      LimeExpressionManager::ShowStackTrace();

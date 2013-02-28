@@ -140,15 +140,14 @@ class index extends CAction {
         {
             $sTempLanguage='';
         }
-        
         //CHECK FOR REQUIRED INFORMATION (sid)
         if ($surveyid && $surveyExists)
         {
             LimeExpressionManager::SetSurveyId($surveyid); // must be called early - it clears internal cache if a new survey is being used
             $clang = SetSurveyLanguage( $surveyid, $sTempLanguage);
             UpdateSessionGroupList($surveyid, $sTempLanguage);  // to refresh the language strings in the group list session variable
-            UpdateFieldArray();        // to refresh question titles and question text
-
+            
+            
         }
         else
         {
@@ -262,7 +261,6 @@ class index extends CAction {
             "listheading"=>$clang->gT("The following surveys are available:"),
             "list"=>implode("\n",$aSurveyLinkList),
             );
-
             $thissurvey['templatedir'] = $defaulttemplate;
 
             $data['thissurvey'] = $thissurvey;
@@ -301,7 +299,6 @@ class index extends CAction {
             doFooter();
             exit;
         }
-
         // Get token
         if (!isset($token))
         {

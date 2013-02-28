@@ -6,7 +6,10 @@
         public function actions() 
         {
             $externalActions = array(
-                'preview' => 'application.controllers.surveys.preview'
+                'preview' => 'application.controllers.surveys.preview',
+                'start' => 'application.controllers.surveys.start',
+                // All in one survey
+                'survey' => 'application.controllers.surveys.SurveyAllInOne',
             );
             
             return array_merge(parent::actions(), $externalActions);
@@ -88,6 +91,54 @@
                 $this->redirect(array('surveys/index'));
             }
             
+        }
+        
+        
+        public function actionWelcome($id)
+        {
+            // Check if session exists.
+            if (App()->getSurveySession()->exists($id))
+            {
+                
+                $survey = Survey::model()->findByPk($id);
+                
+                // Show welcome screen unless it is disabled or the format is all in one.
+                
+                if (isset($survey) && $survey->showwelcome == 'Y' && $survey->format != 'A')
+                {
+                    $language = App()->getSurveySession()->read($id, 'language');
+                    // Get the welcome message.
+                    $survey_languagesettings = Surveys_languagesettings::model()->findByAttributes(array(
+                        'surveyls_survey_id' => $id,
+                        'surveyls_language' => $language
+                    ));
+                    debug('WELCOME!!!');
+                    debug($survey_languagesettings->attributes);
+                }
+                elseif (isset($survey))
+                {
+                    // Breaks are just for readability / best practice.
+                    switch ($survey->format) {
+                        case 'Q':
+                            $this->redirect(array('surveys/question', 'id' => $id));
+                            break;
+                        case 'A':
+                            $this->redirect(array('surveys/survey', 'id' => $id));
+                            break;
+                        case 'G': 
+                            $this->redirect(array('surveys/group', 'id' => $id));
+                            break;
+                    }
+                }
+                else
+                {
+                    debug('survey could not be found; should probably remove surveysessions..');
+                }
+            }
+            else
+            {
+                debug('survey session could not be found; do some redirect here.');
+            }
         }
     }
 ?>

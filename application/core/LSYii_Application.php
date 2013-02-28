@@ -29,6 +29,10 @@ class LSYii_Application extends CWebApplication
     protected $pluginManager;
     
     /**
+     * @var SurveySession
+     */
+    protected $surveySession;
+    /**
     * Initiates the application
     *
     * @access public
@@ -125,6 +129,8 @@ class LSYii_Application extends CWebApplication
         // Now initialize the plugin manager
         $this->initPluginManager(); 
         
+        $this->initSurveySession();
+        
     }
     
     /**
@@ -142,6 +148,12 @@ class LSYii_Application extends CWebApplication
         
         // And load the active plugins
         $this->pluginManager->loadPlugins();
+    }
+    
+    public function initSurveySession()
+    {
+        Yii::import('application.helpers.SurveySessionHelper', true);
+        $this->surveySession = new SurveySession();
     }
 
     /**
@@ -250,6 +262,15 @@ class LSYii_Application extends CWebApplication
     public function getPluginManager()
     {
         return $this->pluginManager;
+    }
+    
+    /**
+     * Get the survey session manager.
+     * @return SurveySession
+     */
+    public function getSurveySession()
+    {
+        return $this->surveySession;
     }
 }
 
