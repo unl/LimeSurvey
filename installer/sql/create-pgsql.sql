@@ -167,7 +167,7 @@ CREATE TABLE prefix_participant_attribute_names (
   "attribute_id" serial NOT NULL,
   "attribute_type" character varying( 4 ) NOT NULL,
   "visible" character varying( 5 ) NOT NULL,
-  CONSTRAINT prefix_participant_attribute_names_pkey PRIMARY KEY (attribute_id, attribute_type)
+  CONSTRAINT prefix_participant_attribute_names_pkey PRIMARY KEY (attribute_id)
 );
 
 
@@ -504,6 +504,7 @@ CREATE TABLE prefix_users (
     parent_id integer NOT NULL,
     lang character varying(20),
     email character varying(320),
+    manage_survey integer DEFAULT 0 NOT NULL,
     create_survey integer DEFAULT 0 NOT NULL,
     create_user integer DEFAULT 0 NOT NULL,
     participant_panel integer DEFAULT 0 NOT NULL,
@@ -583,4 +584,4 @@ create index plugin_settings_pluginid_idx on prefix_plugin_settings (plugin_id);
 --
 -- Version Info
 --
-INSERT INTO prefix_settings_global VALUES ('DBVersion', '168');
+INSERT INTO prefix_settings_global VALUES ('DBVersion', '169');

@@ -1035,7 +1035,7 @@ function db_upgrade_all($oldversion) {
     }
             
     if ($oldversion < 165)
-    {
+    {        
         Yii::app()->db->createCommand()->createTable('{{question_types}}',array(
         'tid' => 'pk',
         'order' => 'integer NOT NULL',
@@ -1090,6 +1090,27 @@ function db_upgrade_all($oldversion) {
             // Add directregister text field to survey table.
             addColumn('{{surveys}}','directregister',"{$sVarchar}(1) default 'N'");
             Yii::app()->db->createCommand()->update('{{settings_global}}',array('stg_value'=>168),"stg_name='DBVersion'");
+         }
+
+        if ($oldversion < 169)
+        {
+            // Add manage_survey users right (integre(1) : integer) to users table.
+            Yii::app()->db->createCommand()->addColumn('{{users}}','manage_survey',"integer NOT NULL DEFAULT 0");
+            
+            // Fix composite primary key for pgsql databases http://bugs.limesurvey.org/view.php?id=6996
+            $table = 'participant_attribute_names';
+            if ($sDBDriverName == 'mysql') {
+                // Only for mysql first remove auto increment
+                alterColumn('{{' . $table . '}}', 'attribute_id', 'int', false);
+            }
+            dropPrimaryKey($table);
+            addPrimaryKey($table, array('attribute_id'));
+            if ($sDBDriverName == 'mysql') {
+                // Add back auto increment
+                alterColumn('{{' . $table . '}}', 'attribute_id', Yii::app()->getConfig('autoincrement'));
+            }
+            
+            Yii::app()->db->createCommand()->update('{{settings_global}}',array('stg_value'=>169),"stg_name='DBVersion'");
          }
 
     }

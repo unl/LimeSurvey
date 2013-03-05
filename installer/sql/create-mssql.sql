@@ -159,7 +159,7 @@ CREATE TABLE [prefix_participant_attribute_names] (
   [attribute_id] int NOT NULL IDENTITY (1,1),
   [attribute_type] varchar(4) NOT NULL,
   [visible] varchar(5) NOT NULL,
-  PRIMARY KEY  ([attribute_id],[attribute_type])
+  PRIMARY KEY  ([attribute_id])
 );
 
 
@@ -494,6 +494,7 @@ CREATE TABLE [prefix_users] (
   [lang] varchar(20),
   [email] varchar(320),
   [create_survey] int NOT NULL default '0',
+  [manage_survey] int NOT NULL default '0',
   [create_user] int NOT NULL default '0',
   [participant_panel] int NOT NULL default '0',
   [delete_user] int NOT NULL default '0',
@@ -575,4 +576,4 @@ create index [plugin_settings_pluginid_idx] on [prefix_plugin_settings] ([plugin
 --
 -- Version Info
 --
-INSERT INTO [prefix_settings_global] VALUES ('DBVersion', '168');
+INSERT INTO [prefix_settings_global] VALUES ('DBVersion', '169');

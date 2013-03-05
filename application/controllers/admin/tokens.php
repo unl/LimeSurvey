@@ -444,6 +444,7 @@ class tokens extends Survey_Common_Action
             $aRowToAdd['id'] = $token['tid'];
 
             $action = "";
+            $action .= "<div class='inputbuttons'>";    // so we can hide this when edit is clicked
             if ($token['token'] != "" && ($token['completed'] == "N" || $token['completed'] == "")) {
                 $action .= viewHelper::getImageLink('do_16.png', "survey/index/sid/{$iSurveyId}/token/{$token['token']}", $clang->gT("Do survey"), '_blank');
             } elseif ($token['completed'] != "N" && $token['completed'] != "" && getSurveyInfo($iSurveyId)['anonymized'] == "N") {
@@ -478,6 +479,7 @@ class tokens extends Survey_Common_Action
             } else {
                 $action .= '<div style="width: 20px; height: 16px; float: left;"></div>';
             }
+            $action .= '</div>';
             $aRowToAdd['cell'] = array($token['tid'], $action, $token['firstname'], $token['lastname'], $token['email'], $token['emailstatus'], $token['token'], $token['language'], $token['sent'], $token['remindersent'], $token['remindercount'], $token['completed'], $token['usesleft'], $token['validfrom'], $token['validuntil']);
             foreach ($attributes as $attribute) {
                 $aRowToAdd['cell'][] = $token[$attribute];
@@ -551,7 +553,7 @@ class tokens extends Survey_Common_Action
             {
                 $value = Yii::app()->request->getPost($attr_name);
                 if ($desc['mandatory'] == 'Y' && trim($value) == '')
-                    $this->getController()->error(sprintf($this->controller->lang->gT('%s cannot be empty'), $desc['description']));
+                    $this->getController()->error(sprintf($this->controller->lang->gT('%s cannot be left empty'), $desc['description']));
                 $aData[$attr_name] = Yii::app()->request->getPost($attr_name);
             }
             $token = Tokens_dynamic::model()->find('tid=' . Yii::app()->getRequest()->getPost('id'));
@@ -582,7 +584,7 @@ class tokens extends Survey_Common_Action
             {
                 $value = Yii::app()->request->getPost($attr_name);
                 if ($desc['mandatory'] == 'Y' && trim($value) == '')
-                    $this->getController()->error(sprintf($clang->gT('%s cannot be empty'), $desc['description']));
+                    $this->getController()->error(sprintf($clang->gT('%s cannot be left empty'), $desc['description']));
                 $aData[$attr_name] = Yii::app()->request->getPost($attr_name);
             }
             echo ls_json_encode(var_export($aData));
@@ -691,7 +693,7 @@ class tokens extends Survey_Common_Action
                 if(!in_array($attr_name,$aTokenFieldNames)) continue;
                 $value = Yii::app()->getRequest()->getPost($attr_name);
                 if ($desc['mandatory'] == 'Y' && trim($value) == '')
-                    $this->getController()->error(sprintf($clang->gT('%s cannot be empty'), $desc['description']));
+                    $this->getController()->error(sprintf($clang->gT('%s cannot be left empty'), $desc['description']));
                 $aData[$attr_name] = Yii::app()->getRequest()->getPost($attr_name);
             }
 
@@ -796,7 +798,7 @@ class tokens extends Survey_Common_Action
 
                     $value = Yii::app()->request->getPost($attr_name);
                     if ($desc['mandatory'] == 'Y' && trim($value) == '')
-                        $this->getController()->error(sprintf($clang->gT('%s cannot be empty'), $desc['description']));
+                        $this->getController()->error(sprintf($clang->gT('%s cannot be left empty'), $desc['description']));
                     $aTokenData[$attr_name] = Yii::app()->request->getPost($attr_name);
                 }
 
@@ -924,7 +926,7 @@ class tokens extends Survey_Common_Action
             {
                 $value = Yii::app()->request->getPost($attr_name);
                 if ($desc['mandatory'] == 'Y' && trim($value) == '')
-                    $this->getController()->error(sprintf($clang->gT('%s cannot be empty'), $desc['description']));
+                    $this->getController()->error(sprintf($clang->gT('%s cannot be left empty'), $desc['description']));
                 $aData[$attr_name] = Yii::app()->request->getPost($attr_name);
             }
 
@@ -1315,22 +1317,20 @@ class tokens extends Survey_Common_Action
                     }
 
                     $from = Yii::app()->request->getPost('from_' . $emrow['language']);
-
-                    $fieldsarray["{OPTOUTURL}"] = $this->getController()
-                                                       ->createAbsoluteUrl("/optout/tokens/langcode/" . trim($emrow['language']) . "/surveyid/{$iSurveyId}/token/{$emrow['token']}");
-                    $fieldsarray["{OPTINURL}"] = $this->getController()
-                                                      ->createAbsoluteUrl("/optin/tokens/langcode/" . trim($emrow['language']) . "/surveyid/{$iSurveyId}/token/{$emrow['token']}");
-                    $fieldsarray["{SURVEYURL}"] = $this->getController()
-                                                       ->createAbsoluteUrl("/survey/index/sid/{$iSurveyId}/token/{$emrow['token']}/lang/" . trim($emrow['language']) . "/");
-
-                    foreach(array('OPTOUT', 'OPTIN', 'SURVEY') as $key)
+                    $surveyurl = $this->createAbsoluteUrl("/survey/index/sid/{$surveyid}",array('lang'=>$baselang,'token'=>$newtoken));
+                    $optouturl = $this->createAbsoluteUrl("/optout/tokens/surveyid/{$surveyid}",array('langcode'=>'fr','token'=>'newtoken'));
+                    $optinurl = $this->createAbsoluteUrl("/optin/tokens/surveyid/{$surveyid}",array('langcode'=>'fr','token'=>'newtoken'));
+                    if ($bHtml)
                     {
-                        $url = $fieldsarray["{{$key}URL}"];
-                        if ($bHtml) $fieldsarray["{{$key}URL}"] = "<a href='{$url}'>" . htmlspecialchars($url) . '</a>';
-                        if ($key == 'SURVEY')
-                        {
-                            $barebone_link = $url;
-                        }
+                        $fieldsarray["{SURVEYURL}"] = "<a href='{$surveyurl}'>" . htmlspecialchars($surveyurl) . '</a>';
+                        $fieldsarray["{OPTOUTURL}"] = "<a href='{$optouturl}'>" . htmlspecialchars($optouturl) . '</a>';
+                        $fieldsarray["{OPTINURL}"] = "<a href='{$optinurl}'>" . htmlspecialchars($optinurl) . '</a>';
+                    }
+                    else
+                    {
+                        $fieldsarray["{SURVEYURL}"] = "<{$surveyurl}>";
+                        $fieldsarray["{OPTOUTURL}"] = "<{$optouturl}>";
+                        $fieldsarray["{OPTINURL}"] = "<{$optinurl}>";
                     }
 
                     $customheaders = array('1' => "X-surveyid: " . $iSurveyId,
@@ -1340,11 +1340,10 @@ class tokens extends Survey_Common_Action
                     $modsubject = Replacefields(Yii::app()->request->getPost('subject_' . $emrow['language']), $fieldsarray);
                     $modmessage = Replacefields(Yii::app()->request->getPost('message_' . $emrow['language']), $fieldsarray);
 
-                    if (isset($barebone_link))
-                    {
-                        $modsubject = str_replace("@@SURVEYURL@@", $barebone_link, $modsubject);
-                        $modmessage = str_replace("@@SURVEYURL@@", $barebone_link, $modmessage);
-                    }
+                    $modsubject = str_replace("@@SURVEYURL@@", $surveyurl, $modsubject);
+                    $modmessage = str_replace("@@SURVEYURL@@", $surveyurl, $modmessage);
+                    $modmessage = str_replace("@@OPTOUTURL@@", $optouturl, $modmessage);
+                    $modmessage = str_replace("@@OPTINURL@@", $optinurl, $modmessage);
 
                     if (trim($emrow['validfrom']) != '' && convertDateTimeFormat($emrow['validfrom'], 'Y-m-d H:i:s', 'U') * 1 > date('U') * 1)
                     {
@@ -2290,6 +2289,7 @@ class tokens extends Survey_Common_Action
     function _newtokentable($iSurveyId)
     {
         $clang = $this->getController()->lang;
+        $aSurveyInfo = getSurveyInfo($iSurveyId);
         Yii::import('application.helpers.admin.token_helper', true);
         if (Yii::app()->request->getQuery('createtable') == "Y" && hasSurveyPermission($iSurveyId, 'surveyactivation', 'update'))
         {
@@ -2307,7 +2307,8 @@ class tokens extends Survey_Common_Action
             //Rebuild attributedescription value for the surveys table
             $table = Yii::app()->db->schema->getTable(Yii::app()->request->getPost('oldtable'));
             $fields=array_filter(array_keys($table->columns), 'filterForAttributes');
-            $fieldcontents=array();
+            $fieldcontents = $aSurveyInfo['attributedescriptions'];        
+            if (!is_array($fieldcontents)) $fieldcontents=array();
             foreach ($fields as $fieldname)
             {
                 $name=$fieldname;
@@ -2316,11 +2317,14 @@ class tokens extends Survey_Common_Action
                     $data=ParticipantAttributeNames::model()->getAttributeName($cpdbattid, Yii::app()->session['adminlang']);
                     $name=$data['attribute_name'];
                 }
-                $fieldcontents[$fieldname] = array(
-                            'description' => $name,
-                            'mandatory' => 'N',
-                            'show_register' => 'N'
-                            );
+                if (!isset($fieldcontents[$fieldname]))
+                {
+                    $fieldcontents[$fieldname] = array(
+                                'description' => $name,
+                                'mandatory' => 'N',
+                                'show_register' => 'N'
+                                );
+                }
             }
             Survey::model()->updateByPk($iSurveyId, array('attributedescriptions' => serialize($fieldcontents)));
 
