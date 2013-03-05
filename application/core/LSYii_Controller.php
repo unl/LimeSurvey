@@ -15,6 +15,8 @@
 
 abstract class LSYii_Controller extends CController
 {
+    
+    public $navData = array();
     /**
      * Basic initialiser to the base controller class
      *
@@ -30,8 +32,12 @@ abstract class LSYii_Controller extends CController
 
         Yii::app()->session->init();
         $this->loadLibrary('LS.LS');
+        
         $this->loadHelper('globalsettings');
         $this->loadHelper('common');
+        $this->loadHelper('survey');
+        
+        $this->loadLibrary('limesurvey_lang');
         $this->loadHelper('expressions.em_manager');
         $this->loadHelper('replacements');
         $this->_init();

@@ -1,6 +1,8 @@
 //$Id: admin_core.js 10154 2011-05-31 11:45:24Z c_schmitz $
 
 $(document).ready(function(){
+    initializeHtmlEditors();
+    initializeAjaxProgress();
     if(typeof(userdateformat) !== 'undefined')
         {
         $(".popupdate").each(function(i,e) {
@@ -230,12 +232,19 @@ $(document).ready(function(){
     $('#MaximizeGroupWindow').click(function(){
         $('#groupdetails').show();
     });
+    // This works only for a single tabbed interface.
     $('#tabs').tabs();
-    $("#flashmessage").notify().notify('create','themeroller',{},{custom:true,
+    
+    // This also works for multiple tabbed interfaces, allowing nesting.
+    $('.tabs').tabs(); 
+    
+    $(".flashmessage").each(function() {
+        $(this).notify().notify('create','themeroller',{},{custom:true,
         speed: 500,
         expires: 5000
+        });
     });
-
+/*
     if ($("#question_type").not('.none').length > 0 && $("#question_type").attr('type')!='hidden'){
         $("#question_type").msDropDown({onInit:qTypeDropdownInit});
 
@@ -244,6 +253,7 @@ $(document).ready(function(){
             OtherSelection(selected_value);
         });
     }
+    */
     $("#question_type.none").change(function(event){
         var selected_value = qDescToCode[''+$("#question_type option:selected").text()];
         OtherSelection(selected_value);
@@ -312,19 +322,25 @@ function getToolTip(desc){
 
 function updatequestionattributes()
 {
-    $('.loader').show();
-    $('#advancedquestionsettings').html('');
-    var selected_value = qDescToCode[''+$("#question_type_child .selected").text()];
-    if (selected_value==undefined) selected_value = qDescToCode[''+$("#question_type option:selected").text()];
-    if (selected_value==undefined) selected_value = $("#question_class").val();
-    $('#advancedquestionsettings').load(attr_url,{qid:$('#qid').val(),
-        class:selected_value,
-        sid:$('#sid').val()
+    if (LS.updatequestions_question_type == $('#question_type').val())
+    {
+        return;
+    }
+    else
+    {
+        LS.updatequestions_question_type = $('#question_type').val();
+    }
+    $('#advanced').html('');
+
+    $('#advanced').load(attr_url,
+    {
+        'qid': $('#qid').val(),
+        'questionType_id' : $('#question_type').val(),
+        'sid': $('#sid').val()
     }, function(){
         // Loads the tooltips for the toolbars
 
         // Loads the tooltips for the toolbars
-        $('.loader').hide();
         $('label[title]').qtip({
             style: {name: 'cream',
                 tip: true,
@@ -341,7 +357,7 @@ function updatequestionattributes()
             },
             show: {effect: {length:50}}
         });}
-    );
+    );    
 }
 
 function validatefilename (form, strmessage )
@@ -686,5 +702,60 @@ function removeCSRFDivs()
        grandfather = $(parent).parent();
        grandfather.append(this);
        parent.remove();
+    });
+}
+
+function initializeHtmlEditors()
+{
+    $('.htmleditor textarea').each(function() {
+        if (typeof(CKEDITOR.instances[$(this).attr('name')]) != 'undefined')
+        {
+            CKEDITOR.instances[$(this).attr('name')].destroy(true);
+        }
+        
+        $(this).ckeditor({
+            'customConfig' : '/scripts/admin/ckeditor-config.js',
+            'LimeReplacementFieldsType' : '',
+            'LimeReplacementFieldsSID' : 0,
+            'LimeReplacementFieldsGID' : 0,
+            'LimeReplacementFieldsQID' : 0,
+            'LimeReplacementFieldsPath' : LS.data.replacementFields.path
+            
+        });
+    })
+    
+    // If we initialize ck editors we should make sure that all text areas are before any forms are submitted.
+    
+    $('form').bind('submit', function() {
+        if (typeof CKEDITOR != 'undefined')
+        {
+            for (var i in CKEDITOR.instances)
+            {
+                CKEDITOR.instances[i].updateElement();
+            }
+        }
+    });
+    
+    
+}
+
+function initializeAjaxProgress()
+{
+    $('#ajaxprogress').dialog({
+            'modal' : true,
+            'closeOnEscape' : false,
+            'title' : $('#ajaxprogress').attr('title'),
+            'autoOpen' : false,
+            'minHeight': 0,
+            'resizable': false
+        });
+    $('#ajaxprogress').bind('ajaxStart', function()
+    {
+        $(this).dialog('open');
+    });
+    $('#ajaxprogress').bind('ajaxStop', function()
+    {
+        
+        $(this).dialog('close');
     });
 }

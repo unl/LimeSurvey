@@ -67,7 +67,6 @@ class SurveyRuntimeHelper {
         'timeadjust' => (isset($timeadjust) ? $timeadjust : 0),
         'token' => (isset($clienttoken) ? $clienttoken : NULL),
         );
-
         //Security Checked: POST, GET, SESSION, REQUEST, returnGlobal, DB
         $previewgrp = false;
         if ($surveyMode == 'group' && isset($param['action']) && ($param['action'] == 'previewgroup'))
@@ -94,6 +93,7 @@ class SurveyRuntimeHelper {
             //RUN THIS IF THIS IS THE FIRST TIME , OR THE FIRST PAGE ########################################
             if (!isset($_SESSION[$LEMsessid]['step'])) // || !$_SESSION[$LEMsessid]['step']) - don't do this for step0, else rebuild the session
             {
+                
                 buildsurveysession($surveyid);
                 $sTemplatePath = $_SESSION[$LEMsessid]['templatepath'];
 
@@ -310,6 +310,7 @@ class SurveyRuntimeHelper {
             //CHECK IF ALL CONDITIONAL MANDATORY QUESTIONS THAT APPLY HAVE BEEN ANSWERED
             global $notanswered;
 
+
             if (isset($moveResult) && !$moveResult['finished'])
             {
                 $unansweredSQList = $moveResult['unansweredSQs'];
@@ -501,6 +502,30 @@ class SurveyRuntimeHelper {
                     echo $content;
                 }
                 $redata['completed'] = $completed;
+                
+                // @todo Remove direct session access.
+                $event = new PluginEvent('afterSurveyCompleted');
+                $event->set('responseId', $_SESSION[$LEMsessid]['srid']);
+                $event->set('surveyId', $surveyid);
+                App()->getPluginManager()->dispatchEvent($event);
+                if ($event->get('blocks', null) != null)
+                {
+                    $blocks = array();
+                    foreach ($event->get('blocks') as $blockData)
+                    {
+                        
+                        $defaults = array(
+                            'class' => array('pluginblock'),
+                            'contents' => '',
+                            'id' => ''
+                        );
+                        $blockData = array_merge($defaults, $blockData);
+                        $blocks[] = CHtml::tag('div', array('id' => $blockData['id'], 'class' => implode(' ', $blockData['class'])), $blockData['contents']);
+                    }
+                }
+                $redata['completed'] = implode("\n", $blocks) ."\n". $redata['completed'];
+                
+                
                 echo templatereplace(file_get_contents($sTemplatePath."completed.pstpl"), array('completed' => $completed), $redata);
                 echo "\n<br />\n";
                 if ((($LEMdebugLevel & LEM_DEBUG_TIMING) == LEM_DEBUG_TIMING))
@@ -522,7 +547,6 @@ class SurveyRuntimeHelper {
                 exit;
             }
         }
-
         $redata = compact(array_keys(get_defined_vars()));
 
         // IF GOT THIS FAR, THEN DISPLAY THE ACTIVE GROUP OF QUESTIONSs

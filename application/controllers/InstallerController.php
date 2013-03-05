@@ -35,6 +35,8 @@ class InstallerController extends CController {
     * clang
     */
     public $lang = null;
+    
+    public $layout = false;
 
     /**
     * Checks for action specific authorization and then executes an action
@@ -365,7 +367,7 @@ class InstallerController extends CController {
                         .$clang->gT("The database you specified does not exist:")."<br /><br />\n<strong>".$oModel->dbname."</strong><br /><br />\n"
                         .$clang->gT("LimeSurvey can attempt to create this database for you.")."<br /><br />\n";
 
-                        $values['adminoutputForm'] =  CHtml::form(array('installer/createdb'), 'post').
+                        $aValues['adminoutputForm'] =  CHtml::form(array('installer/createdb'), 'post').
                         "<input type='submit' value='"
                         .$clang->gT("Create database")."' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only' /></form>";
                     }
@@ -821,7 +823,7 @@ class InstallerController extends CController {
             $bProceed = false;
 
         // JSON library check
-        if (!check_PHPFunction('json_encode', $data['bJSONPresent']))
+        if (!check_PHPFunction('json_encode', $aData['bJSONPresent']))
             $bProceed = false;
             
         // ** file and directory permissions checking **

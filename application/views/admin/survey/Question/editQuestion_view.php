@@ -1,5 +1,7 @@
 <script type='text/javascript'>
     var attr_url = "<?php echo $this->createUrl('/admin/question/sa/ajaxquestionattributes'); ?>";
+    var local_attr_url = "<?php echo $this->createUrl('/admin/question/sa/ajaxLocalizedAttributes'); ?>";
+    var local_advanced_attr_url = "<?php echo $this->createUrl('/admin/question/sa/ajaxLocalizedAdvancedAttributes'); ?>";
     var imgurl = '<?php echo Yii::app()->getConfig('imageurl'); ?>';
 </script>
 <?php PrepareEditorScript(true, $this); ?>
@@ -18,277 +20,24 @@
 
 </div>
 
-<div id='tabs'>
-    <ul>
-
-        <li><a href="#<?php echo $eqrow['language']; ?>"><?php echo getLanguageNameFromCode($eqrow['language'],false); ?>
-                (<?php $clang->eT("Base language"); ?>)
-            </a></li>
-        <?php
-            $addlanguages=Survey::model()->findByPk($surveyid)->additionalLanguages;
-            foreach  ($addlanguages as $addlanguage)
-            { ?>
-            <li><a href="#<?php echo $addlanguage; ?>"><?php echo getLanguageNameFromCode($addlanguage,false); ?>
-                </a></li>
-            <?php }
-        ?>
-    </ul>
-    <?php echo CHtml::form(array("admin/database/index"), 'post',array('class'=>'form30','id'=>'frmeditquestion','name'=>'frmeditquestion','onsubmit'=>"return isEmpty(document.getElementById('title'), '".$clang->gT("Error: You have to enter a question code.",'js')."');")); ?>
-            <div id='questionactioncopy'>
-                <p><input type='button' class="saveandreturn" value='<?php $clang->eT("Save") ?>' />
-                <input type='submit' value='<?php $clang->eT("Save and close"); ?>' />
-            </div>
-
-            <div id="<?php echo $eqrow['language']; ?>">
-            <?php $eqrow  = array_map('htmlspecialchars', $eqrow); ?>
-                <ul><li>
-                        <label for='title'> <?php $clang->eT("Code:"); ?></label><input type='text' size='20' maxlength='20' id='title' name='title' value="<?php echo $eqrow['title']; ?>" /> <?php if ($copying) $clang->eT("Note: You MUST enter a new question code!"); ?>
-                    </li><li>
-                        <label for='question_<?php echo $eqrow['language']; ?>'><?php $clang->eT("Question:"); ?></label>
-                        <div class="htmleditor">
-                        <textarea cols='50' rows='4' id='question_<?php echo $eqrow['language']; ?>' name='question_<?php echo $eqrow['language']; ?>'><?php echo $eqrow['question']; ?></textarea>
-                        </div>
-                        <?php echo getEditor("question-text","question_".$eqrow['language'], "[".$clang->gT("Question:", "js")."](".$eqrow['language'].")",$surveyid,$gid,$qid,$action); ?>
-                    </li><li>
-                        <label for='help_<?php echo $eqrow['language']; ?>'><?php $clang->eT("Help:"); ?></label>
-                        <div class="htmleditor">
-                        <textarea cols='50' rows='4' id='help_<?php echo $eqrow['language']; ?>' name='help_<?php echo $eqrow['language']; ?>'><?php echo $eqrow['help']; ?></textarea>
-                        </div>
-                        <?php echo getEditor("question-help","help_".$eqrow['language'], "[".$clang->gT("Help:", "js")."](".$eqrow['language'].")",$surveyid,$gid,$qid,$action); ?>
-                    </li>
-                </ul>
-            </div>
+<?php
+    $form = 'frmeditquestion';
+    $this->renderPartial('/admin/survey/Question/editQuestion_nonlocalized', compact('form', 'selectormodeclass', 'clang', 'eqrow', 'groupList', 'questionList', 'qTypeGroups', 'questionOrderList'));
+    $this->renderPartial('/admin/survey/Question/editQuestion_localized', compact('form', 'surveyid', 'clang', 'eqrow', 'gid', 'qid', 'action', 'activated', 'aqresult', 'adding', 'copying'));
+?>
 
 
-        <?php if (!$adding)
-            {
-
-                foreach ($aqresult as $aqrow)
-                {
-                    $aqrow = $aqrow->attributes;
-                    ?>
-
-                <div id="<?php echo $aqrow['language']; ?>">
-                    <ul>
-                        <?php $aqrow  = array_map('htmlspecialchars', $aqrow); ?>
-                        <li>
-                            <label for='question_<?php echo $aqrow['language']; ?>'><?php $clang->eT("Question:"); ?></label>
-                            <div class="htmleditor">
-                            <textarea cols='50' rows='4' id='question_<?php echo $aqrow['language']; ?>' name='question_<?php echo $aqrow['language']; ?>'><?php echo $aqrow['question']; ?></textarea>
-                            </div>
-                            <?php echo getEditor("question-text","question_".$aqrow['language'], "[".$clang->gT("Question:", "js")."](".$aqrow['language'].")",$surveyid,$gid,$qid,$action); ?>
-                        </li><li>
-                            <label for='help_<?php echo $aqrow['language']; ?>'><?php $clang->eT("Help:"); ?></label>
-                            <div class="htmleditor">
-                            <textarea cols='50' rows='4' id='help_<?php echo $aqrow['language']; ?>' name='help_<?php echo $aqrow['language']; ?>'><?php echo $aqrow['help']; ?></textarea>
-                            </div>
-                            <?php echo getEditor("question-help","help_".$aqrow['language'], "[".$clang->gT("Help:", "js")."](".$aqrow['language'].")",$surveyid,$gid,$qid,$action); ?>
-                        </li>/
-
-                    </ul>
-                </div>
-                <?php }
-            }
-            else
-            {
-                $addlanguages=Survey::model()->findByPk($surveyid)->additionalLanguages;
-                foreach  ($addlanguages as $addlanguage)
-                { ?>
-                <div id="<?php echo $addlanguage; ?>">
-                    <ul>
-                        <li>
-                            <label for='question_<?php echo $addlanguage; ?>'><?php $clang->eT("Question:"); ?></label>
-                             <div class="htmleditor">
-                            <textarea cols='50' rows='4' id='question_<?php echo $addlanguage; ?>' name='question_<?php echo $addlanguage; ?>'></textarea>
-                            </div>
-                            <?php echo getEditor("question-text","question_".$addlanguage, "[".$clang->gT("Question:", "js")."](".$addlanguage.")",$surveyid,$gid,$qid,$action); ?>
-                        </li><li>
-                            <label for='help_<?php echo $addlanguage; ?>'><?php $clang->eT("Help:"); ?></label>
-                            <div class="htmleditor">
-                            <textarea cols='50' rows='4' id='help_<?php echo $addlanguage; ?>' name='help_<?php echo $addlanguage; ?>'></textarea>
-                            </div>
-                            <?php echo getEditor("question-help","help_".$addlanguage, "[".$clang->gT("Help:", "js")."](".$addlanguage.")",$surveyid,$gid,$qid,$action); ?>
-                        </li></ul>
-                </div>
-                <?php }
-        } ?>
-        <div id='questionbottom'>
-            <ul>
-                <li><label for='question_type'><?php $clang->eT("Question Type:"); ?></label>
-                    <?php if ($activated != "Y")
-                        { ?>
-
-                        <select id='question_type' style='margin-bottom:5px' name='type' class='<?php echo $selectormodeclass; ?>'>
-                            <?php
-                            foreach ($qTypeGroups as $group => $members)
-                            {
-                                echo '<optgroup label="' . $group . '">';
-                                foreach ($members as $type)
-                                {
-                                    echo "<option value='{$type['tid']}'";
-                                    if ($eqrow['class'] == $type['class'])
-                                    {
-                                        echo " selected='selected'";
-                                    }
-                                    echo ">{$type['name']}</option>\n";
-                                }
-                                echo '</optgroup>';
-                            }; ?>
-                        </select>
-                        <?php }
-                        else
-                        {
-                            $description = createQuestion($eqrow['class'])->questionProperties('description');
-                            echo "{$description} - ".$clang->gT("Cannot be changed (survey is active)"); ?>
-                        <input type='hidden' name='type' id='question_type' value='<?php echo $eqrow['tid']; ?>' />
-                        <input type='hidden' name='class' id='question_class' value='<?php echo $eqrow['class']; ?>' />
-                        <?php } ?>
-
-                </li>
-
-
-
-                <?php if ($activated != "Y")
-                    { ?>
-                    <li>
-                        <label for='gid'><?php $clang->eT("Question group:"); ?></label>
-                        <select name='gid' id='gid'>
-
-                            <?php echo getGroupList3($eqrow['gid'],$surveyid); ?>
-                        </select></li>
-                    <?php }
-                    else
-                    { ?>
-                    <li>
-                        <label><?php $clang->eT("Question group:"); ?></label>
-                        <?php echo $eqrow['group_name']." - ".$clang->gT("Cannot be changed (survey is active)"); ?>
-                        <input type='hidden' name='gid' value='<?php echo $eqrow['gid']; ?>' />
-                    </li>
-                    <?php } ?>
-                <li id='OtherSelection'>
-                    <label><?php $clang->eT("Option 'Other':"); ?></label>
-
-                    <?php if ($activated != "Y")
-                        { ?>
-                        <label for='OY'><?php $clang->eT("Yes"); ?></label><input id='OY' type='radio' class='radiobtn' name='other' value='Y'
-                            <?php if ($eqrow['other'] == "Y") { ?>
-                                checked
-                                <?php } ?>
-                            />&nbsp;&nbsp;
-                        <label for='ON'><?php $clang->eT("No"); ?></label><input id='ON' type='radio' class='radiobtn' name='other' value='N'
-                            <?php if ($eqrow['other'] == "N" || $eqrow['other'] == "" ) { ?>
-                                checked='checked'
-                                <?php } ?>
-                            />
-                        <?php }
-                        else
-                        {
-                            if($eqrow['other']=='Y') $clang->eT("Yes"); else $clang->eT("No");
-                            echo " - ".$clang->gT("Cannot be changed (survey is active)"); ?>
-                        <input type='hidden' name='other' value="<?php echo $eqrow['other']; ?>" />
-                        <?php } ?>
-                </li>
-
-                <li id='MandatorySelection'>
-                    <label><?php $clang->eT("Mandatory:"); ?></label>
-                    <label for='MY'><?php $clang->eT("Yes"); ?></label> <input id='MY' type='radio' class='radiobtn' name='mandatory' value='Y'
-                        <?php if ($eqrow['mandatory'] == "Y") { ?>
-                            checked='checked'
-                            <?php } ?>
-                        />&nbsp;&nbsp;
-                    <label for='MN'><?php $clang->eT("No"); ?></label> <input id='MN' type='radio' class='radiobtn' name='mandatory' value='N'
-                        <?php if ($eqrow['mandatory'] != "Y") { ?>
-                            checked='checked'
-                            <?php } ?>
-                        />
-                </li>
-                <li>
-                    <label for='relevance'><?php $clang->eT("Relevance equation:"); ?></label>
-                    <textarea cols='50' rows='1' id='relevance' name='relevance'><?php echo $eqrow['relevance']; ?></textarea>
-                </li>
-
-                <li id='Validation'>
-                    <label for='preg'><?php $clang->eT("Validation:"); ?></label>
-                    <input type='text' id='preg' name='preg' size='50' value="<?php echo $eqrow['preg']; ?>" />
-                </li>
-
-
-                <?php if ($adding) {
-                        if (count($oqresult)) { ?>
-
-                        <li>
-                            <label for='questionposition'><?php $clang->eT("Position:"); ?></label>
-                            <select name='questionposition' id='questionposition'>
-                                <option value=''><?php $clang->eT("At end"); ?></option>
-                                <option value='0'><?php $clang->eT("At beginning"); ?></option>
-                                <?php foreach ($oqresult as $oq)
-                                    {
-                                        $oq = $oq->attributes;
-                                    ?>
-                                    <?php $question_order_plus_one = $oq['question_order']+1; ?>
-                                    <option value='<?php echo $question_order_plus_one; ?>'><?php $clang->eT("After"); ?>: <?php echo $oq['title']; ?></option>
-                                    <?php } ?>
-                            </select>
-                        </li>
-                        <?php }
-                        else
-                        { ?>
-                        <input type='hidden' name='questionposition' value='' />
-                        <?php }
-                } elseif ($copying) { ?>
-
-                    <li>
-                        <label for='copysubquestions'><?php $clang->eT("Copy subquestions?"); ?></label>
-                        <input type='checkbox' class='checkboxbtn' checked='checked' id='copysubquestions' name='copysubquestions' value='Y' />
-                    </li>
-                    <li>
-                        <label for='copyanswers'><?php $clang->eT("Copy answer options?"); ?></label>
-                        <input type='checkbox' class='checkboxbtn' checked='checked' id='copyanswers' name='copyanswers' value='Y' />
-                    </li>
-                    <li>
-                        <label for='copyattributes'><?php $clang->eT("Copy advanced settings?"); ?></label>
-                        <input type='checkbox' class='checkboxbtn' checked='checked' id='copyattributes' name='copyattributes' value='Y' />
-                    </li>
-
-                <?php } ?>
-
-            </ul>
-
-            <?php if (!$copying) { ?>
-                <p><a id="showadvancedattributes"><?php $clang->eT("Show advanced settings"); ?></a><a id="hideadvancedattributes" style="display:none;"><?php $clang->eT("Hide advanced settings"); ?></a></p>
-                <div id="advancedquestionsettingswrapper" style="display:none;">
-                    <div class="loader"><?php $clang->eT("Loading..."); ?></div>
-                    <div id="advancedquestionsettings"></div>
-                </div><br />
-            <?php } ?>
-                <?php if ($adding)
-                    { ?>
-                    <input type='hidden' name='action' value='insertquestion' />
-                    <input type='hidden' name='gid' value='<?php echo $eqrow['gid']; ?>' />
-                    <p><input type='submit' value='<?php $clang->eT("Add question"); ?>' />
-                    <?php }
-                    elseif ($copying)
-                    { ?>
-                    <input type='hidden' name='action' value='copyquestion' />
-                    <input type='hidden' id='oldqid' name='oldqid' value='<?php echo $qid; ?>' />
-                    <p><input type='submit' value='<?php $clang->eT("Copy question"); ?>' />
-                    <?php }
-                    else
-                    { ?>
-                    <input type='hidden' name='action' value='updatequestion' />
-                    <input type='hidden' id='newpage' name='newpage' value='' />
-                    <input type='hidden' id='qid' name='qid' value='<?php echo $qid; ?>' />
-                    <p><input type='button' class="saveandreturn" value='<?php $clang->eT("Save") ?>' />
-                    <input type='submit' value='<?php $clang->eT("Save and close"); ?>' />
-                    <?php } ?>
-                <input type='hidden' id='sid' name='sid' value='<?php echo $surveyid; ?>' /></p><br />
-        </div></form></div>
 
 
 
 <?php if ($adding)
     {
-
+        echo CHtml::form(array("questions/create"), 'post',array(
+            'id'=> $form,
+            'name'=> $form,
+            'onsubmit'=>"return isEmpty(document.getElementById('title'), '".$clang->gT("Error: You have to enter a question code.",'js')."');"
+        ));
+        echo CHtml::endForm();
 
         if (hasSurveyPermission($surveyid,'surveycontent','import'))
         { ?>
@@ -313,10 +62,5 @@
 
         <?php } ?>
 
-    <script type='text/javascript'>
-        <!--
-        document.getElementById('title').focus();
-        //-->
-    </script>
-
+    
     <?php } ?>

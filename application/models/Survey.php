@@ -16,7 +16,7 @@ if (!defined('BASEPATH'))
 *   $Id$
 */
 
-class Survey extends CActiveRecord
+class Survey extends LSActiveRecord
 {
     /**
      * This is a static cache, it lasts only during the active request. If you ever need
@@ -201,6 +201,14 @@ class Survey extends CActiveRecord
             return array();
     }
 
+    /**
+     * Returns al languages this survey uses in an array.
+     * The default language is the first one in the array.
+     */
+    public function getLanguages()
+    {
+        return  array_merge(array($this->language), explode(' ', trim($this->additional_languages)));
+    }
     /**
     * Returns the additional token attributes
     *

@@ -55,7 +55,6 @@ class index extends CAction {
         $redata = compact(array_keys(get_defined_vars()));
 
         $clang = $this->_loadLimesurveyLang($surveyid);
-
         if ( $this->_isClientTokenDifferentFromSessionToken($clienttoken,$surveyid) )
         {
             $aMessage = array(
@@ -75,7 +74,6 @@ class index extends CAction {
             );
             $this->_createNewUserSessionAndRedirect($surveyid, $redata, __LINE__, $aMessage);
         }
-
 
         if (isset($param['action']) && (in_array($param['action'],array('previewgroup','previewquestion'))) && !$this->_canUserPreviewSurvey($surveyid))
         {
@@ -142,21 +140,14 @@ class index extends CAction {
         {
             $sTempLanguage='';
         }
-
         //CHECK FOR REQUIRED INFORMATION (sid)
         if ($surveyid && $surveyExists)
         {
             LimeExpressionManager::SetSurveyId($surveyid); // must be called early - it clears internal cache if a new survey is being used
-            if(!isset($_SESSION['survey_'.$surveyid]['s_lang']) || $sTempLanguage!=$_SESSION['survey_'.$surveyid]['s_lang'])
-            {
-                $clang = SetSurveyLanguage( $surveyid, $sTempLanguage);
-                UpdateSessionGroupList($surveyid, $sTempLanguage);  // to refresh the language strings in the group list session variable
-                UpdateSessionQuestion($surveyid, $sTempLanguage);        // to refresh question titles and question text
-            }
-            else
-            {
-                $clang = SetSurveyLanguage( $surveyid, $sTempLanguage);
-            }
+            $clang = SetSurveyLanguage( $surveyid, $sTempLanguage);
+            UpdateSessionGroupList($surveyid, $sTempLanguage);  // to refresh the language strings in the group list session variable
+            
+            
         }
         else
         {
@@ -270,7 +261,6 @@ class index extends CAction {
             "listheading"=>$clang->gT("The following surveys are available:"),
             "list"=>implode("\n",$aSurveyLinkList),
             );
-
             $thissurvey['templatedir'] = $defaulttemplate;
 
             $data['thissurvey'] = $thissurvey;
@@ -283,6 +273,8 @@ class index extends CAction {
             $data['sitename'] = Yii::app()->getConfig("sitename");
             $data['languagechanger'] = makeLanguageChanger($sDisplayLanguage);
 
+            
+            
             //A nice exit
             sendCacheHeaders();
             doHeader();
@@ -307,7 +299,6 @@ class index extends CAction {
             doFooter();
             exit;
         }
-
         // Get token
         if (!isset($token))
         {
@@ -629,6 +620,7 @@ class index extends CAction {
         }
 
         // Preview action : Preview right already tested before
+        
         if (isset($param['action']) && (in_array($param['action'],array('previewgroup','previewquestion'))))
         {
             // Unset all SESSION: be sure to have the last version

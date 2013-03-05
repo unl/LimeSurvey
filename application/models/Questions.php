@@ -17,7 +17,7 @@
     *   Files Purpose: lots of common functions
     */
 
-    class Questions extends CActiveRecord
+    class Questions extends LSActiveRecord
     {
 
         /**
@@ -26,7 +26,7 @@
         * @static
         * @access public
         * @param string $class
-        * @return CActiveRecord
+        * @return LSActiveRecord
         */
         public static function model($class = __CLASS__)
         {
@@ -65,13 +65,10 @@
         {
             return array(
             'groups' => array(self::HAS_ONE, 'Groups', '',
-            'on' => 't.gid = groups.gid AND t.language = groups.language'
+            'on' => 't.gid = groups.gid'
             ),
             'parents' => array(self::HAS_ONE, 'Questions', '',
-            'on' => 't.parent_qid = parents.qid',
-            ),
-            'question_types' => array(self::HAS_ONE, 'Question_types', '',
-            'on' => 't.tid = question_types.tid',
+            'on' => 't.parent_id = parents.qid',
             ),
             'question_attributes' => array(self::HAS_MANY, 'Question_attributes', '',
             'on' => 't.qid = question_attributes.qid',
@@ -86,13 +83,9 @@
         public function rules()
         {
             return array(
-                array('title','required'),
-                array('title,question,help','LSYii_Validators'),
-                array('other', 'in','range'=>array('Y','N'), 'allowEmpty'=>true),
-                array('mandatory', 'in','range'=>array('Y','N'), 'allowEmpty'=>true),
-                array('question_order','numerical', 'integerOnly'=>true,'allowEmpty'=>true),
-                array('scale_id','numerical', 'integerOnly'=>true,'allowEmpty'=>true),
-                array('same_default','numerical', 'integerOnly'=>true,'allowEmpty'=>true),
+                array('code','required'),
+                array('code','LSYii_Validators'),
+                array('sortorder','numerical', 'integerOnly'=>true,'allowEmpty'=>true),
             );
         }
 
@@ -108,7 +101,7 @@
         */
         public static function updateSortOrder($gid, $surveyid)
         {
-            $questions = self::model()->findAllByAttributes(array('gid' => $gid, 'sid' => $surveyid, 'language' => Survey::model()->findByPk($surveyid)->language));
+            $questions = self::model()->findAllByAttributes(array('gid' => $gid, 'sid' => $surveyid));
             $p = 0;
             foreach ($questions as $question)
             {
@@ -203,18 +196,18 @@
             return $aAttributeNames;
         }
 
-        function getQuestions($sid, $gid, $language)
+        function getQuestions($sid, $gid)
         {
-            return self::model()->with('question_types')->findAllByAttributes(array('sid'=>$sid, 'gid'=>$gid, 'language'=>$language, 'parent_qid'=>0));
+            return self::model()->with('question_types')->findAllByAttributes(array('sid'=>$sid, 'gid'=>$gid, 'parent_id'=>0));
         }
 
-        function getSubQuestions($parent_qid)
+        function getSubQuestions($parent_id)
         {
             return Yii::app()->db->createCommand()
             ->select()
             ->from(self::tableName())
-            ->where('parent_qid=:parent_qid')
-            ->bindParam(":parent_qid", $parent_qid, PDO::PARAM_INT)
+            ->where('parent_id=:parent_id')
+            ->bindParam(":parent_id", $parent_id, PDO::PARAM_INT)
             ->order('question_order asc')
             ->query();
         }
@@ -252,7 +245,7 @@
             Yii::app()->db->createCommand()->delete(Conditions::model()->tableName(), array('in', 'qid', $questionsIds));
             Yii::app()->db->createCommand()->delete(Question_attributes::model()->tableName(), array('in', 'qid', $questionsIds));
             Yii::app()->db->createCommand()->delete(Answers::model()->tableName(), array('in', 'qid', $questionsIds));
-            Yii::app()->db->createCommand()->delete(Questions::model()->tableName(), array('in', 'parent_qid', $questionsIds));
+            Yii::app()->db->createCommand()->delete(Questions::model()->tableName(), array('in', 'parent_id', $questionsIds));
             Yii::app()->db->createCommand()->delete(Questions::model()->tableName(), array('in', 'qid', $questionsIds));
             Yii::app()->db->createCommand()->delete(Defaultvalues::model()->tableName(), array('in', 'qid', $questionsIds));
             Yii::app()->db->createCommand()->delete(Quota_members::model()->tableName(), array('in', 'qid', $questionsIds));
@@ -288,7 +281,7 @@
             ." WHERE groups.gid=questions.gid"
             ." AND groups.language=:language1"
             ." AND questions.language=:language2"
-            ." AND questions.parent_qid=0"
+            ." AND questions.parent_id=0"
             ." AND questions.sid=:sid";
             return Yii::app()->db->createCommand($query)->bindParam(":language1", $language, PDO::PARAM_STR)
                                                         ->bindParam(":language2", $language, PDO::PARAM_STR)

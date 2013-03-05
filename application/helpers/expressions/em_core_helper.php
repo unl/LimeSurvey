@@ -66,8 +66,16 @@ class ExpressionManager {
     private $hyperlinkSyntaxHighlighting=true;  // TODO - change this back to false
     private $sgqaNaming=false;
 
-    function __construct()
+    /**
+     * Originally EM uses static referencing for callbacks to LimeExpressionManager.
+     * To remove this static dependency I (Sam) have added support for dynamic callbacks.
+     * @var array of callable.
+     */
+    private $callbacks = array();
+    
+    function __construct($callbacks = array())
     {
+        $this->callbacks = $callbacks;
         // List of token-matching regular expressions
         // Note, this is effectively a Lexer using Regular Expressions.  Don't change this unless you understand compiler design.
         $RDP_regex_dq_string = '(?<!\\\\)".*?(?<!\\\\)"';
@@ -1633,6 +1641,10 @@ class ExpressionManager {
      */
     private function GetVarAttribute($name,$attr,$default)
     {
+        if (isset($this->callbacks['GetVarAttribute']) && is_callable($this->callbacks['GetVarAttribute']))
+        {
+            return call_user_func_array($this->callbacks['GetVarAttribute'], array($name, $attr, $default));
+        }
         return LimeExpressionManager::GetVarAttribute($name,$attr,$default,$this->groupSeq,$this->questionSeq);
     }
 
@@ -1732,7 +1744,14 @@ class ExpressionManager {
     private function RDP_isValidVariable($name)
     {
         $varName = preg_replace("/^(?:INSERTANS:)?(.*?)(?:\.(?:" . ExpressionManager::$RDP_regex_var_attr . "))?$/", "$1", $name);
-        return LimeExpressionManager::isValidVariable($varName);
+        if (isset($this->callbacks['isValidVariable']) && is_callable($this->callbacks['isValidVariable']))
+        {
+            return call_user_func($this->callbacks['isValidVariable'], $varName);
+        }
+        else
+        {
+            return LimeExpressionManager::isValidVariable($varName);
+        }
     }
 
     /**

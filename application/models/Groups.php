@@ -14,7 +14,7 @@
     *   Files Purpose: lots of common functions
     */
 
-    class Groups extends CActiveRecord
+    class Groups extends LSActiveRecord
     {
         /**
         * Returns the static model of Settings table
@@ -22,7 +22,7 @@
         * @static
         * @access public
         * @param string $class
-        * @return CActiveRecord
+        * @return LSActiveRecord
         */
         public static function model($class = __CLASS__)
         {
@@ -149,7 +149,7 @@
             $questions = Yii::app()->db->createCommand()
             ->select('qid')
             ->from('{{questions}} q')
-            ->join('{{groups}} g', 'g.gid=q.gid AND g.gid=:groupid AND q.parent_qid=0')
+            ->join('{{groups}} g', 'g.gid=q.gid AND g.gid=:groupid AND q.parent_id=0')
             ->group('qid')
             ->bindParam(":groupid", $groupId, PDO::PARAM_INT)
             ->queryAll();

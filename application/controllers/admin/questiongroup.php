@@ -124,7 +124,6 @@ class questiongroup extends Survey_Common_Action
             $aData['action'] = $aData['display']['menu_bars']['gid_action'] = 'addgroup';
             $aData['grplangs'] = $grplangs;
             $aData['baselang'] = $baselang;
-
             $this->_renderWrappedTemplate('survey/QuestionGroups', 'addGroup_view', $aData);
         }
     }

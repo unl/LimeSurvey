@@ -228,7 +228,6 @@ CREATE TABLE prefix_questions (
     parent_qid integer DEFAULT 0 NOT NULL,
     sid integer DEFAULT 0 NOT NULL,
     gid integer DEFAULT 0 NOT NULL,
-    tid integer DEFAULT 0 NOT NULL,
     "type" character varying(1) DEFAULT 'T' NOT NULL,
     title character varying(20) DEFAULT '' NOT NULL,
     question text NOT NULL,
@@ -547,31 +546,23 @@ CREATE TABLE prefix_templates (
 
 
 --
--- Create question_types
+-- @todo Make name unique
 --
 
-CREATE TABLE prefix_question_types (
-  tid integer PRIMARY KEY NOT NULL,
-  "order" integer NOT NULL,
-  "group" integer NOT NULL,
-  name character varying( 50 )::character varying UNIQUE NOT NULL,
-  "class" character varying( 50 )::character varying UNIQUE NOT NULL,
-  legacy character(1) DEFAULT NULL,
-  system character(1) NOT NULL DEFAULT 'N',
-  CONSTRAINT prefix_question_types_ukey UNIQUE KEY ("order", "group")
-) AUTO_INCREMENT=30;
+CREATE TABLE `prefix_plugins` (
+  `id` integer PRIMARY KEY NOT NULL,
+  `name` character varying(50) NOT NULL,
+  `active` integer NOT NULL default '0'
+);
 
-
---
--- Create question_type_groups
---
-
-CREATE TABLE `prefix_question_type_groups` (
-  id integer PRIMARY KEY NOT NULL,
-  name character varying( 50 ) NOT NULL,
-  "order" integer::character varying UNIQUE NOT NULL,
-  system character(1) NOT NULL DEFAULT 'N',
-) AUTO_INCREMENT=6;
+CREATE TABLE `prefix_plugin_settings` (
+  `id` integer PRIMARY KEY NOT NULL,
+  `plugin_id` integer NOT NULL,
+  `model` character varying(50) NULL,
+  `model_id` integer NULL,
+  `key` character varying(50) NOT NULL,
+  `value` text NULL
+);
 
 --
 -- Secondary indexes
@@ -586,48 +577,12 @@ create index question_attributes_idx2 on prefix_question_attributes (qid);
 create index question_attributes_idx3 on prefix_question_attributes (attribute);
 create index questions_idx2 on prefix_questions (sid);
 create index questions_idx3 on prefix_questions (gid);
-create index questions_idx4 on prefix_questions (tid);
 create index quota_idx2 on prefix_quota (sid);
 create index saved_control_idx2 on prefix_saved_control (sid);
 create index parent_qid_idx on prefix_questions (parent_qid);
 create index labels_code_idx on prefix_labels (code);
-
-INSERT INTO prefix_question_types (tid, "order", "group", name, "class", legacy, system) VALUES
-(1, 1, 1, '5 point choice', 'FiveList', '5', 'Y'),
-(2, 2, 1, 'List (dropdown)', 'Select', '!', 'Y'),
-(3, 3, 1, 'List (radio)', 'List', 'L', 'Y'),
-(4, 4, 1, 'List with comment', 'CommentList', 'O', 'Y'),
-(5, 1, 2, 'Array', 'RadioArray', 'F', 'Y'),
-(6, 2, 2, 'Array (10 point choice)', 'TenRadioArray', 'B', 'Y'),
-(7, 3, 2, 'Array (5 point choice)', 'FiveRadioArray', 'A', 'Y'),
-(8, 4, 2, 'Array (Increase/Same/Decrease)', 'IDRadioArray', 'E', 'Y'),
-(9, 5, 2, 'Array (Numbers)', 'NumberArray', ':', 'Y'),
-(10, 6, 2, 'Array (Texts)', 'TextArray', ';', 'Y'),
-(11, 7, 2, 'Array (Yes/No/Uncertain)', 'YNRadioArray', 'C', 'Y'),
-(12, 8, 2, 'Array by column', 'ColumnRadioArray', 'H', 'Y'),
-(13, 9, 2, 'Array dual scale', 'DualRadioArray', '1', 'Y'),
-(14, 1, 3, 'Date/Time', 'Date', 'D', 'Y'),
-(15, 2, 3, 'Equation', 'Equation', '*', 'Y'),
-(16, 3, 3, 'File upload', 'File', '|', 'Y'),
-(17, 4, 3, 'Gender', 'Gender', 'G', 'Y'),
-(18, 5, 3, 'Language switch', 'Language', 'I', 'Y'),
-(19, 6, 3, 'Multiple numerical input', 'Multinumerical', 'K', 'Y'),
-(20, 7, 3, 'Numerical input', 'Numerical', 'N', 'Y'),
-(21, 8, 3, 'Ranking', 'Ranking', 'R', 'Y'),
-(22, 9, 3, 'Text display', 'Display', 'X', 'Y'),
-(23, 10, 3, 'Yes/No', 'YN', 'Y', 'Y'),
-(24, 1, 4, 'Huge free text', 'HugeText', 'U', 'Y'),
-(25, 2, 4, 'Long free text', 'LongText', 'T', 'Y'),
-(26, 3, 4, 'Multiple short text', 'Multitext', 'Q', 'Y'),
-(27, 4, 4, 'Short free text', 'ShortText', 'S', 'Y'),
-(28, 1, 5, 'Multiple choice', 'Check', 'M', 'Y'),
-(29, 2, 5, 'Multiple choice with comments', 'CommentCheck', 'P', 'Y');
-INSERT INTO prefix_question_type_groups (id, name, "order", system) VALUES
-(1, 'Single choice questions', 1, 'Y'),
-(2, 'Arrays', 2, 'Y'),
-(3, 'Mask questions', 3, 'Y'),
-(4, 'Text questions', 4, 'Y'),
-(5, 'Multiple choice questions', 5, 'Y');
+create index plugins_active_idx on prefix_plugins (active);
+create index plugin_settings_pluginid_idx on prefix_plugin_settings (plugin_id);
 
 --
 -- Version Info

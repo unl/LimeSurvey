@@ -1,6 +1,13 @@
 CKEDITOR.editorConfig = function( config )
 {
-
+    
+    config.LimeReplacementFieldsType = $(this.element).data('LRFtype');
+    config.LimeReplacementFieldsSID = $(this.element).data('LRFsid');
+    config.LimeReplacementFieldsGID = $(this.element).data('LRFgid');
+    config.LimeReplacementFieldsQID = $(this.element).data('LRFqid');
+    config.LimeReplacementFieldsAction = $(this.element).data('LRFaction');
+    config.LimeReplacementFieldsPath = LS.createUrl('admin/limereplacementfields/sa/index/');
+    
     config.filebrowserBrowseUrl = CKEDITOR.basePath+'../kcfinder/browse.php?type=files';
     config.filebrowserImageBrowseUrl = CKEDITOR.basePath+'../kcfinder/browse.php?type=images'; 
     config.filebrowserFlashBrowseUrl = CKEDITOR.basePath+'../kcfinder/browse.php?type=flash';
@@ -70,9 +77,10 @@ CKEDITOR.editorConfig = function( config )
 
 
     config.extraPlugins = "ajax,limereplacementfields";
-
-    
-
+    config.toolbarStartupExpanded = true;
+    config.toolbar = 'inline';
+    config.smiley_path = "/upload/images/smiley/msn";
+    config.width = 660;
 };
 
 (function () {

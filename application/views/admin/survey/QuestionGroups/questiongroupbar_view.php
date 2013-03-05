@@ -160,7 +160,7 @@
     if (trim($grow['randomization_group'])!='')
     {?>
     <tr>
-        <td><?php $clang->eT("Randomization group:"); ?></td><td><?php echo $grow['randomization_group'];?></td>
+        <td><?php $clang->eT("Randomization group:"); ?></td><td><?php echo $grow['randomgroup'];?></td>
     </tr>
     <?php
     }

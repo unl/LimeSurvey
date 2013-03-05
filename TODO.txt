@@ -1,0 +1,8 @@
+TODO LIST FOR THIS BRANCH:
+mdekker:
+create update script and increment db version number
+i see a double menu in the installer? maybe due to new menu widget?
+beware when loading plugins, the database could not be initialised yet (on install), return empty array of plugins in try/catch block
+create plugin_settings model and proper relations
+maybe plugins need a specific order and order field in the table?
+document what events are available to plugins

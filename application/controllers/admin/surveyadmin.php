@@ -197,27 +197,10 @@ class SurveyAdmin extends Survey_Common_Action
         $aData = array_merge($aData, $this->_tabTokens($esrow));
         $aData = array_merge($aData, $this->_tabPanelIntegration($esrow));
         $aData = array_merge($aData, $this->_tabResourceManagement($iSurveyID));
-
-        $oResult = Questions::model()->with('groups')->with('question_types')->with('parents')->findAllByAttributes(array('sid' => $iSurveyID, 'language' => $esrow['language']), array('index' => 'qid', 'order' => 'group_order, t.question_order'));
-        $questions=array();
-        foreach ($oResult as $result)
-        {
-            $q = createQuestion(empty($result->question_types['class']) ? $oResult[$result['parent_qid']]->question_types['class'] : $result->question_types['class'] );
-            if ($q->questionProperties('subquestions') && $result['parent_qid'])
-            {
-                $questions[] = array('qid' => $result['parent_qid'], 'sqid' => $result['qid'], 'title' => $result->parents['title'], 'question' => $result->parents['question'], 'sqquestion' => $result['question']);
-            }
-            else if ($q->questionProperties('hasdefaultvalues') && !$q->questionProperties('subquestions'))
-            {
-                $questions[] = array('qid' => $result['qid'], 'title' => $result['title'], 'question' => $result['question']);
-            }
-        }
-
-        $aData['questions'] = $questions;
         $aData['display']['menu_bars']['surveysummary'] = "editsurveysettings";
         $tempData = $aData;
         $aData['data'] = $tempData;
-
+        
         $this->_renderWrappedTemplate('survey', 'editSurvey_view', $aData);
     }
 
@@ -317,7 +300,6 @@ class SurveyAdmin extends Survey_Common_Action
         LimeExpressionManager::SetEMLanguage(Survey::model()->findByPk($iSurveyID)->language);
         LimeExpressionManager::SetSurveyId($iSurveyID);
         LimeExpressionManager::StartProcessingPage(false,true);
-
         $aData['surveyid'] = $iSurveyID;
         $aData['gid'] = $gid;
         $aData['qid'] = $qid;
@@ -825,6 +807,7 @@ class SurveyAdmin extends Survey_Common_Action
             $aViewUrls['output'] = PrepareEditorScript(false, $this->getController());
 
             $i = 0;
+            
             foreach ($grplangs as $grouplang)
             {
                 // this one is created to get the right default texts fo each language
@@ -843,7 +826,6 @@ class SurveyAdmin extends Survey_Common_Action
                 $aData['esrow'] = $esrow;
                 $aData['action'] = "editsurveylocalesettings";
                 $aData['clang'] = $clang;
-
                 $tab_content[$i] = $this->getController()->render('/admin/survey/editLocalSettings_view', $aData, true);
 
                 $i++;
@@ -870,8 +852,10 @@ class SurveyAdmin extends Survey_Common_Action
             $aViewUrls[] = 'editLocalSettings_main_view';
         }
         else
+        {
             $this->getController()->error('Access denied');
-
+        }
+        
         $this->_renderWrappedTemplate('survey', $aViewUrls, $aData);
     }
 
@@ -1266,6 +1250,12 @@ class SurveyAdmin extends Survey_Common_Action
         $aData['clang'] = $clang;
         $aData['esrow'] = $esrow;
         $aData['surveyid'] = $iSurveyID;
+        
+        
+        $beforeSurveySettings = new PluginEvent('beforeSurveySettings');
+        $beforeSurveySettings->set('survey', $iSurveyID);
+        App()->getPluginManager()->dispatchEvent($beforeSurveySettings);
+        $aData['pluginSettings'] = $beforeSurveySettings->get('surveysettings');
         return $aData;
     }
 

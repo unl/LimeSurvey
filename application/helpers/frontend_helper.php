@@ -2,7 +2,7 @@
 /*
 * LimeSurvey
 * Copyright (C) 2007-2012 The LimeSurvey Project Team / Carsten Schmitz
-* All rights reserved.
+* All rights reserved.$clienttoken
 * License: GNU/GPL License v2 or later, see LICENSE.php
 * LimeSurvey is free software. This version may have been modified pursuant
 * to the GNU General Public License, and as distributed it includes or
@@ -1264,11 +1264,11 @@ function submitfailed($errormsg='')
 */
 function buildsurveysession($surveyid,$previewGroup=false)
 {
-    global $thissurvey, $secerror, $clienttoken;
     global $tokensexist;
     //global $surveyid;
     global $templang, $move, $rooturl;
 
+    $thissurvey = getSurveyInfo($surveyid);
     $clang = Yii::app()->lang;
 
     if (empty($templang))
@@ -1344,7 +1344,7 @@ function buildsurveysession($surveyid,$previewGroup=false)
             exit;
         }
     }
-
+    
     //BEFORE BUILDING A NEW SESSION FOR THIS SURVEY, LET'S CHECK TO MAKE SURE THE SURVEY SHOULD PROCEED!
     // TOKEN REQUIRED BUT NO TOKEN PROVIDED
     if ($tokensexist == 1 && !$clienttoken && !$previewGroup)
@@ -1364,7 +1364,7 @@ function buildsurveysession($surveyid,$previewGroup=false)
         // DISPLAY CAPTCHA if needed
         sendCacheHeaders();
         doHeader();
-
+        
         $redata = compact(array_keys(get_defined_vars()));
             echo templatereplace(file_get_contents($sTemplatePath."startpage.pstpl"),array(),$redata,'frontend_helper[1594]');
         //echo makedropdownlist();
@@ -1635,7 +1635,7 @@ function buildsurveysession($surveyid,$previewGroup=false)
     {
         $language_to_set = $thissurvey['language'];
     }
-
+        
     if (!isset($_SESSION['survey_'.$surveyid]['s_lang']))
     {
         SetSurveyLanguage($surveyid, $language_to_set);
@@ -1646,25 +1646,20 @@ function buildsurveysession($surveyid,$previewGroup=false)
 
     $unique = array();
     $display = array();
+       
     $fieldmap = createFieldMap($surveyid, false, false, $_SESSION['survey_'.$surveyid]['s_lang']);
+    
     foreach ($fieldmap as $q)
     {
         if ((int) $q->id > 0 && ($q->displayOnly() || $q->isEquation())) $display[$q->id] = true;
         if ((int) $q->id > 0) $unique[$q->id] = true;
     }
-    $totalquestions = count($unique);
-    $_SESSION['survey_'.$surveyid]['totalquestions'] = $totalquestions - count($display);
+    
+    $totalquestions = Questions::model()->countByAttributes(array(
+        'sid' => $surveyid
+    ));
+    $_SESSION['survey_'.$surveyid]['totalquestions'] = $totalquestions;
      
-
-    // Fix totalquestions by substracting Test Display questions
-    $iNumberofQuestions=dbExecuteAssoc("SELECT count(*)\n"
-    ." FROM {{questions}}"
-    ." WHERE type in ('X','*')\n"
-    ." AND sid={$surveyid}"
-    ." AND language='".$_SESSION['survey_'.$surveyid]['s_lang']."'"
-    ." AND parent_qid=0")->read();
-
-    $_SESSION['survey_'.$surveyid]['totalquestions'] = $totalquestions - (int) reset($iNumberofQuestions);
 
     //2. SESSION VARIABLE: totalsteps
     //The number of "pages" that will be presented in this survey
@@ -1675,10 +1670,9 @@ function buildsurveysession($surveyid,$previewGroup=false)
             $_SESSION['survey_'.$surveyid]['totalsteps']=1;
             break;
         case "G":
-            if (isset($_SESSION['survey_'.$surveyid]['grouplist']))
-            {
-                $_SESSION['survey_'.$surveyid]['totalsteps']=count($_SESSION['survey_'.$surveyid]['grouplist']);
-            }
+            $_SESSION['survey_'.$surveyid]['totalsteps']= Groups::model()->countByAttributes(array(
+                'sid' => $surveyid
+            ));
             break;
         case "S":
             $_SESSION['survey_'.$surveyid]['totalsteps']=$totalquestions;
@@ -1714,7 +1708,7 @@ function buildsurveysession($surveyid,$previewGroup=false)
     //An array containing information about used to insert the data into the db at the submit stage
     //4. SESSION VARIABLE - fieldarray
     //See rem at end..
-    $_SESSION['survey_'.$surveyid]['token'] = $clienttoken;
+    $_SESSION['survey_'.$surveyid]['token'] = isset($clienttoken) ? $clienttoken : null;
 
     if ($thissurvey['anonymized'] == "N")
     {
@@ -1727,7 +1721,7 @@ function buildsurveysession($surveyid,$previewGroup=false)
         $_SESSION['survey_'.$surveyid]['thistoken']=getTokenData($surveyid, $clienttoken);
     }
     $fieldmap=createFieldMap($surveyid,false,false,$_SESSION['survey_'.$surveyid]['s_lang']);
-
+    
 
     // Randomization groups for groups
     $aRandomGroups=array();
@@ -1741,6 +1735,7 @@ function buildsurveysession($surveyid,$previewGroup=false)
     {
         $aRandomGroups[$aGroup['randomization_group']][] = $aGroup['gid'];
     }
+    
     // Shuffle each group and create a map for old GID => new GID
     foreach ($aRandomGroups as $sGroupName=>$aGIDs)
     {
@@ -1799,22 +1794,14 @@ function buildsurveysession($surveyid,$previewGroup=false)
     // Randomization groups for questions
 
     // Find all defined randomization groups through question attribute values
-    $randomGroups=array();
-    if (in_array(Yii::app()->db->getDriverName(), array('mssql', 'sqlsrv')))
-    {
-        $rgquery = "SELECT attr.qid, CAST(value as varchar(255)) as value FROM {{question_attributes}} as attr right join {{questions}} as quests on attr.qid=quests.qid WHERE attribute='random_group' and CAST(value as varchar(255)) <> '' and sid=$surveyid GROUP BY attr.qid, CAST(value as varchar(255))";
-    }
-    else
-    {
-        $rgquery = "SELECT attr.qid, value FROM {{question_attributes}} as attr right join {{questions}} as quests on attr.qid=quests.qid WHERE attribute='random_group' and value <> '' and sid=$surveyid GROUP BY attr.qid, value";
-    }
-    $rgresult = dbExecuteAssoc($rgquery);
-    foreach($rgresult->readAll() as $rgrow)
-    {
-        // Get the question IDs for each randomization group
-        $randomGroups[$rgrow['value']][] = $rgrow['qid'];
-    }
-
+    $criteria = new CDbCriteria();
+    $criteria->select = 'randomization';
+    $criteria->distinct = true;
+            
+    $randomGroups = Questions::model()->findAllByAttributes(array(
+        'sid' => $surveyid
+    ), $criteria);
+    
     // If we have randomization groups set, then lets cycle through each group and
     // replace questions in the group with a randomly chosen one from the same group
     if (count($randomGroups) > 0)
@@ -2211,6 +2198,35 @@ function doAssessment($surveyid, $returndataonly=false)
         else
         {
             return $assessments;
+        }
+    }
+}
+
+function UpdateGroupList($surveyid, $language)
+//1. SESSION VARIABLE: grouplist
+//A list of groups in this survey, ordered by group name.
+
+{
+
+
+    $clang = Yii::app()->lang;
+    unset ($_SESSION['survey_'.$surveyid]['grouplist']);
+    $query = "SELECT * FROM {{groups}} WHERE sid=$surveyid AND language='".$language."' ORDER BY group_order";
+    $result = dbExecuteAssoc($query) or safeDie ("Couldn't get group list<br />$query<br />");  //Checked
+    foreach ($result->readAll() as $row)
+    {
+        $_SESSION['survey_'.$surveyid]['grouplist'][$row['gid']]=array($row['gid'], $row['group_name'], $row['description']);
+    }
+    if (isset($_SESSION['survey_'.$surveyid]['groupReMap']) && count($_SESSION['survey_'.$surveyid]['groupReMap'])>0)
+    {
+        // Now adjust the grouplist
+        foreach ($_SESSION['survey_'.$surveyid]['groupReMap'] as $iOldGid=>$iNewGid)
+        {
+            if (!isset($_SESSION['survey_'.$surveyid]['grouplist'][$iOldGid]['shuffled']) && $iOldGid!=$iNewGid)
+            {
+                $_SESSION['survey_'.$surveyid]['grouplist']=arraySwapAssoc($iOldGid,$iNewGid,$_SESSION['survey_'.$surveyid]['grouplist']);
+            }
+            $_SESSION['survey_'.$surveyid]['grouplist'][$iNewGid]['shuffled']=true;
         }
     }
 }

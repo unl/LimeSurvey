@@ -82,7 +82,7 @@ if (!empty($useradddialog))
                             <select name='uid'>
                                 <?php echo $useraddusers; ?>
                             </select>
-                            <input type='submit' value='<?php $clang->eT("Add user"); ?>' />
+                            <input type='submit' value='<?php $clang->eT("Add User"); ?>' />
                         </td>
                     </tr>
                 </tbody>

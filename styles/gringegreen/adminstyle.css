@@ -1821,3 +1821,37 @@ td.LEMerror  {
 #cquestions optgroup{
     font-weight:bold;
 }
+
+.settings ul {
+    list-style: none;
+    padding-left: 0px;
+    text-align: center;
+    min-height: 100px;
+    
+}
+.settings li {
+    margin-top: 5px;
+}
+
+.settings li > * {
+    display: inline-block;
+    width: 660px;
+}
+
+.settings li > label {
+    width: 200px;
+    text-align: right;
+    margin-right: 15px;
+    vertical-align: top;
+}
+
+form.modern {
+    text-align: center;
+}
+
+form.modern .limebutton{
+    width: 200px;
+    height: 30px;
+    margin-top: 10px;
+    margin-bottom: 30px;
+}

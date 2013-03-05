@@ -122,8 +122,8 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 
 CKEDITOR.plugins.setLang('limereplacementfields','en', {
     limereplacementfields: {   
-        title:sReplacementFieldTitle,
-        button:sReplacementFieldButton
+        //title:sReplacementFieldTitle,
+        //button:sReplacementFieldButton
     }
     }
 );                        

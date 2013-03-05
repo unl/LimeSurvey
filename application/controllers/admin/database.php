@@ -472,7 +472,7 @@ class database extends Survey_Common_Action
                     } else {
                         $q = tidToQuestion(Yii::app()->request->getPost('type'));
                         $aLanguages=array_merge(array(Survey::model()->findByPk($surveyid)->language),Survey::model()->findByPk($surveyid)->additionalLanguages);
-
+                        var_dump($_POST);
                         foreach ($q->availableAttributes() as $validAttribute)
                         {
                             if ($validAttribute['i18n'])
@@ -762,7 +762,7 @@ class database extends Survey_Common_Action
                             $uqresult = $question->save();//($uqquery); // or safeDie ("Error Update Question: ".$uqquery."<br />");  // Checked)
                             if (!$uqresult)
                             {
-                                $databaseoutput .= "<script type=\"text/javascript\">\n<!--\n alert(\"".$clang->gT("Question could not be updated","js")."\n\")\n //-->\n</script>\n";
+                                $databaseoutput .= "<script type=\"text/javascript\">\n<!--\n alert(\"".$clang->gT("Question could not be updated","js")."\")\n //-->\n</script>\n";
                             }
                         }
                     }
@@ -820,7 +820,6 @@ class database extends Survey_Common_Action
             $languagelist[]=Survey::model()->findByPk($surveyid)->language;
 
             Yii::app()->loadHelper('database');
-
             foreach ($languagelist as $langname)
             {
                 if ($langname)
@@ -871,10 +870,19 @@ class database extends Survey_Common_Action
 
         if (($action == "updatesurveysettingsandeditlocalesettings" || $action == "updatesurveysettings") && hasSurveyPermission($surveyid,'surveysettings','update'))
         {
+            // Save plugin settings.
+            $pluginSettings = App()->request->getPost('plugin', array());
+            foreach($pluginSettings as $plugin => $settings)
+            {
+                $settingsEvent = new PluginEvent('newSurveySettings');
+                $settingsEvent->set('settings', $settings);
+                $settingsEvent->set('survey', $surveyid);
+                App()->getPluginManager()->dispatchEvent($settingsEvent, $plugin);
+            }
+            
             Yii::app()->loadHelper('surveytranslator');
             Yii::app()->loadHelper('database');
             $formatdata=getDateFormatData(Yii::app()->session['dateformat']);
-
             $expires = $_POST['expires'];
             if (trim($expires)=="")
             {
@@ -906,9 +914,7 @@ class database extends Survey_Common_Action
             {
                 $tokenlength = 15;
             }
-
             cleanLanguagesFromSurvey($surveyid,Yii::app()->request->getPost('languageids'));
-
             fixLanguageConsistency($surveyid,Yii::app()->request->getPost('languageids'));
             $template = Yii::app()->request->getPost('template');
 

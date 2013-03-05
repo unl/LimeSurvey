@@ -15,6 +15,66 @@
  */
 class LSActiveRecord extends CActiveRecord
 {
+    
+    
+    public function count($condition = '', $params = array()) {
+        $result = parent::count($condition, $params);
+        return intval($result);
+    }
+    /**
+     * Finds all active records satisfying the specified condition but returns them as array
+     *
+     * See {@link find()} for detailed explanation about $condition and $params.
+     * @param mixed $condition query condition or criteria.
+     * @param array $params parameters to be bound to an SQL statement.
+     * @return array list of active records satisfying the specified condition. An empty array is returned if none is found.
+     */
+    public function findAllAsArray($condition = '', $params = array())
+    {
+        Yii::trace(get_class($this) . '.findAll()', 'system.db.ar.CActiveRecord');
+        $criteria = $this->getCommandBuilder()->createCriteria($condition, $params);
+        return $this->query($criteria, true, false);  //Notice the third parameter 'false'
+    }
+
+    /**
+     * Retrieves a single field from the database.
+     * @todo This should be improved to actually query just the required column.
+     * 
+     * @param type $pk
+     * @param type $field
+     * @return mixed
+     */
+    public function findFieldByPk($pk, $field)
+    {
+        $record = $this->findByPk($pk);
+        if (isset($record->$field))
+        {
+            return $record->$field;
+        }
+    }
+    /** 
+     * Returns a key value array.
+     * 
+     * @param type $attributes Any conditions you want applied.
+     * @param type $title The field to use for the array values.
+     * @param string $key The field to use for the array keys, defaults to the primary key.
+     * @param string $condition Specify optional conditions.
+     */
+    public function findListByAttributes($attributes, $title, $key = null, $condition = '')
+    {
+        $records = $this->findAllByAttributes($attributes, $condition);
+        if (!isset($key))
+        {
+            $key = $this->primaryKey();
+        }
+        $result = array();
+        foreach ($records as $record)
+        {
+            $result[$record->$key] = $record->$title;
+        }
+        return $result;
+    }
+
     /**
      * Modified version that default to do the same as the original, but allows via a
      * third parameter to retrieve the result as array instead of active records. This
@@ -47,20 +107,5 @@ class LSActiveRecord extends CActiveRecord
 
             return $all ? $command->queryAll() : $command->queryRow();
         }
-    }
-
-    /**
-     * Finds all active records satisfying the specified condition but returns them as array
-     *
-     * See {@link find()} for detailed explanation about $condition and $params.
-     * @param mixed $condition query condition or criteria.
-     * @param array $params parameters to be bound to an SQL statement.
-     * @return array list of active records satisfying the specified condition. An empty array is returned if none is found.
-     */
-    public function findAllAsArray($condition = '', $params = array())
-    {
-        Yii::trace(get_class($this) . '.findAll()', 'system.db.ar.CActiveRecord');
-        $criteria = $this->getCommandBuilder()->createCriteria($condition, $params);
-        return $this->query($criteria, true, false);  //Notice the third parameter 'false'
     }
 }

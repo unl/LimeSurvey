@@ -70,6 +70,32 @@ function comparePermission($aPermissionA,$aPermissionB)
 }
 
 /**
+ * Helper function to replace calls to Yii::app() and enable correct code completion.
+ * @return LSYii_Application
+ */
+function App()
+{
+    return Yii::app();
+}
+
+
+/**
+ * Translation helper function.
+ * @param string $string
+ * @param string $escapemode
+ */
+function gT($string, $escapemode = 'html')
+{
+    if (isset(App()->lang))
+    {
+        return App()->lang->gT($string, $escapemode);
+    }
+    else
+    {
+        return $string;
+    }
+}
+/**
 * isStandardTemplate returns true if a template is a standard template
 * This function does not check if a template actually exists
 *
@@ -103,6 +129,7 @@ function getSurveyList($returnarray=false, $surveyid=false)
     static $cached = null;
 
     $timeadjust = getGlobalSetting('timeadjust');
+    Yii::import('application.libraries.Limesurvey_lang');
     $clang = new Limesurvey_lang(Yii::app()->session['adminlang']);
 
     if(is_null($cached)) {
@@ -380,14 +407,14 @@ function getQuestions($surveyid,$gid,$selectedqid)
 {
     $clang = Yii::app()->lang;
     $s_lang = Survey::model()->findByPk($surveyid)->language;
-    $qrows = Questions::model()->findAllByAttributes(array('sid' => $surveyid, 'gid' => $gid, 'language' => $s_lang, 'parent_qid' => 0),array('order'=>'question_order'));
+    $qrows = Questions::model()->findAllByAttributes(array('sid' => $surveyid, 'gid' => $gid, 'parent_id' => null),array('order'=>'sortorder'));
 
     if (!isset($sQuestionselecter)) {$sQuestionselecter="";}
     foreach ($qrows as $qrow)
     {
         $qrow = $qrow->attributes;
-        $qrow['title'] = strip_tags($qrow['title']);
-        $link = Yii::app()->getController()->createUrl("/admin/survey/sa/view/surveyid/".$surveyid."/gid/".$gid."/qid/".$qrow['qid']);
+        $qrow['title'] = strip_tags($qrow['code']);
+        $link = Yii::app()->getController()->createUrl("/questions/update/", array('qid' =>  $qrow['qid']));
         $sQuestionselecter .= "<option value='{$link}'";
         if ($selectedqid == $qrow['qid'])
         {
@@ -463,7 +490,7 @@ function getQidPrevious($surveyid, $gid, $qid)
 {
     $clang = Yii::app()->lang;
     $s_lang = Survey::model()->findByPk($surveyid)->language;
-    $qrows = Questions::model()->findAllByAttributes(array('gid' => $gid, 'sid' => $surveyid, 'language' => $s_lang, 'parent_qid'=>0),array('order'=>'question_order'));
+    $qrows = Questions::model()->findAllByAttributes(array('gid' => $gid, 'sid' => $surveyid, 'parent_id'=>null),array('order'=>'sortorder'));
 
     $i = 0;
     $iPrev = -1;
@@ -532,7 +559,7 @@ function getQidNext($surveyid, $gid, $qid)
 {
     $clang = Yii::app()->lang;
     $s_lang = Survey::model()->findByPk($surveyid)->language;
-    $qrows = Questions::model()->findAllByAttributes(array('gid' => $gid, 'sid' => $surveyid, 'language' => $s_lang, 'parent_qid' => 0), array('order'=>'question_order'));
+    $qrows = Questions::model()->findAllByAttributes(array('gid' => $gid, 'sid' => $surveyid, 'parent_id' => null), array('order'=>'sortorder'));
 
 
     $i = 0;
@@ -1709,6 +1736,7 @@ function createCompleteSGQA($iSurveyID, $sLanguage, $public  = false)
 */
 
 function createFieldMap($surveyid, $force_refresh=false, $questionid=false, $sLanguage) {
+    
     $sLanguage = sanitize_languagecode($sLanguage);
     $surveyid = sanitize_int($surveyid);
     $clang = new Limesurvey_lang($sLanguage);
@@ -1761,10 +1789,8 @@ function createFieldMap($surveyid, $force_refresh=false, $questionid=false, $sLa
     $q->text=$clang->gT("Start language");
     $q->group_name="";
     $fieldmap["startlanguage"] = $q;
-
     //Check for any additional fields for this survey and create necessary fields (token and datestamp and ipaddr)
     $prow = Survey::model()->findByPk($surveyid)->getAttributes(); //Checked
-
     if ($prow['anonymized'] == "N" && Survey::model()->hasTokens($surveyid)) 
     {
         $q = new StdClass;
@@ -1829,37 +1855,13 @@ function createFieldMap($surveyid, $force_refresh=false, $questionid=false, $sLa
         $q->group_name="";
         $fieldmap["refurl"] = $q;
     }
-
-    // Collect all default values once so don't need separate query for each question with defaults
-    $baseLanguage = getBaseLanguageFromSurveyID($surveyid);
-    $defaultsQuery = "SELECT a.qid, a.sqid, a.scale_id, a.specialtype, a.defaultvalue"
-    . " FROM {{defaultvalues}} as a, {{questions}} as b"
-    . " WHERE a.qid = b.qid"
-    . " AND a.language = b.language"
-    . " AND b.sid = ".$surveyid
-    . " AND ((b.same_default=0"
-    . " AND a.language = '{$sLanguage}')"
-    . " OR (b.same_default=1"
-    . " AND a.language = '{$baseLanguage}'))";
-    $defaultResults = Yii::app()->db->createCommand($defaultsQuery)->queryAll();
-
-    foreach($defaultResults as $dv)
-    {
-        if ($dv['specialtype'] != '') {
-            $sq = $dv['specialtype'];
-        }
-        else {
-            $sq = $dv['sqid'];
-        }
-        $defaults[$dv['qid']][$sq] = $dv['defaultvalue'];
-    }
-
-    $cond = "t.sid=$surveyid AND t.language='$sLanguage' AND groups.language='$sLanguage'";
+    return $fieldmap;
+    $cond = "t.sid=$surveyid AND groups.language='$sLanguage'";
     if ($questionid!==false)
     {
         $cond.=" AND t.qid=$questionid";
     }
-    $aresult = Questions::model()->with('groups')->with('question_types')->findAll(array('condition'=>$cond, 'order'=>'groups.group_order, question_order', 'index' => 'qid'));
+    $aresult = Questions::model()->with('groups')->findAll(array('condition'=>$cond, 'order'=>'groups.group_order, sortorder', 'index' => 'qid'));
     $questionSeq=-1; // this is incremental question sequence across all groups
     $groupSeq=-1;
     $_groupOrder=-1;
@@ -1884,36 +1886,39 @@ function createFieldMap($surveyid, $force_refresh=false, $questionid=false, $sLa
         // Implicit (subqestion intermal to a question type ) or explicit qubquestions/answer count starts at 1
 
         $fieldname="{$arow['sid']}X{$arow['gid']}X{$arow['qid']}";
-        $class = empty($arow->question_types['class']) ? $aresult[$arow->parent_qid]->question_types['class'] : $arow->question_types['class'];
-        $pq = createQuestion($class, array('surveyid'=>$surveyid,
-            'id'=>$arow['qid'], 'fieldname'=>$fieldname,
-            'title'=>$arow['title'], 'text'=>$arow['question'],
-            'gid'=>$arow['gid'], 'mandatory'=>$arow['mandatory'],
-            'conditionsexist'=>$conditions, 'usedinconditions'=>$usedinconditions,
-            'questioncount'=>$questionSeq, 'language'=>$sLanguage));
-        $pq->aid = '';
-        if(isset($defaults[$arow['qid']])) $pq->defaults = $defaults[$arow['qid']];
-
-        $pq->haspreg = $arow['preg'];
-        $pq->isother = $arow['other'];
-        $pq->groupname = $arow->groups['group_name'];
-        $pq->groupcount = $groupSeq;
-        $add = $pq->createFieldmap();
-
-        if (count($add))
+        if (isset($arow->questiontype))
         {
-            $tmp=array_values($add);
-            $q = $tmp[count($add)-1];
-            $q->relevance=$arow['relevance'];
-            $q->grelevance=$arow->groups['grelevance'];
-            $q->preg=$arow['preg'];
-            $q->other=$arow['other'];
-            $q->help=$arow['help'];
-            $fieldmap=array_merge($fieldmap, $add);
-        }
-        else
-        {
-            --$questionSeq; // didn't generate a valid $fieldmap entry, so decrement the question counter to ensure they are sequential
+            $pq = createQuestion($arow->questiontype);
+            /*, array('surveyid'=>$surveyid,
+                'id'=>$arow['qid'], 'fieldname'=>$fieldname,
+                'title'=>$arow['title'], 'text'=>$arow['question'],
+                'gid'=>$arow['gid'], 'mandatory'=>$arow['mandatory'],
+                'conditionsexist'=>$conditions, 'usedinconditions'=>$usedinconditions,
+                'questioncount'=>$questionSeq, 'language'=>$sLanguage));
+            $pq->aid = '';
+            if(isset($defaults[$arow['qid']])) $pq->defaults = $defaults[$arow['qid']];
+
+            $pq->haspreg = $arow['preg'];
+            $pq->isother = $arow['other'];
+            $pq->groupname = $arow->groups['group_name'];
+            $pq->groupcount = $groupSeq;
+            $add = $pq->createFieldmap();
+            */
+            if (count($add))
+            {
+                $tmp=array_values($add);
+                $q = $tmp[count($add)-1];
+                $q->relevance=$arow['relevance'];
+                $q->grelevance=$arow->groups['grelevance'];
+                $q->preg=$arow['preg'];
+                $q->other=$arow['other'];
+                $q->help=$arow['help'];
+                $fieldmap=array_merge($fieldmap, $add);
+            }
+            else
+            {
+                --$questionSeq; // didn't generate a valid $fieldmap entry, so decrement the question counter to ensure they are sequential
+            }
         }
     }
 
@@ -5284,7 +5289,10 @@ function accessDenied($action,$sid='')
 */
 function cleanLanguagesFromSurvey($sid, $availlangs)
 {
-
+    /** 
+     * @todo Update to reflect changes to question localized attributes.
+     */
+    return;
     Yii::app()->loadHelper('database');
     //$clang = Yii::app()->lang;
     $sid=sanitize_int($sid);
@@ -5338,6 +5346,11 @@ function cleanLanguagesFromSurvey($sid, $availlangs)
 */
 function fixLanguageConsistency($sid, $availlangs='')
 {
+    /**
+     * @todo This must be updated to correctly handle the new database structure.
+     * Also these raw SQL queries should be removed, and the documentation should be made more precice.
+     */
+    return;
     $sid=sanitize_int($sid);
     $clang = Yii::app()->lang;
 
@@ -5628,11 +5641,10 @@ function getGroupDepsForConditions($sid,$depgid="all",$targgid="all",$indexby="b
     . "{{questions}} AS tq2, "
     . "{{groups}} AS tg ,"
     . "{{groups}} AS tg2 "
-    . "WHERE tq.language='{$baselang}' AND tq2.language='{$baselang}' AND tg.language='{$baselang}' AND tg2.language='{$baselang}' AND tc.qid = tq.qid AND tq.sid=$sid "
+    . "WHERE tg.language='{$baselang}' AND tg2.language='{$baselang}' AND tc.qid = tq.qid AND tq.sid=$sid "
     . "AND tq.gid = tg.gid AND tg2.gid = tq2.gid "
     . "AND tq2.qid=tc.cqid AND tq.gid != tg2.gid $sqldepgid $sqltarggid";
     $condresult = Yii::app()->db->createCommand($condquery)->query()->readAll();
-
     if (count($condresult) > 0) {
         foreach ($condresult as $condrow)
         {
@@ -6149,6 +6161,14 @@ function getFooter()
         return $embedded_footerfunc();
 }
 
+/**
+ * Debugging function.
+ * @param type $msg
+ */
+function debug($msg)
+{
+    echo CHtml::tag('div', array('style' => 'white-space: pre; background-color: #FFFF99; padding: 10px; border: 2px solid black; margin-bottom: 5px;'), json_encode($msg,  JSON_FORCE_OBJECT+ JSON_PRETTY_PRINT));
+}
 function doFooter()
 {
     echo getFooter();
@@ -6556,15 +6576,33 @@ function getBrowserLanguage()
 
 function tidToQuestion($tid, $data=array())
 {
-    $type = Question_types::model()->findByPk($tid);
-    return createQuestion($type['class'], $data);
+    if (is_numeric($tid))
+    {
+        $type = Question_types::model()->findByPk($tid);
+        return createQuestion($type['class'], $data);
+    }
+    elseif (is_string($tid) && strlen($tid) == 32)
+    { // The new question objects use GUIDs.
+        // @todo Add more parameters in case applicable.
+        return App()->getPluginManager()->constructQuestionFromGUID($tid);
+    }
 }
 
 function createQuestion($name, $data=array())
 {
-    $class = $name.'Question';
-    Yii::import('application.modules.*');
-    return new $class($data);
+    /**
+     * @todo Remove ugly fix that assumes "old" question object names are not 32 chars long.
+     */
+    if (strlen($name) == 32)
+    {
+        return App()->getPluginManager()->constructQuestionFromGUID($name);
+    }
+    else
+    {
+        $class = $name.'Question';
+        Yii::import('application.modules.*');
+        return new $class($data);
+    }
 }
 
 /**
@@ -6585,3 +6623,4 @@ function header_includes($includes = false, $method = "js" )
     return $header_includes;
 }
 // Closing PHP tag intentionally omitted - yes, it is okay
+
