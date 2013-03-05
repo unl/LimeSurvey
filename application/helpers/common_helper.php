@@ -4749,7 +4749,9 @@ function getQuotaCompletedCount($iSurveyId, $quotaid)
 
             if (!in_array($fieldname, $fields_list)) $fields_list[] = $fieldname;
 
-            $criteria->addColumnCondition(array($fieldname => $member), 'OR');
+                // Yii does not quote column names (duh!) so we have to do it.
+                $criteria->addColumnCondition(array(Yii::app()->db->quoteColumnName($fieldname) => $member['value']), 'OR');
+            }
 
             $fields_query[$fieldname] = $criteria;
         }
@@ -5037,22 +5039,17 @@ function translateInsertansTags($newsid,$oldsid,$fieldnames)
             $description=preg_replace('/'.$pattern.'/', $replacement, $description);
         }
 
-        if (strcmp($description,$qentry['description']) !=0  ||
-        strcmp($gpname,$qentry['group_name']) !=0)
+        if (strcmp($description,$qentry['description']) !=0  || strcmp($gpname,$qentry['group_name']) !=0)
         {
             // Update Fields
-
-            $data = array(
-            'description' => $description,
-            'group_name' => $gpname
-            );
-
             $where = array(
             'gid' => $gid,
             'language' => $language
             );
-
-            Groups::model()->update($data,$where);
+            $oGroup = Groups::model()->findByAttributes($where);
+            $oGroup->description= $description;
+            $oGroup->group_name= $gpname;
+            $oGroup->save();
 
         } // Enf if modified
     } // end while qentry
