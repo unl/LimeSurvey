@@ -216,18 +216,6 @@ function makeLanguageChangerSurvey($sSelectedLanguage)
         }
         foreach ($slangs as $sLanguage)
         {
-            $sHTMLCode .= "<option value=\"{$sTargetURL}?sid=". $surveyid ."&amp;lang=". $sLanguage ."{$sAddToURL}\" ";
-            if ($sLanguage==$sSelectedLanguage)
-            {
-                $sHTMLCode .=" selected='selected'";
-            }
-            if (Yii::app()->request->getParam('token')!='')
-            {
-                $route.="/token/".Yii::app()->request->getParam('token');
-            }
-            $sHTMLCode = "<select id='languagechanger' name='languagechanger' class='languagechanger' onchange='javascript:window.location=this.value'>\n";
-            foreach ($slangs as $sLanguage)
-            {
                 $sTargetURL=Yii::app()->getController()->createUrl($route."/lang/$sLanguage");
                 $sHTMLCode .= "<option value=\"{$sTargetURL}\" ";
                 if ($sLanguage==$sSelectedLanguage)
@@ -237,13 +225,13 @@ function makeLanguageChangerSurvey($sSelectedLanguage)
                 $sHTMLCode .= ">".$aAllLanguages[$sLanguage]['nativedescription']."</option>\n";
 
         }
-            $sHTMLCode .= "</select>\n";
-            return $sHTMLCode;
-        }
-        else
-        {
-            return false;
-        }
+        
+        return $sHTMLCode;
+    }
+    else
+    {
+        return false;
+    }
 
 }
 

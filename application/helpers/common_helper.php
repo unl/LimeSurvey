@@ -4748,7 +4748,7 @@ function getQuotaCompletedCount($iSurveyId, $quotaid)
             $criteria = new CDbCriteria;
 
             if (!in_array($fieldname, $fields_list)) $fields_list[] = $fieldname;
-
+            {
                 // Yii does not quote column names (duh!) so we have to do it.
                 $criteria->addColumnCondition(array(Yii::app()->db->quoteColumnName($fieldname) => $member['value']), 'OR');
             }
@@ -4759,11 +4759,11 @@ function getQuotaCompletedCount($iSurveyId, $quotaid)
         $criteria = new CDbCriteria;
 
         foreach ($fields_list as $fieldname)
+        {
             $criteria->mergeWith($fields_query[$fieldname]);
-
+        }
         $result = Survey_dynamic::model($iSurveyId)->count($criteria);
     }
-
     return $result;
 }
 
