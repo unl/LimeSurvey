@@ -16,7 +16,6 @@
             $discoveredPlugins = App()->getPluginManager()->scanPlugins();
             
             $installedPlugins = Plugin::model()->findAll();
-            
             $installedNames = array_map(function ($installedPlugin) { return $installedPlugin->name; }, $installedPlugins);
             
             // Install newly discovered plugins.
@@ -30,7 +29,6 @@
                     $plugin->save();
                 }
             }
-            
             $plugins = Plugin::model()->findAll();
             $data = array();
             foreach ($plugins as $plugin)

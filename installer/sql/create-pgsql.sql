@@ -225,7 +225,7 @@ CREATE TABLE prefix_question_attributes (
 --
 CREATE TABLE prefix_questions (
     qid serial NOT NULL,
-    parent_qid integer DEFAULT 0 NOT NULL,
+    parent_id integer DEFAULT 0 NOT NULL,
     sid integer DEFAULT 0 NOT NULL,
     gid integer DEFAULT 0 NOT NULL,
     "type" character varying(1) DEFAULT 'T' NOT NULL,
@@ -579,7 +579,7 @@ create index questions_idx2 on prefix_questions (sid);
 create index questions_idx3 on prefix_questions (gid);
 create index quota_idx2 on prefix_quota (sid);
 create index saved_control_idx2 on prefix_saved_control (sid);
-create index parent_qid_idx on prefix_questions (parent_qid);
+create index parent_id on prefix_questions (parent_id);
 create index labels_code_idx on prefix_labels (code);
 create index plugins_active_idx on prefix_plugins (active);
 create index plugin_settings_pluginid_idx on prefix_plugin_settings (plugin_id);

@@ -218,7 +218,7 @@ CREATE TABLE [prefix_question_attributes] (
 --//AJSL
 CREATE TABLE [prefix_questions] (
   [qid] int NOT NULL IDENTITY (1,1),
-  [parent_qid] int NOT NULL default '0',
+  [parent_id] int NOT NULL default '0',
   [sid] int NOT NULL default '0',
   [gid] int NOT NULL default '0',
   [type] varchar(1) NOT NULL default 'T',
@@ -571,7 +571,7 @@ create index [questions_idx2] on [prefix_questions] ([sid]);
 create index [questions_idx3] on [prefix_questions] ([gid]);
 create index [quota_idx2] on [prefix_quota] ([sid]);
 create index [saved_control_idx2] on [prefix_saved_control] ([sid]);
-create index [parent_qid_idx] on [prefix_questions] ([parent_qid]);
+create index [parent_id] on [prefix_questions] ([parent_id]);
 create index [labels_code_idx] on [prefix_labels] ([code]);
 create index [plugins_active_idx] on [prefix_plugins] ([active]);
 create index [plugin_settings_pluginid_idx] on [prefix_plugin_settings] ([plugin_id]);

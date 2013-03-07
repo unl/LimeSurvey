@@ -574,7 +574,7 @@ create index `questions_idx3` on `prefix_questions` (`gid`);
 
 create index `quota_idx2` on `prefix_quota` (`sid`);
 create index `saved_control_idx2` on `prefix_saved_control` (`sid`);
-create index `parent_qid_idx` on `prefix_questions` (`parent_qid`);
+create index `parent_id` on `prefix_questions` (`parent_id`);
 create index `plugins_active_idx2` on `prefix_plugins` (`active`);
 create index `plugin_settings_idx2` on `prefix_plugin_settings` (`plugin_id`);
 
