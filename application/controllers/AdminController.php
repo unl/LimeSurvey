@@ -14,7 +14,7 @@
 class AdminController extends LSYii_Controller
 {
     public $lang = null;
-    public $layout = false;
+    //public $layout = false;
     protected $user_id = 0;
 
     /**
@@ -307,7 +307,7 @@ class AdminController extends LSYii_Controller
 
         $aData['css_admin_includes'] = $this->_css_admin_includes(array(), true);
 
-        return $this->renderPartial("/admin/super/header", $aData);
+        return '';//$this->renderPartial("/admin/super/header", $aData);
     }
 
     /**
@@ -348,7 +348,7 @@ class AdminController extends LSYii_Controller
         $data['js_admin_includes']  = $this->_js_admin_includes(array(), true);
         $data['css_admin_includes'] = $this->_css_admin_includes(array(), true);
 
-        return $this->render("/admin/super/footer", $data);
+        return ''; //$this->render("/admin/super/footer", $data);
 
     }
 
@@ -361,14 +361,14 @@ class AdminController extends LSYii_Controller
     * @param string $sClass
     * @return void
     */
-    public function _showMessageBox($sTitle, $sMessage, $sClass="header ui-widget-header")
+    public function _showMessageBox($sTitle, $sMessage, $sClass="header ui-widget-header", $return = false)
     {
         $aData['title'] = $sTitle;
         $aData['message'] = $sMessage;
         $aData['class'] = $sClass;
         $aData['clang'] = $this->lang;
 
-        $this->render('/admin/super/messagebox', $aData);
+        return $this->renderPartial('/admin/super/messagebox', $aData, $return);
     }
 
     /**
@@ -394,14 +394,14 @@ class AdminController extends LSYii_Controller
         $aData['surveyid'] = $iSurveyID;
         $aData['iconsize'] = Yii::app()->getConfig('adminthemeiconsize');
         $aData['sImageURL'] = Yii::app()->getConfig('adminimageurl');
-        $this->render("/admin/super/adminmenu", $aData);
+        //$this->render("/admin/super/adminmenu", $aData);
     }
 
     /**
     * put your comment there...
     * 
     */
-    public function _loadEndScripts()
+    public function _loadEndScripts($return = false)
     {
         static $bOut = false;
         if ($bOut)
@@ -412,7 +412,7 @@ class AdminController extends LSYii_Controller
 
         unset(Yii::app()->session['metaHeader']);
 
-        return $this->render('/admin/endScripts_view', array());
+        return $this->renderPartial('/admin/endScripts_view', null, $return);
     }
     
     /**

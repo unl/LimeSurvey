@@ -8,7 +8,7 @@
     var sURLParameters = '';
     var sAddParam = '';
 </script>
-<div id='tabs'>
+<div class='tabs'>
     <ul>
         <li><a href='#general'><?php $clang->eT("General"); ?></a></li>
         <li><a href='#presentation'><?php $clang->eT("Presentation & navigation"); ?></a></li>

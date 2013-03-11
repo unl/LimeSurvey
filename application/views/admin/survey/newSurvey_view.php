@@ -1,7 +1,7 @@
 <?php
     extract($data);
     Yii::app()->loadHelper('admin/htmleditor');
-    PrepareEditorScript(false, $this);
+    //PrepareEditorScript(false, $this);
 ?>
 <script type="text/javascript">
     standardtemplaterooturl='<?php echo Yii::app()->getConfig('standardtemplaterooturl');?>';
@@ -9,19 +9,19 @@
 </script>
 <div class='header ui-widget-header'><?php $clang->eT("Create, import, or copy survey"); ?></div>
 <?php
-    $this->render('/admin/survey/subview/tab_view',$data);
-    $this->render('/admin/survey/subview/tabGeneralNewSurvey_view',$data);
-    $this->render('/admin/survey/subview/tabPresentation_view',$data);
-    $this->render('/admin/survey/subview/tabPublication_view',$data);
-    $this->render('/admin/survey/subview/tabNotification_view',$data);
-    $this->render('/admin/survey/subview/tabTokens_view',$data);
+    $this->renderPartial('/admin/survey/subview/tab_view',$data);
+    $this->renderPartial('/admin/survey/subview/tabGeneralNewSurvey_view',$data);
+    $this->renderPartial('/admin/survey/subview/tabPresentation_view',$data);
+    $this->renderPartial('/admin/survey/subview/tabPublication_view',$data);
+    $this->renderPartial('/admin/survey/subview/tabNotification_view',$data);
+    $this->renderPartial('/admin/survey/subview/tabTokens_view',$data);
 ?>
 
 <input type='hidden' id='surveysettingsaction' name='action' value='insertsurvey' />
 </form>
 <?php
-    $this->render('/admin/survey/subview/tabImport_view',$data);
-    $this->render('/admin/survey/subview/tabCopy_view',$data);
+    $this->renderPartial('/admin/survey/subview/tabImport_view',$data);
+    $this->renderPartial('/admin/survey/subview/tabCopy_view',$data);
 ?>
 </div>
 

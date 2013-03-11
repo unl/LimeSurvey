@@ -10,6 +10,9 @@
             $cs->registerScriptFile(Yii::app()->getConfig('generalscripts') . 'jquery/jquery.ui.touch-punch.min.js');
             $cs->registerScriptFile(Yii::app()->getConfig('generalscripts') . 'jquery/jquery.qtip.js');
             $cs->registerScriptFile(Yii::app()->getConfig('generalscripts') . 'jquery/jquery.notify.js');
+            $cs->registerScriptFile(App()->getConfig('third_party') . 'ckeditor/ckeditor.js');
+            $cs->registerScriptFile(App()->getConfig('third_party') . 'ckeditor/adapters/jquery.js');
+            
             $cs->registerScriptFile(Yii::app()->getConfig('adminscripts') . 'admin_core.js');
             $cs->registerScript('LimeScript', $this->widget('ext.LimeScript.LimeScript', array(), true), CClientScript::POS_HEAD);
         ?>

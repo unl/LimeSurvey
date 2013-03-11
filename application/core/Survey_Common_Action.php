@@ -207,7 +207,6 @@ class Survey_Common_Action extends CAction
         $aData = $this->_addPseudoParams($aData);
         $aViewUrls = (array) $aViewUrls;
         $sViewPath = '/admin/';
-
         if (!empty($sAction))
         {
             $sViewPath .= $sAction . '/';
@@ -223,57 +222,6 @@ class Survey_Common_Action extends CAction
             Yii::app()->getController()->_getAdminHeader();
         }
 
-
-        // Menu bars
-        if (!isset($aData['display']['menu_bars']) || ($aData['display']['menu_bars'] !== false && (!is_array($aData['display']['menu_bars']) || !in_array('browse', array_keys($aData['display']['menu_bars'])))))
-        {
-            Yii::app()->getController()->_showadminmenu(!empty($aData['surveyid']) ? $aData['surveyid'] : null);
-
-            if (!empty($aData['surveyid']))
-            {
-
-                LimeExpressionManager::StartProcessingPage(false, Yii::app()->baseUrl,true);  // so can click on syntax highlighting to edit questions
-                $this->_surveybar($aData['surveyid'], !empty($aData['gid']) ? $aData['gid'] : null);
-                
-                if (isset($aData['display']['menu_bars']['surveysummary']))
-                {
-
-                    if ((empty($aData['display']['menu_bars']['surveysummary']) || !is_string($aData['display']['menu_bars']['surveysummary'])) && !empty($aData['gid']))
-                    {
-                        $aData['display']['menu_bars']['surveysummary'] = 'viewgroup';
-                    }
-                    $this->_surveysummary($aData['surveyid'], !empty($aData['display']['menu_bars']['surveysummary']) ? $aData['display']['menu_bars']['surveysummary'] : null, !empty($aData['gid']) ? $aData['gid'] : null);
-                }
-                
-                if (!empty($aData['gid']))
-                {
-                    if (empty($aData['display']['menu_bars']['gid_action']) && !empty($aData['qid']))
-                    {
-                        $aData['display']['menu_bars']['gid_action'] = 'viewquestion';
-                    }
-
-                    $this->_questiongroupbar($aData['surveyid'], $aData['gid'], !empty($aData['qid']) ? $aData['qid'] : null, !empty($aData['display']['menu_bars']['gid_action']) ? $aData['display']['menu_bars']['gid_action'] : null);
-                    
-                    if (!empty($aData['qid']))
-                    {
-                        $this->_questionbar($aData['surveyid'], $aData['gid'], $aData['qid'], !empty($aData['display']['menu_bars']['qid_action']) ? $aData['display']['menu_bars']['qid_action'] : null);
-                    }
-                }
-
-                LimeExpressionManager::FinishProcessingPage();
-
-            }
-        }
-        if (!empty($aData['display']['menu_bars']['browse']) && !empty($aData['surveyid']))
-        {
-            $this->_browsemenubar($aData['surveyid'], $aData['display']['menu_bars']['browse']);
-        }
-
-        if (!empty($aData['display']['menu_bars']['user_group']))
-        {
-            $this->_userGroupBar(!empty($aData['ugid']) ? $aData['ugid'] : 0);
-        }
-
         // Load views
         foreach ($aViewUrls as $sViewKey => $viewUrl)
         {
@@ -281,14 +229,14 @@ class Survey_Common_Action extends CAction
             {
                 if (is_numeric($sViewKey))
                 {
-                    Yii::app()->getController()->render($sViewPath . $viewUrl, $aData);
+                    $out .= Yii::app()->getController()->renderPartial($sViewPath . $viewUrl, $aData, true);
                 }
                 elseif (is_array($viewUrl))
                 {
                     foreach ($viewUrl as $aSubData)
                     {
                         $aSubData = array_merge($aData, $aSubData);
-                        Yii::app()->getController()->render($sViewPath . $sViewKey, $aSubData);
+                        $out .= Yii::app()->getController()->renderPartial($sViewPath . $sViewKey, $aSubData, true);
                     }
                 }
             }
@@ -300,17 +248,17 @@ class Survey_Common_Action extends CAction
                     case 'message' :
                         if (empty($viewUrl['class']))
                         {
-                            Yii::app()->getController()->_showMessageBox($viewUrl['title'], $viewUrl['message']);
+                            $out .= Yii::app()->getController()->_showMessageBox($viewUrl['title'], $viewUrl['message'], "header ui-widget-header", true);
                         }
                         else
                         {
-                            Yii::app()->getController()->_showMessageBox($viewUrl['title'], $viewUrl['message'], $viewUrl['class']);
+                            $out .= Yii::app()->getController()->_showMessageBox($viewUrl['title'], $viewUrl['message'], $viewUrl['class'], true);
                         }
                         break;
 
                         // Output
                     case 'output' :
-                        echo $viewUrl;
+                        $out .=  $viewUrl;
                         break;
                 }
             }
@@ -318,10 +266,12 @@ class Survey_Common_Action extends CAction
 
         // Footer
         if(!isset($aData['display']['endscripts']) || $aData['display']['endscripts'] !== false)
-            Yii::app()->getController()->_loadEndScripts();
+            $out .= Yii::app()->getController()->_loadEndScripts(true);
 
         if(!isset($aData['display']['footer']) || $aData['display']['footer'] !== false)
             Yii::app()->getController()->_getAdminFooter('http://docs.limesurvey.org', $clang->gT('LimeSurvey online manual'));
+        
+        $this->getController()->renderText($out);
     }
 
     /**
@@ -426,10 +376,10 @@ class Survey_Common_Action extends CAction
             $aData['condarray'] = $condarray;
             $aData['sImageURL'] = Yii::app()->getConfig('adminimageurl');
             $aData['iIconSize'] = Yii::app()->getConfig('adminthemeiconsize');
-            $questionsummary .= $this->getController()->render('/admin/survey/Question/questionbar_view', $aData, true);
+            //$questionsummary .= $this->getController()->render('/admin/survey/Question/questionbar_view', $aData, true);
         $finaldata['display'] = $questionsummary;
 
-        $this->getController()->render('/survey_view', $finaldata);
+        $this->getController()->renderPartial('/survey_view', $finaldata);
     }
 
     /**
@@ -490,11 +440,11 @@ class Survey_Common_Action extends CAction
             $aData['sumcount4'] = $sumcount4;
             $aData['iIconSize'] = Yii::app()->getConfig('adminthemeiconsize');
             $aData['imageurl'] = Yii::app()->getConfig('adminimageurl');
-            $groupsummary .= $this->getController()->render('/admin/survey/QuestionGroups/questiongroupbar_view', $aData, true);
+            $groupsummary .= $this->getController()->renderPartial('/admin/survey/QuestionGroups/questiongroupbar_view', $aData, true);
         }
         $groupsummary .= "\n</table>\n";
         $finaldata['display'] = $groupsummary;
-        $this->getController()->render('/survey_view', $finaldata);
+        $this->getController()->renderPartial('/survey_view', $finaldata);
     }
 
     /**
@@ -638,7 +588,7 @@ class Survey_Common_Action extends CAction
         $aData['iIconSize'] = Yii::app()->getConfig('adminthemeiconsize');
         $aData['sImageURL'] = Yii::app()->getConfig('adminimageurl');
 
-        $this->getController()->render("/admin/survey/surveybar_view", $aData);
+        $this->getController()->renderPartial("/admin/survey/surveybar_view", $aData);
     }
 
     /**
@@ -886,7 +836,7 @@ class Survey_Common_Action extends CAction
             $aData['clang'] = $clang;
             $aData['surveyinfo'] = $surveyinfo;
 
-            $this->getController()->render("/admin/survey/surveySummary_view", $aData);
+            $this->getController()->renderPartial("/admin/survey/surveySummary_view", $aData);
         }
 
         /**
@@ -907,7 +857,7 @@ class Survey_Common_Action extends CAction
             rsort($tmp_survlangs);
             $aData['tmp_survlangs'] = $tmp_survlangs;
 
-            $this->getController()->render("/admin/responses/browsemenubar_view", $aData);
+            //$this->getController()->render("/admin/responses/browsemenubar_view", $aData);
         }
         /**
         * Load menu bar of user group controller.
@@ -945,7 +895,7 @@ class Survey_Common_Action extends CAction
 
         $data['ugid'] = $ugid;
         $data['imageurl'] = Yii::app()->getConfig("adminimageurl"); // Don't came from rendertemplate ?
-        $this->getController()->render('/admin/usergroup/usergroupbar_view', $data);
+        $this->getController()->renderPartial('/admin/usergroup/usergroupbar_view', $data);
     }
 
     protected function _filterImportedResources($extractdir, $destdir)

@@ -708,20 +708,22 @@ function removeCSRFDivs()
 function initializeHtmlEditors()
 {
     $('.htmleditor textarea').each(function() {
-        if (typeof(CKEDITOR.instances[$(this).attr('name')]) != 'undefined')
+        if (typeof(CKEDITOR) != 'undefined' && typeof(CKEDITOR.instances[$(this).attr('name')]) != 'undefined')
         {
             CKEDITOR.instances[$(this).attr('name')].destroy(true);
         }
-        
-        $(this).ckeditor({
-            'customConfig' : '/scripts/admin/ckeditor-config.js',
-            'LimeReplacementFieldsType' : '',
-            'LimeReplacementFieldsSID' : 0,
-            'LimeReplacementFieldsGID' : 0,
-            'LimeReplacementFieldsQID' : 0,
-            'LimeReplacementFieldsPath' : LS.data.replacementFields.path
-            
-        });
+        if (typeof($(this).ckeditor) != 'undefined')
+        {
+            $(this).ckeditor({
+                'customConfig' : '/scripts/admin/ckeditor-config.js',
+                'LimeReplacementFieldsType' : '',
+                'LimeReplacementFieldsSID' : 0,
+                'LimeReplacementFieldsGID' : 0,
+                'LimeReplacementFieldsQID' : 0,
+                'LimeReplacementFieldsPath' : LS.data.replacementFields.path
+
+            });
+        }
     })
     
     // If we initialize ck editors we should make sure that all text areas are before any forms are submitted.

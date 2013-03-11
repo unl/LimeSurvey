@@ -16,6 +16,7 @@
     //Security Checked: POST/GET/SESSION/DB/returnGlobal
     function initKcfinder()
     {
+       
      Yii::app()->session['KCFINDER'] = array();
 
         $sAllowedExtensions = implode(' ', array_map('trim', explode(',', Yii::app()->getConfig('allowedresourcesuploads'))));
@@ -87,6 +88,7 @@
 
     function PrepareEditorScript($load=false, $controller = null)
     {
+        return;
         $js_admin_includes = Yii::app()->getConfig("js_admin_includes");
         $clang = Yii::app()->lang;
         $data['clang'] = $clang;
@@ -101,11 +103,11 @@
         if ($load == false)
         {
 
-            return $controller->render('/admin/survey/prepareEditorScript_view',$data,true);
+            return $controller->renderPartial('/admin/survey/prepareEditorScript_view',$data,true);
         }
         else
         {
-            $controller->render('/admin/survey/prepareEditorScript_view',$data);
+            $controller->renderPartial('/admin/survey/prepareEditorScript_view',$data);
         }
     }
 

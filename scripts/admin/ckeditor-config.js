@@ -8,13 +8,13 @@ CKEDITOR.editorConfig = function( config )
     config.LimeReplacementFieldsAction = $(this.element).data('LRFaction');
     config.LimeReplacementFieldsPath = LS.createUrl('admin/limereplacementfields/sa/index/');
     
-    config.filebrowserBrowseUrl = CKEDITOR.basePath+'../kcfinder/browse.php?type=files';
-    config.filebrowserImageBrowseUrl = CKEDITOR.basePath+'../kcfinder/browse.php?type=images'; 
-    config.filebrowserFlashBrowseUrl = CKEDITOR.basePath+'../kcfinder/browse.php?type=flash';
+    config.filebrowserBrowseUrl = LS.data.baseUrl + '/third_party/kcfinder/browse.php?type=files';
+    config.filebrowserImageBrowseUrl = LS.data.baseUrl + '/third_party/kcfinder/browse.php?type=images'; 
+    config.filebrowserFlashBrowseUrl = LS.data.baseUrl + '/third_party/kcfinder/browse.php?type=flash';
 
-    config.filebrowserUploadUrl = CKEDITOR.basePath+'../kcfinder/upload.php?type=files';
-    config.filebrowserImageUploadUrl = CKEDITOR.basePath+'../kcfinder/upload.php?type=images';
-    config.filebrowserFlashUploadUrl = CKEDITOR.basePath+'../kcfinder/upload.php?type=flash';
+    config.filebrowserUploadUrl = LS.data.baseUrl + '/third_party/kcfinder/upload.php?type=files';
+    config.filebrowserImageUploadUrl = LS.data.baseUrl + '/third_party/kcfinder/upload.php?type=images';
+    config.filebrowserFlashUploadUrl = LS.data.baseUrl + '/third_party/kcfinder/upload.php?type=flash';
 
     config.skin = 'ls-office2003';
     config.toolbarCanCollapse = false;

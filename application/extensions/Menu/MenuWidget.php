@@ -20,18 +20,24 @@
         
         public function run()
         {
-            $this->render('adminmenu', array('menu' => $this->menuMain()));
-            if (isset($this->surveyId))
+            /**
+             * Only render the menu if logged in.
+             */
+            if (!Yii::app()->user->getIsGuest())
             {
-                $this->render('adminmenu', array('menu' => $this->menuSurvey($this->surveyId)));
-            }
-            if (isset($this->groupId))
-            {
-                $this->render('adminmenu', array('menu' => $this->menuGroup($this->groupId)));
-            }
-            if (isset($this->questionId))
-            {
-                $this->render('adminmenu', array('menu' => $this->menuQuestion($this->questionId)));
+                $this->render('adminmenu', array('menu' => $this->menuMain()));
+                if (isset($this->surveyId))
+                {
+                    $this->render('adminmenu', array('menu' => $this->menuSurvey($this->surveyId)));
+                }
+                if (isset($this->groupId))
+                {
+                    $this->render('adminmenu', array('menu' => $this->menuGroup($this->groupId)));
+                }
+                if (isset($this->questionId))
+                {
+                    $this->render('adminmenu', array('menu' => $this->menuQuestion($this->questionId)));
+                }
             }
         }
 

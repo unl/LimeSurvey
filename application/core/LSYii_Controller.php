@@ -146,4 +146,11 @@ abstract class LSYii_Controller extends CController
         }
 
     }
+    
+    public function render($view, $data = null, $return = false) {
+        return parent::render($view, $data, $return);
+        echo '<pre>';
+        var_dump(debug_backtrace());
+        echo '</pre>';
+    }
 }

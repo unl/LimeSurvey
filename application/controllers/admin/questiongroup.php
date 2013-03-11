@@ -102,6 +102,7 @@ class questiongroup extends Survey_Common_Action
      */
     function add($surveyid)
     {
+        $this->getController()->navData['surveyId'] = $surveyid;
         $surveyid = sanitize_int($surveyid);
         $aViewUrls = $aData = array();
 

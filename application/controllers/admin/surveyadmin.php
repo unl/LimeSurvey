@@ -155,14 +155,13 @@ class SurveyAdmin extends Survey_Common_Action
         $aData['aModelList']=$aModelList;
         $arrayed_data['data'] = $aData;
         $aViewUrls[] = 'newSurvey_view';
-
         $this->_renderWrappedTemplate('survey', $aViewUrls, $arrayed_data);
     }
     
     function fakebrowser()
     {
         $aData['clang'] = $this->getController()->lang;
-        Yii::app()->getController()->render('/admin/survey/newSurveyBrowserMessage', $aData);
+        Yii::app()->getController()->renderPartial('/admin/survey/newSurveyBrowserMessage', $aData);
     }    
 
     /**
@@ -172,6 +171,7 @@ class SurveyAdmin extends Survey_Common_Action
     function editsurveysettings($iSurveyID)
     {
         $iSurveyID = (int) $iSurveyID;
+        $this->getController()->navData['surveyId'] = $iSurveyID;
         if (is_null($iSurveyID) || !$iSurveyID)
             $this->getController()->error('Invalid survey id');
 
@@ -289,6 +289,9 @@ class SurveyAdmin extends Survey_Common_Action
     */
     public function view($iSurveyID, $gid = null, $qid = null)
     {
+        $this->getController()->navData['surveyId'] = $iSurveyID;
+        $this->getController()->navData['groupId'] = $gid;
+        $this->getController()->navData['questionId'] = $qid;
         $iSurveyID = sanitize_int($iSurveyID);
         if (isset($gid))
             $gid = sanitize_int($gid);
@@ -789,6 +792,7 @@ class SurveyAdmin extends Survey_Common_Action
     */
     public function editlocalsettings($iSurveyID)
     {
+        $this->getController()->navData['surveyId'] = $iSurveyID;
         $clang = $this->getController()->lang;
         $aData['surveyid'] = $iSurveyID = sanitize_int($iSurveyID);
         $aViewUrls = array();
@@ -828,7 +832,7 @@ class SurveyAdmin extends Survey_Common_Action
                 $aData['esrow'] = $esrow;
                 $aData['action'] = "editsurveylocalesettings";
                 $aData['clang'] = $clang;
-                $tab_content[$i] = $this->getController()->render('/admin/survey/editLocalSettings_view', $aData, true);
+                $tab_content[$i] = $this->getController()->renderPartial('/admin/survey/editLocalSettings_view', $aData, true);
 
                 $i++;
             }
@@ -857,7 +861,6 @@ class SurveyAdmin extends Survey_Common_Action
         {
             $this->getController()->error('Access denied');
         }
-        
         $this->_renderWrappedTemplate('survey', $aViewUrls, $aData);
     }
 
