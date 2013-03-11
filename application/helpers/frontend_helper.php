@@ -2521,47 +2521,82 @@ function display_first_page() {
     $languagechanger=makeLanguageChangerSurvey($clang->langcode);
 
     sendCacheHeaders();
-    doHeader();
-
     LimeExpressionManager::StartProcessingPage();
     LimeExpressionManager::StartProcessingGroup(-1, false, $surveyid);  // start on welcome page
 
-    $redata = compact(array_keys(get_defined_vars()));
-    $sTemplatePath=$_SESSION['survey_'.$surveyid]['templatepath'];
-
-    echo templatereplace(file_get_contents($sTemplatePath."startpage.pstpl"),array(),$redata,'frontend_helper[2757]');
-    echo CHtml::form(array("/survey/index"), 'post', array('id'=>'limesurvey','name'=>'limesurvey','autocomplete'=>'off'));
-    echo "\n\n<!-- START THE SURVEY -->\n";
-
-    echo templatereplace(file_get_contents($sTemplatePath."welcome.pstpl"),array(),$redata,'frontend_helper[2762]')."\n";
-    if ($thissurvey['anonymized'] == "Y")
+    
+    
+    if (file_exists(getTemplatePath($thissurvey['template']). DIRECTORY_SEPARATOR . "welcome.twig"))
     {
-        echo templatereplace(file_get_contents($sTemplatePath."/privacy.pstpl"),array(),$redata,'frontend_helper[2765]')."\n";
-    }
-    echo templatereplace(file_get_contents($sTemplatePath."navigator.pstpl"),array(),$redata,'frontend_helper[2767]');
-    if ($thissurvey['active'] != "Y")
+        Twig::activateTemplate($thissurvey['template']);
+        $twig = Twig::getTwigEnvironment();
+        $context = array(
+            'languagecode' => App()->lang->langcode,
+            'direction' => getLanguageRTL(App()->lang->langcode) ? 'rtl' : 'ltr',
+            'survey' => array(
+                'name' => $thissurvey['name'],
+                'welcome' => $thissurvey['welcome'],
+                'description' => $thissurvey['description'],
+                'questioncount' => $_SESSION['survey_'.$surveyid]['totalquestions']
+            ),
+            'navigator' => array(
+                'next' => true,
+                'clearall' => true,
+                'load' => true
+            )
+        );
+        
+        $out = $twig->render("welcome.twig", $context);
+        App()->getClientScript()->registerScriptFile(App()->getConfig('third_party') . 'jquery/jquery.js');
+        App()->getClientScript()->registerScriptFile(App()->getConfig('third_party') . 'jquery-ui/js/jquery-ui-1.9.2.custom.js');
+        App()->getClientScript()->registerScriptFile(App()->getConfig('generalscripts'). 'jquery/jquery.ui.touch-punch.min.js');
+        App()->getClientScript()->registerScriptFile(App()->getConfig('generalscripts'). 'survey_runtime.js');
+        App()->getClientScript()->registerScriptFile(App()->getConfig('generalscripts'). 'survey_nav.js');
+        App()->getClientScript()->renderHead($out);
+        echo $out;
+    }       
+    else
     {
-        echo "<p style='text-align:center' class='error'>".$clang->gT("This survey is currently not active. You will not be able to save your responses.")."</p>\n";
-    }
-    echo "\n<input type='hidden' name='sid' value='$surveyid' id='sid' />\n";
-    if (isset($token) && !empty($token)) {
-        echo "\n<input type='hidden' name='token' value='$token' id='token' />\n";
-    }
-    echo "\n<input type='hidden' name='lastgroupname' value='_WELCOME_SCREEN_' id='lastgroupname' />\n"; //This is to ensure consistency with mandatory checks, and new group test
-    $loadsecurity = returnGlobal('loadsecurity');
-    if (isset($loadsecurity)) {
-        echo "\n<input type='hidden' name='loadsecurity' value='$loadsecurity' id='loadsecurity' />\n";
-    }
-    $_SESSION['survey_'.$surveyid]['LEMpostKey'] = mt_rand();
-    echo "<input type='hidden' name='LEMpostKey' value='{$_SESSION['survey_'.$surveyid]['LEMpostKey']}' id='LEMpostKey' />\n";
-    echo "<input type='hidden' name='thisstep' id='thisstep' value='0' />\n";
+        doHeader();
+        $redata = compact(array_keys(get_defined_vars()));
+        $sTemplatePath=$_SESSION['survey_'.$surveyid]['templatepath'];
+        echo templatereplace(file_get_contents($sTemplatePath."startpage.pstpl"),array(),$redata,'frontend_helper[2757]');
+        echo CHtml::form(array("/survey/index"), 'post', array('id'=>'limesurvey','name'=>'limesurvey','autocomplete'=>'off'));
+        echo "\n\n<!-- START THE SURVEY -->\n";
 
-    echo "\n</form>\n";
-    echo templatereplace(file_get_contents($sTemplatePath."endpage.pstpl"),array(),$redata,'frontend_helper[2782]');
+        echo templatereplace(file_get_contents($sTemplatePath."welcome.pstpl"),array(),$redata,'frontend_helper[2762]')."\n";
+        if ($thissurvey['anonymized'] == "Y")
+        {
+            echo templatereplace(file_get_contents($sTemplatePath."/privacy.pstpl"),array(),$redata,'frontend_helper[2765]')."\n";
+        }
+        echo templatereplace(file_get_contents($sTemplatePath."navigator.pstpl"),array(),$redata,'frontend_helper[2767]');
+        if ($thissurvey['active'] != "Y")
+        {
+            echo "<p style='text-align:center' class='error'>".$clang->gT("This survey is currently not active. You will not be able to save your responses.")."</p>\n";
+        }
+        echo "\n<input type='hidden' name='sid' value='$surveyid' id='sid' />\n";
+        if (isset($token) && !empty($token)) {
+            echo "\n<input type='hidden' name='token' value='$token' id='token' />\n";
+        }
+        echo "\n<input type='hidden' name='lastgroupname' value='_WELCOME_SCREEN_' id='lastgroupname' />\n"; //This is to ensure consistency with mandatory checks, and new group test
+        $loadsecurity = returnGlobal('loadsecurity');
+        if (isset($loadsecurity)) {
+            echo "\n<input type='hidden' name='loadsecurity' value='$loadsecurity' id='loadsecurity' />\n";
+        }
+        $_SESSION['survey_'.$surveyid]['LEMpostKey'] = mt_rand();
+        echo "<input type='hidden' name='LEMpostKey' value='{$_SESSION['survey_'.$surveyid]['LEMpostKey']}' id='LEMpostKey' />\n";
+        echo "<input type='hidden' name='thisstep' id='thisstep' value='0' />\n";
 
-    echo LimeExpressionManager::GetRelevanceAndTailoringJavaScript();
+        echo "\n</form>\n";
+        echo templatereplace(file_get_contents($sTemplatePath."endpage.pstpl"),array(),$redata,'frontend_helper[2782]');
+
+        echo LimeExpressionManager::GetRelevanceAndTailoringJavaScript();
+        
+        doFooter();
+        
+    }
+        
     LimeExpressionManager::FinishProcessingPage();
-    doFooter();
 }
 
 function killSurveySession($iSurveyID)

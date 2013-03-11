@@ -19,7 +19,6 @@
 
     <?php echo CHtml::form(array("admin/questiongroup/sa/insert/surveyid/{$surveyid}"), 'post', array('id'=>'newquestiongroup', 'name'=>'newquestiongroup', 'class'=>'form30')); ?>
         <?php
-        
             foreach ($grplangs as $grouplang)
             { ?>
             <div id="<?php echo $grouplang; ?>">

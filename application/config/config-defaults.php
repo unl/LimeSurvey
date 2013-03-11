@@ -743,6 +743,7 @@ $config['adminstyleurl']           = $config['styleurl'].$config['admintheme'].'
 // Directories
 $config['rootdir']                 = getcwd();                                             // This is the physical disk location for your limesurvey installation. Normally you don't have to touch this setting.
 $config['tempdir']                 = $config['rootdir'].DIRECTORY_SEPARATOR."tmp";         // The directory path where LimeSurvey can store temporary files
+$config['twigdir']                 = $config['tempdir'].DIRECTORY_SEPARATOR."twig_cache";  // The directory path where Twig can store compiled template files.
 $config['imagedir']                = $config['rootdir'].DIRECTORY_SEPARATOR."images";      // The directory path of the image directory
 $config['uploaddir']               = $config['rootdir'].DIRECTORY_SEPARATOR."upload";
 $config['standardtemplaterootdir'] = $config['rootdir'].DIRECTORY_SEPARATOR."templates";   // The directory path of the standard templates

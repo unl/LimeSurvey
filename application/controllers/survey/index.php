@@ -15,10 +15,134 @@ class index extends CAction {
 
     public function run()
     {
-        $this->action();
+        
+        $survey = getSurveyInfo(sanitize_int(App()->request->getPost('sid')));
+        // Decide what our navigation action is, this implicitly sanitizes the variable.
+        $navigate = App()->request->getPost('navigate', null);
+        switch ($navigate) {
+            case 'clear': 
+                $this->clear($survey);
+                break;
+            case 'previous':
+                $this->action('moveprev');
+                break;
+            case 'next':
+                $this->action('movenext');
+                break;
+            case 'submit':
+                $this->action('movesubmit');
+                break;
+            case 'load':
+                $this->action('loadall');
+                break;
+            case 'save':
+                $this->action('saveall');
+                break;
+            default:
+                $this->action($navigate);
+        }
+        
     }
 
-    function action()
+    /**
+     * Delete the response but only if not already completed
+     */
+    public function clear($survey)
+    {
+        $templatePath = getTemplatePath($survey['template']);
+        if (isset($_SESSION["survey_{$survey['sid']}"]['srid']) && !Survey_dynamic::model($survey['sid'])->isCompleted($_SESSION["survey_{$survey['sid']}"]['srid']))
+            {
+                // delete the response but only if not already completed
+                $oResult= dbExecuteAssoc("DELETE FROM {{survey_{$survey['sid']}}} WHERE id={$_SESSION["survey_{$survey['sid']}"]['srid']} AND submitdate IS NULL");
+                if($oResult->count()>0){ // Using count() here *should* be okay for MSSQL because it is a delete statement
+                    // find out if there are any fuqt questions - checked
+                    $fieldmap = createFieldMap($survey['sid'],false,false,$survey['language']);
+                    foreach ($fieldmap as $q)
+                    {
+                        if (is_a($q, 'QuestionModule') && $q->fileUpload() && !strpos($q->fieldname, "_filecount"))
+                        {
+                            if (!isset($questions)) { $questions = array(); }
+                            $qid[] = $q;
+                        }
+                    }
+
+                    // if yes, extract the response json to those questions
+                    if (isset($qid))
+                    {
+                        $sQuery = "SELECT * FROM {{survey_{$survey['sid']}}} WHERE id={$_SESSION["survey_{$survey['sid']}"]['srid']}";
+                        $oResult = dbExecuteAssoc($sQuery);
+                        foreach($oResult->readAll() as $row)
+                        {
+                            foreach ($qid as $question)
+                            {
+                                $json = $row[$q->fieldname];
+                                if ($json == "" || $json == NULL)
+                                    continue;
+
+                                // decode them
+                                $phparray = json_decode($json);
+
+                                foreach ($phparray as $metadata)
+                                {
+                                    $target = Yii::app()->getConfig("uploaddir")."/surveys/".$survey['sid']."/files/";
+                                    // delete those files
+                                    unlink($target.$metadata->filename);
+                                }
+                            }
+                        }
+                    }
+                    // done deleting uploaded files
+                }
+
+                // also delete a record from saved_control when there is one
+                dbExecuteAssoc("DELETE FROM {{saved_control}} WHERE srid={$_SESSION["survey_{$survey['sid']}"]['srid']} AND sid={$survey['sid']}");
+            }
+            killSurveySession($survey['sid']);
+            sendCacheHeaders();
+            
+            if (file_exists($templatePath.'/clearall.twig'))
+            {
+                App()->loadHelper('twig');
+                App()->loadHelper('surveytranslator');
+                $twig = Twig::getTwigEnvironment();
+                
+                $twig->getLoader()->addPath($templatePath);
+                //var_dump($survey);
+                /**
+                 * @todo fix google analytics cases.
+                 */
+                //die();
+                $context = array(
+                    'survey' => array(
+                        'language' => array(
+                            'code' => $survey['language'],
+                            'direction' => getLanguageRTL($survey['language']) ? 'rtl' : 'ltr'
+                        ),
+                        'name' => $survey['name']
+                    ),
+                    'cssFiles' => array(),
+                    'template' => array('url' => 'test')
+                );
+                $output = $twig->render("clearall.twig", $context);
+                App()->getClientScript()->render($output);
+                echo $output;
+            }
+            else
+            {
+                doHeader();
+
+                $this->_printTemplateContent($templatePath.'/startpage.pstpl', $redata, __LINE__);
+                //Present the clear all page using clearall.pstpl template
+                $this->_printTemplateContent($templatePath.'/clearall.pstpl', $redata, __LINE__);
+            }
+
+            
+    }
+    /**
+     * 
+     * @param type $moverride Contains an override value for the $move variable.
+     */
+    public function action($moverride = null)
     {
         global $surveyid;
         global $thissurvey, $thisstep;
@@ -26,7 +150,7 @@ class index extends CAction {
         global $clang;
         $clang = Yii::app()->lang;
         @ini_set('session.gc_maxlifetime', Yii::app()->getConfig('sess_expiration'));
-
+        
         $this->_loadRequiredHelpersAndLibraries();
 
         $param = $this->_getParameters(func_get_args(), $_POST);
@@ -35,6 +159,10 @@ class index extends CAction {
         Yii::app()->setConfig('surveyID',$surveyid);
         $thisstep = $param['thisstep'];
         $move = $param['move'];
+        if ($moverride)
+        {
+            $move = $moverride;
+        }
         $clienttoken = $param['token'];
         $standardtemplaterootdir = Yii::app()->getConfig('standardtemplaterootdir');
         if (is_null($thissurvey) && !is_null($surveyid)) $thissurvey = getSurveyInfo($surveyid);
@@ -514,74 +642,7 @@ class index extends CAction {
         //Clear session and remove the incomplete response if requested.
         if (isset($move) && $move == "clearall")
         {
-            // delete the response but only if not already completed
-            $s_lang = $_SESSION['survey_'.$surveyid]['s_lang'];
-            if (isset($_SESSION['survey_'.$surveyid]['srid']) && !Survey_dynamic::model($surveyid)->isCompleted($_SESSION['survey_'.$surveyid]['srid']))
-            {
-                // delete the response but only if not already completed
-                $oResult= dbExecuteAssoc('DELETE FROM {{survey_'.$surveyid.'}} WHERE id='.$_SESSION['survey_'.$surveyid]['srid']." AND submitdate IS NULL");
-                if($oResult->count()>0){ // Using count() here *should* be okay for MSSQL because it is a delete statement
-                    // find out if there are any fuqt questions - checked
-                    $fieldmap = createFieldMap($surveyid,false,false,$s_lang);
-                    foreach ($fieldmap as $q)
-                    {
-                        if (is_a($q, 'QuestionModule') && $q->fileUpload() && !strpos($q->fieldname, "_filecount"))
-                        {
-                            if (!isset($questions)) { $questions = array(); }
-                            $qid[] = $q;
-                        }
-                    }
-
-                    // if yes, extract the response json to those questions
-                    if (isset($qid))
-                    {
-                        $sQuery = "SELECT * FROM {{survey_".$surveyid."}} WHERE id=".$_SESSION['survey_'.$surveyid]['srid'];
-                        $oResult = dbExecuteAssoc($sQuery);
-                        foreach($oResult->readAll() as $row)
-                        {
-                            foreach ($qid as $question)
-                            {
-                                $json = $row[$q->fieldname];
-                                if ($json == "" || $json == NULL)
-                                    continue;
-
-                                // decode them
-                                $phparray = json_decode($json);
-
-                                foreach ($phparray as $metadata)
-                                {
-                                    $target = Yii::app()->getConfig("uploaddir")."/surveys/".$surveyid."/files/";
-                                    // delete those files
-                                    unlink($target.$metadata->filename);
-                                }
-                            }
-                        }
-                    }
-                    // done deleting uploaded files
-                }
-
-                // also delete a record from saved_control when there is one
-                dbExecuteAssoc('DELETE FROM {{saved_control}} WHERE srid='.$_SESSION['survey_'.$surveyid]['srid'].' AND sid='.$surveyid);
-            }
-            killSurveySession($surveyid);
-            sendCacheHeaders();
-            doHeader();
-
-            $redata = compact(array_keys(get_defined_vars()));
-            $this->_printTemplateContent($thistpl.'/startpage.pstpl', $redata, __LINE__);
-            echo "\n\n<!-- JAVASCRIPT FOR CONDITIONAL QUESTIONS -->\n"
-            ."\t<script type='text/javascript'>\n"
-            ."\t<!--\n"
-            ."function checkconditions(value, name, type, evt_type)\n"
-            ."\t{\n"
-            ."\t}\n"
-            ."\t//-->\n"
-            ."\t</script>\n\n";
-
-            //Present the clear all page using clearall.pstpl template
-            $this->_printTemplateContent($thistpl.'/clearall.pstpl', $redata, __LINE__);
-
-            $this->_niceExit($redata, __LINE__, $thistpl);
+           
         }
 
 

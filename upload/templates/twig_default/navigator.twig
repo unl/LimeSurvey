@@ -1,0 +1,31 @@
+<div class="navigator">
+    {# specifying the form attribute allows this input to be outside the form tag, this gives more templating freedom! #}
+    <input type="hidden" form="limesurvey" name="navigate" value="next" />
+    <div>
+        {% if navigator.load %}
+            <button type="button" name="load" value="load">{{ trans("Load unfinished survey") }}</button>
+        {% endif %}
+        {% if navigator.save %}
+            <button type="button" value="save">{{ trans("Resume later") }}</button>
+        {% endif %}
+ 
+        
+    </div>
+    <div>
+         {% if navigator.previous %}
+            <button type="button" value="previous">{{ trans("Previous") }}</button>
+         {% endif %}
+ 
+         {% if navigator.next %}
+             <button type="button" value="next">{{ trans("Next") }}</button>
+         {% endif %}
+         {% if navigator.submit %}
+             <button type="button" value="submit">{{ trans("Submit") }}</button>
+         {% endif %}
+    </div>
+    <div>
+        {% if navigator.clearall %}
+            <button type="button" value="clear">{{ trans("Exit and clear survey") }}</button>
+        {% endif %}
+    </div>
+</div>

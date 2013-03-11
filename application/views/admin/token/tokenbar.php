@@ -26,8 +26,11 @@
                 <a href="<?php echo $this->createUrl("admin/tokens/sa/managetokenattributes/surveyid/$surveyid"); ?>">
                     <img src='<?php echo $imageurl; ?>token_manage.png' title='' alt='<?php $clang->eT("Manage additional attribute fields"); ?>' />
                 </a>
-            <?php } ?>
-            <?php if (hasSurveyPermission($surveyid, 'tokens', 'import')){ ?>
+                <?php
+                }
+                if (hasSurveyPermission($surveyid, 'tokens', 'import'))
+                {
+                ?>
                 <img src='<?php echo $imageurl; ?>separator.gif' class='separator' alt='' />
                 <a href="<?php echo $this->createUrl("admin/tokens/sa/import/surveyid/$surveyid") ?>">
                     <img src='<?php echo $imageurl; ?>importcsv.png' title='' alt='<?php $clang->eT("Import tokens from CSV file"); ?>' />
@@ -58,8 +61,11 @@
                     <img src='<?php echo $imageurl; ?>tokenify.png' alt='<?php $clang->eT("Generate tokens"); ?>' />
                 </a>
                 <img src='<?php echo $imageurl; ?>separator.gif' class='separator' alt='' />
-            <?php } ?>
-            <?php if (hasSurveyPermission($surveyid, 'tokens', 'update')){ ?>
+                <?php
+                }
+                if (hasSurveyPermission($surveyid, 'tokens', 'update'))
+                {
+                ?>
                 <a href="<?php echo $this->createUrl("admin/tokens/sa/bouncesettings/surveyid/$surveyid"); ?>">
                     <img src='<?php echo $imageurl; ?>bounce_settings.png' alt='<?php $clang->eT("Bounce settings"); ?>' />
                 </a>

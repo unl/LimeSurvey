@@ -1,0 +1,9 @@
+{% include 'startpage.twig' %}
+
+<div class="clearall-result">
+    <h1 class="warning-text">{{ trans("Answers cleared") }}</h1>
+    {% if restart is defined %}
+        <a href="{{restart}}">{{ trans("Restart this survey") }}</a>
+    {% endif %}
+    <button type="button" onclick="window.close();">{{ trans("Close this window") }}</button>
+</div>

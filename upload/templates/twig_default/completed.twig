@@ -1,0 +1,25 @@
+{# Twig template for the thank you page shown on survey completion.#}
+{# This template is not rendered if auto-redirect is enabled. #}
+<!DOCTYPE html>
+<html lang="{{languagecode}}" dir="{{direction}}">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <meta name="generator" content="LimeSurvey http://www.limesurvey.org" />
+
+        <title>{{survey.name}}</title>
+        <link rel='stylesheet' type='text/css' media='all' href='{{template.url}}/template.css' />
+        {% for cssFile in cssFiles %}
+            <style type="text/css" src="{{ cssFile }}"/>
+        {% endfor %}
+        <link rel="shortcut icon" href="{{templateurl}}/favicon.ico" />
+    </head>
+    <body class="default lang-{{languagecode}} completed">
+        {% if survey.endtext|length > 0 %}
+            {{ survey.endtext|raw }}
+        {% else %}
+            <span class='success'>{{ trans('Thank you') }}</span>
+        {% endif %}
+    
+    
+    </body>    
+</html>

@@ -1,0 +1,30 @@
+{# Twig tempalte for rendering a question. #}
+<div {{question.essentials}} id="{{question.id}}" class="{{question.classes}} question-wrapper">
+    <div class="questiontext">
+        {% if question.mandatory %}
+            <span class="asterisk"></span>
+        {% endif %}
+        {% if question.number is defined %}
+            <span class="qnum">{{question.number}}</span>
+        {% endif %}
+        {% if question.code is defined %}
+            <span class="qcode">{{question.code}}</span>
+        {% endif %}
+        {{ em(question.text)|raw }}
+    </div>
+    <div class="instructions">
+        {% if question.mandatory %}
+            {{ question.message.mandatory}}
+        {% endif %}
+
+        {{ question.message.valid }}
+        {{ question.message.filevalid }}
+    </div>
+    <div class="answer">
+        {# This needs to be raw since it containts HTML. This content is currently not themeable. #}
+        {{ question.answer|raw }}
+    </div>
+    <div class="helptext">
+        {{ question.help }}
+    </div>
+</div>
