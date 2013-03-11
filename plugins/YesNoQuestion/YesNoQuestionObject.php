@@ -82,11 +82,11 @@
             
             if ($return)
             {
-                return $out;
+                return CHtml::tag('div', array('class' => 'question'), $out);
             }
             else
             {
-                echo $out;
+                echo CHtml::tag('div', array('class' => 'question'), $out);
             }
         }
     }

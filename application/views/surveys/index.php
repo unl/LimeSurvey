@@ -11,7 +11,7 @@
             'sid',
             array(
                 'labelExpression' => function($row, $data) { return $row['title']; },
-                'urlExpression' => function($row, $data) { return App()->createUrl('surveys/view', array('sid' => $row['sid'])); },
+                'urlExpression' => function($row, $data) { return App()->createUrl('surveys/view', array('id' => $row['sid'])); },
                 'class' => 'CLinkColumn'
             ),
             'created',

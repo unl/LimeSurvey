@@ -60,6 +60,7 @@ function templatereplace($line, $replacements = array(), $redata = array(), $deb
     );
 
     $varsPassed = array();
+    
     $thissurvey = getSurveyInfo($surveyId, App()->getSurveySession()->read($surveyId, 'language'));
     foreach($allowedvars as $var)
     {
@@ -85,8 +86,7 @@ function templatereplace($line, $replacements = array(), $redata = array(), $deb
     if (!isset($captchapath)) { $captchapath = ''; }
     if (!isset($sitename)) { $sitename=Yii::app()->getConfig('sitename'); }
     if (!isset($saved_id) && isset(Yii::app()->session['survey_'.$_surveyid]['srid'])) { $saved_id=Yii::app()->session['survey_'.$_surveyid]['srid'];}
-    $clang = Yii::app()->lang;
-
+    
     Yii::app()->loadHelper('surveytranslator');
 
     $questiondetails = false;
@@ -399,8 +399,8 @@ function templatereplace($line, $replacements = array(), $redata = array(), $deb
         {
             $aURLParams['token'] = trim(sanitize_token(strip_tags(returnGlobal('token'))));
         }
-        $_clearall = "<input type='button' name='clearallbtn' value='" . $clang->gT("Exit and clear survey") . "' class='clearall' "
-        . "onclick=\"if (confirm('" . $clang->gT("Are you sure you want to clear all your responses?", 'js') . "')) {\nwindow.open('".Yii::app()->getController()->createUrl("survey/index/sid/$surveyid",$aURLParams,'&amp;');
+        $_clearall = "<input type='button' name='clearallbtn' value='" . gT("Exit and clear survey") . "' class='clearall' "
+        . "onclick=\"if (confirm('" . gT("Are you sure you want to clear all your responses?", 'js') . "')) {\nwindow.open('".Yii::app()->getController()->createUrl("survey/index/sid/$surveyid",$aURLParams,'&amp;');
         $_clearall .= "', '_self')}\" />";
     }
     else

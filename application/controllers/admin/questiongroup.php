@@ -260,6 +260,8 @@ class questiongroup extends Survey_Common_Action
      */
     public function edit($surveyid, $gid)
     {
+        $this->getController()->navData['surveyId'] = $surveyid;
+        $this->getController()->navData['groupId'] = $gid;
         $clang = $this->getController()->lang;
         $surveyid = sanitize_int($surveyid);
         $gid = sanitize_int($gid);

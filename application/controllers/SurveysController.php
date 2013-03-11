@@ -47,6 +47,11 @@
                     $condition->addNotInCondition('submitdate', null);
                     $completed = Survey_dynamic::model($survey->sid)->count($condition);
                 }
+                else
+                {
+                    $completed = 0;
+                    $total = 0;
+                }
                 $row = array(
                     'sid' => $survey->sid,
                     'title' => $title,
@@ -112,8 +117,14 @@
                         'surveyls_survey_id' => $id,
                         'surveyls_language' => $language
                     ));
-                    debug('WELCOME!!!');
-                    debug($survey_languagesettings->attributes);
+                    $replacements = array(
+                        'welcome' => $survey_languagesettings->surveyls_welcometext
+                    );
+                    $template = $survey->template;
+                    $this->layout = false;
+                    $this->render('welcome', compact('template', 'replacements'));
+                    //debug('WELCOME!!!');
+                    //debug($survey_languagesettings->attributes);
                 }
                 elseif (isset($survey))
                 {

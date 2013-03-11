@@ -49,7 +49,11 @@
                 $questionObject = App()->getPluginManager()->constructQuestionFromGUID($questiontype);
             }
             
-            
+            if (!isset($questionObject))
+            {
+                App()->user->setFlash('questions', 'Could not create question object.');
+                $this->redirect(array('/groups/view', 'id' => $gid));
+            }
             $attributes = $questionObject->getAttributes('*');
             $this->navData['surveyId'] = $group['sid'];
             $this->navData['groupId'] = $gid;
@@ -108,14 +112,10 @@
                     
                     // Always redirect to prevent reloading from resubmitting.
                     $this->redirect(array($this->route, 'id' => $id));
-                
                 }
-
                 /**
                  * @todo Add support for save & close button; in case of close redirect to overview page.
                  */
-
-                 
                 $question = $question->attributes;
                 $attributes = $questionObject->getAttributes('*');
                 $this->navData['surveyId'] = $question['sid'];

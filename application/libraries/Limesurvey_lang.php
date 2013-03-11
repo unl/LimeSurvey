@@ -27,9 +27,16 @@
         var $gettextclass;
         var $langcode;
 
-        function limesurvey_lang($sLanguageCode){
+        public function __construct($sLanguageCode){
             if(empty($sLanguageCode))
+            {
+                echo '<pre>';
+                var_dump(debug_backtrace());
+                echo '</pre>';
+                die();
                 trigger_error('langcode param is undefined ', E_USER_WARNING);
+            }
+                
 
             Yii::app()->loadHelper('sanitize');
             $sLanguageCode=sanitize_languagecode($sLanguageCode);

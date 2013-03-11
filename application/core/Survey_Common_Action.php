@@ -200,6 +200,7 @@ class Survey_Common_Action extends CAction
     */
     protected function _renderWrappedTemplate($sAction = '', $aViewUrls = array(), $aData = array())
     {
+        $out = '';
         // Gather the data
         $aData['clang'] = $clang = Yii::app()->lang;
         $aData['sImageURL'] = Yii::app()->getConfig('adminimageurl');

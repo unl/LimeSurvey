@@ -138,13 +138,14 @@ class DbStorage implements iPluginStorage {
                 {
                     foreach ($result as &$item)
                     {
-                        if (count($item) == 1)
+                        if (is_array($item) && (count($item) == 1))
                         {
                             $item = $item[0];
                         }
                     }
                 }
-                elseif (count($result) == 1)
+                
+                if (count($result) == 1)
                 {
                     $result = $result[0];
                 }
