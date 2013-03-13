@@ -37,6 +37,8 @@ abstract class LSYii_Controller extends CController
 		$this->loadLibrary('LS.LS');
         $this->loadHelper('globalsettings');
 		$this->loadHelper('common');
+        $this->loadHelper('survey');        
+        $this->loadLibrary('limesurvey_lang');
 		$this->loadHelper('expressions.em_manager');
 		$this->loadHelper('replacements');
 		$this->_init();
@@ -144,4 +146,11 @@ abstract class LSYii_Controller extends CController
         Yii::app()->setConfig('adminimageurl', Yii::app()->getConfig('styleurl').Yii::app()->getConfig('admintheme').'/images/');
         Yii::app()->setConfig('adminstyleurl', Yii::app()->getConfig('styleurl').Yii::app()->getConfig('admintheme').'/');
 	}
+    
+     public function render($view, $data = null, $return = false) {
+        return parent::render($view, $data, $return);
+        echo '<pre>';
+        var_dump(debug_backtrace());
+        echo '</pre>';
+    }
 }
