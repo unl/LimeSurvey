@@ -1,10 +1,7 @@
-<!doctype html>
-<html>
-    <head>
 <?php 
-$path = getTemplatePath($template);
-echo templatereplace(file_get_contents($path . '/startpage.pstpl'));
-echo file_get_contents($path . '/welcome.pstpl');
-echo templatereplace(file_get_contents($path . '/endpage.pstpl'));
+    App()->getClientScript()->registerCoreScript('jquery');
+    App()->getClientScript()->registerScriptFile(App()->getBaseUrl(). 'scripts/navigator.js');
+    Twig::activateTemplate($template);
+    $twig = Twig::getTwigEnvironment();
+    echo $twig->render('welcome.twig', $context);
 ?>
-</html>

@@ -1409,9 +1409,9 @@ class statistics_helper {
 
         if ($usegraph == 1) {
             //for creating graphs we need some more scripts which are included here
-            require_once(APPPATH . '/third_party/pchart/pchart/pChart.class');
-            require_once(APPPATH . '/third_party/pchart/pchart/pData.class');
-            require_once(APPPATH . '/third_party/pchart/pchart/pCache.class');
+            require_once(Yii::app()->basePath . '/third_party/pchart/pchart/pChart.class');
+            require_once(Yii::app()->basePath . '/third_party/pchart/pchart/pData.class');
+            require_once(Yii::app()->basePath . '/third_party/pchart/pchart/pCache.class');
             $MyCache = new pCache($tempdir . '/');
         }
 

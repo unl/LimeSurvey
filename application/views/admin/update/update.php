@@ -24,9 +24,9 @@ else
         echo  "<li class='errortitle'>".sprintf($clang->gT("Tempdir %s is not writable"),$tempdir)."<li>";
         $error=true;
     }
-    if (!is_writable(APPPATH.'config/version.php'))
+    if (!is_writable(Yii::app()->basePath.'config/version.php'))
     {
-        echo  "<li class='errortitle'>".sprintf($clang->gT("Version file is not writable (%s). Please set according file permissions."),APPPATH.'config/version.php')."</li>";
+        echo  "<li class='errortitle'>".sprintf($clang->gT("Version file is not writable (%s). Please set according file permissions."),Yii::app()->basePath.'config/version.php')."</li>";
         $error=true;
     }
     echo '</ul><br><h3>'.$clang->gT('Change log').'</h3>';

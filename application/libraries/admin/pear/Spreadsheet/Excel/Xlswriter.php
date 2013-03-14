@@ -31,7 +31,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+if (!class_exists('Yii', false)) die('No direct script access allowed in ' . __FILE__);
 require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'PEAR.php';
 require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'Spreadsheet'.DIRECTORY_SEPARATOR.'Excel'.DIRECTORY_SEPARATOR.'Writer'.DIRECTORY_SEPARATOR.'Workbook.php';
 

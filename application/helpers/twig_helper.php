@@ -11,11 +11,6 @@
         private static $environment;
         
         /**
-         *
-         * @var Limesurvey_lang
-         */
-        private static $translator = null;
-        /**
          * @return Twig_Environment
          */
         public static function getTwigEnvironment($options = array())
@@ -35,14 +30,12 @@
             if (!self::$initialized)
             {
                 Yii::import('application.libraries.Twig.Autoloader', true);
-                Yii::import('application.libraries.Limesurvey_lang');
                 spl_autoload_unregister(array('YiiBase','autoload'));
                 Twig_Autoloader::register();
                 spl_autoload_register(array('YiiBase','autoload'));
-                
-                self::$translator = new Limesurvey_lang($options['language']);
                 self::$initialized = true;
             }
+            
             if (!isset(self::$environment))
             {
                 $loader = new Twig_Loader_Filesystem(array(
@@ -50,13 +43,21 @@
                     App()->getConfig('usertemplaterootdir')
                 ));
                 $twig = new Twig_Environment($loader, $options);
+                
+                // Make language data available.
+                foreach (getLanguageData() as $code => $data)
+                {
+                    $direction[$code] = $data['rtl'] ? 'rtl' : 'ltr';
+                }
+                $twig->addGlobal('direction', $direction);
+                
+                // Register custom functions.
                 $twig->addFunction(new Twig_SimpleFunction('trans', 'Twig::gT'));
                 $twig->addFunction(new Twig_SimpleFunction('ntrans', 'Twig::ngT'));
                 $twig->addFunction(new Twig_SimpleFunction('em', 'Twig::em'));
                 
-                //$twig->addExtension(new Twig_Extensions_Extension_I18n());
-                self::$environment = $twig;
                 
+                self::$environment = $twig;
             }
             return self::$environment;
         }
@@ -65,7 +66,7 @@
         {
             
             // First translate using proper translation string.
-            $translated = self::$translator->ngT($singular, $plural, $count);
+            $translated = ngT($singular, $plural, $count);
             // Then apply printf.
             $args = func_get_args();
             array_shift($args);
@@ -76,7 +77,7 @@
         public static function gT($txt)
         {
             // First translate text.
-            $translated = self::$translator->gT($txt);
+            $translated = gT($txt);
             
             // Then apply printf.
             if (func_num_args() > 1)

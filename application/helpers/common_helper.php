@@ -1,4 +1,4 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if (!class_exists('Yii', false)) die('No direct script access allowed in ' . __FILE__);
 /*
 * LimeSurvey
 * Copyright (C) 2007-2011 The LimeSurvey Project Team / Carsten Schmitz
@@ -3246,11 +3246,11 @@ function SendEmailMessage($body, $subject, $to, $from, $sitename, $ishtml=false,
     }
 
 
-    require_once(APPPATH.'/third_party/phpmailer/class.phpmailer.php');
+    require_once(Yii::app()->basePath.'/third_party/phpmailer/class.phpmailer.php');
     $mail = new PHPMailer;
-    if (!$mail->SetLanguage($defaultlang,APPPATH.'/third_party/phpmailer/language/'))
+    if (!$mail->SetLanguage($defaultlang,Yii::app()->basePath.'/third_party/phpmailer/language/'))
     {
-        $mail->SetLanguage('en',APPPATH.'/third_party/phpmailer/language/');
+        $mail->SetLanguage('en',Yii::app()->basePath.'/third_party/phpmailer/language/');
     }
     $mail->CharSet = $emailcharset;
     if (isset($emailsmtpssl) && trim($emailsmtpssl)!=='' && $emailsmtpssl!==0) {

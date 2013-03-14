@@ -18,7 +18,7 @@ if(!defined('K_TCPDF_EXTERNAL_CONFIG')) {
 }
 
 # include TCPDF
-require(APPPATH.'config/tcpdf'.EXT);
+require(Yii::app()->basePath.'config/tcpdf'.EXT);
 
 require_once($tcpdf['base_directory'].'/tcpdf.php');
 
@@ -188,7 +188,7 @@ class pdf extends TCPDF {
 
 
     /**
-     * Settings from our APPPATH/config/tcpdf.php file
+     * Settings from our Yii::app()->basePath/config/tcpdf.php file
      *
      * @var array
      * @access private
@@ -213,7 +213,7 @@ class pdf extends TCPDF {
     function __construct() {
 
         # load the config file
-        require(APPPATH.'config/tcpdf'.EXT);
+        require(Yii::app()->basePath.'config/tcpdf'.EXT);
         $this->_config = $tcpdf;
         unset($tcpdf);
 

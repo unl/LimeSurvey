@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="{{survey.language}}" dir="{{direction[survey.language]}}">
+    <!-- TWIG welcome.twig -->
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <meta name="generator" content="LimeSurvey http://www.limesurvey.org" />
+        
+        <title>{{survey.title}}</title>
+
+        <link rel="shortcut icon" href="{{template.url}}/favicon.ico" />
+        <link rel="stylesheet" href="{{template.url}}/template.css" />
+    </head>
+    <body class="default lang-{{survey.language}} {{survey.format}} welcome">
+        <h1>
+            {{survey.title}}
+        </h1>
+        <div class='description'>
+            {{survey.description}}
+        </div>
+        <div class='welcome'>
+            {{survey.welcome}}
+        </div>
+        <div class="questioncount">
+            {{ trans("There are %d questions in this survey.", survey.questionCount) }}
+        </div>
+            <form id="limesurvey" method="post">
+                {% include 'navigator.twig' %}
+            </form>
+    </body>    
+</html>

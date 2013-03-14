@@ -1,4 +1,4 @@
-<?php if (!defined('BASEPATH')) exit('No direct script access allowed');
+<?php if (!class_exists('Yii', false)) die('No direct script access allowed in ' . __FILE__);
 /*
  * LimeSurvey
  * Copyright (C) 2007-2011 The LimeSurvey Project Team / Carsten Schmitz
@@ -30,7 +30,7 @@ require_once($libraryDir . '/reporter.php');
 * See the included tests/TEMPLATE_*.php files for an introduction to SimpleTest.
 *
 * @access public
-* @author Andreas Söderlund, ciscoheat CARE OF gmail DOT com
+* @author Andreas Sï¿½derlund, ciscoheat CARE OF gmail DOT com
 */
 class SimpleTester
 {

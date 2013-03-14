@@ -1,5 +1,6 @@
 <div class="navigator">
-    <input id="navigate" type="hidden" form="limesurvey" name="navigate" value="next" />
+    {# specifying the form attribute allows this input to be outside the form tag, this gives more templating freedom! #}
+    <input type="hidden" form="limesurvey" name="navigate" value="next" />
     <div>
         {% if navigator.load %}
             <button type="button" name="load" value="load">{{ trans("Load unfinished survey") }}</button>

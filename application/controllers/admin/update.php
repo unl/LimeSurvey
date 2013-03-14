@@ -1,4 +1,4 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if (!class_exists('Yii', false)) die('No direct script access allowed in ' . __FILE__);
 /*
 * LimeSurvey
 * Copyright (C) 2007-2011 The LimeSurvey Project Team / Carsten Schmitz
@@ -41,7 +41,7 @@ class update extends Survey_Common_Action
             if (!is_writable($tempdir)) {
                 $error = true;
             }
-            if (!is_writable(APPPATH . 'config/version.php')) {
+            if (!is_writable(Yii::app()->basePath . 'config/version.php')) {
                 $error = true;
             }
 
@@ -479,7 +479,7 @@ class update extends Survey_Common_Action
             return true;
         }
 
-        if (!is_writable($tempdir) || !is_writable(APPPATH.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'update.php'))
+        if (!is_writable($tempdir) || !is_writable(Yii::app()->basePath.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'update.php'))
         {
             $error=true;
         }
@@ -523,7 +523,7 @@ class update extends Survey_Common_Action
         if (file_exists($tempdir.'/updater.zip')){
             Yii::app()->loadLibrary("admin/pclzip/pclzip",array('p_zipname' => $tempdir.'/updater.zip'));
             $archive = new PclZip(array('p_zipname' => $tempdir.'/updater.zip'));
-            if ($archive->extract(PCLZIP_OPT_PATH, APPPATH.'/controllers/admin/', PCLZIP_OPT_REPLACE_NEWER)== 0) {
+            if ($archive->extract(PCLZIP_OPT_PATH, Yii::app()->basePath.'/controllers/admin/', PCLZIP_OPT_REPLACE_NEWER)== 0) {
                 die("Error : ".$archive->errorInfo(true));
             }
             else

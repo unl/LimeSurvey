@@ -4,7 +4,7 @@ if (!is_writable($tempdir))
 {
     echo  "<li class='errortitle'>".sprintf($clang->gT("Tempdir %s is not writable"),$tempdir)."<li>";
 }
-if (!is_writable(APPPATH.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'update.php'))
+if (!is_writable(Yii::app()->basePath.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'update.php'))
 {
     echo  "<li class='errortitle'>".sprintf($clang->gT("Updater file is not writable (%s). Please set according file permissions."),DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'update.php')."</li>";
 }

@@ -3,14 +3,23 @@
     class SurveysController extends LSYii_Controller
     {
 
+        public function __construct($id, $module = null) {
+            parent::__construct($id, $module);
+            if (App()->user->isGuest)
+            {
+                $this->defaultAction = 'publiclist';
+            }
+        }
+        
         public function actions() 
         {
             $externalActions = array(
-                'preview' => 'application.controllers.surveys.preview',
-                'start' => 'application.controllers.surveys.start',
+                'preview' => 'application.controllers.surveys.Preview',
+                'start' => 'application.controllers.surveys.Start',
                 // All in one survey
                 'survey' => 'application.controllers.surveys.SurveyAllInOne',
-            );
+                'publiclist' => 'application.controllers.surveys.PublicList'
+            );  
             
             return array_merge(parent::actions(), $externalActions);
         }
@@ -101,6 +110,8 @@
         
         public function actionWelcome($id)
         {
+            App()->loadHelper('surveytranslator');
+            App()->loadHelper('Twig');
             // Check if session exists.
             if (App()->getSurveySession()->exists($id))
             {
@@ -111,18 +122,30 @@
                 
                 if (isset($survey) && $survey->showwelcome == 'Y' && $survey->format != 'A')
                 {
-                    $language = App()->getSurveySession()->read($id, 'language');
                     // Get the welcome message.
                     $survey_languagesettings = Surveys_languagesettings::model()->findByAttributes(array(
                         'surveyls_survey_id' => $id,
-                        'surveyls_language' => $language
+                        'surveyls_language' => App()->getSurveySession()->read($id, 'language')
                     ));
-                    $replacements = array(
-                        'welcome' => $survey_languagesettings->surveyls_welcometext
+                    $context = array(
+                        'survey' => array(
+                            'title' => $survey_languagesettings->surveyls_title,
+                            'welcome' => $survey_languagesettings->surveyls_welcometext,
+                            'questionCount' => 15,
+                            'language' => App()->getSurveySession()->read($id, 'language'),
+                            'description' => $survey_languagesettings->surveyls_description
+                        ),
+                        'navigator' => array(
+                            'next' => true,
+                            'previous' => false,
+                            'clearall' => true,
+                            'load' => true,
+                            'save' => false
+                        )
                     );
                     $template = $survey->template;
-                    $this->layout = false;
-                    $this->render('welcome', compact('template', 'replacements'));
+                    $this->layout = 'true';
+                    $this->render('welcome', compact('template', 'context'));
                     //debug('WELCOME!!!');
                     //debug($survey_languagesettings->attributes);
                 }

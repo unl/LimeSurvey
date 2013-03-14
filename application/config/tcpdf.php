@@ -1,4 +1,4 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if (!class_exists('Yii', false)) die('No direct script access allowed in ' . __FILE__);
     /*
     * LimeSurvey
     * Copyright (C) 2007-2011 The LimeSurvey Project Team / Carsten Schmitz
@@ -34,7 +34,7 @@
     * ADD TRAILING SLASH!
     ***********************************************************/
 
-    $tcpdf['base_directory'] = APPPATH.'third_party'.DIRECTORY_SEPARATOR.'tcpdf'.DIRECTORY_SEPARATOR;
+    $tcpdf['base_directory'] = Yii::app()->basePath.'third_party'.DIRECTORY_SEPARATOR.'tcpdf'.DIRECTORY_SEPARATOR;
 
 
     /************************************************************

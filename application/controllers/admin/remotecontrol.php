@@ -34,7 +34,7 @@ class remotecontrol extends Survey_Common_Action
             if ($RPCType=='xml')
             {
                 $cur_path = get_include_path();
-                set_include_path($cur_path . PATH_SEPARATOR . APPPATH . 'helpers');
+                set_include_path($cur_path . PATH_SEPARATOR . Yii::app()->basePath . 'helpers');
                 // Yii::import was causing problems for some odd reason
                 require_once('Zend/XmlRpc/Server.php');
                 require_once('Zend/XmlRpc/Server/Exception.php');

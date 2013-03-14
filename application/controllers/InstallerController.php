@@ -1,4 +1,4 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if (!class_exists('Yii', false)) die('No direct script access allowed in ' . __FILE__);
 /*
 * LimeSurvey (tm)
 * Copyright (C) 2011 The LimeSurvey Project Team / Carsten Schmitz
@@ -102,7 +102,7 @@ class InstallerController extends CController {
     */
     function _checkInstallation()
     {
-        if (file_exists(APPPATH . 'config/config.php') && empty($_POST['InstallerConfigForm']))
+        if (file_exists(Yii::app()->basePath . 'config/config.php') && empty($_POST['InstallerConfigForm']))
         {
             throw new CHttpException(500, 'Installation has been done already. Installer disabled.');
             exit();
@@ -187,7 +187,7 @@ class InstallerController extends CController {
     */
     public function stepViewLicense()
     {
-        $sFileName = dirname(BASEPATH) . '/docs/license.txt';
+        $sFileName = App()->basePath . '/docs/license.txt';
         header('Content-Type: text/plain; charset=UTF-8');
         readfile($sFileName);
         exit;
@@ -554,7 +554,7 @@ class InstallerController extends CController {
         }
 
         //checking DB Connection
-        $aErrors = self::_setup_tables(dirname(APPPATH).'/installer/sql/create-'.$sql_file.'.sql');
+        $aErrors = self::_setup_tables(dirname(Yii::app()->basePath).'/installer/sql/create-'.$sql_file.'.sql');
         if ($aErrors === false)
         {
             $model->addError('dblocation', $clang->gT('Try again! Connection with database failed. Reason: ').implode(', ', $aErrors));
@@ -945,7 +945,7 @@ class InstallerController extends CController {
     }
 
     /**
-    * Function to write given database settings in APPPATH.'config/config.php'
+    * Function to write given database settings in Yii::app()->basePath.'config/config.php'
     */
     function _writeConfigFile()
     {
@@ -978,7 +978,7 @@ class InstallerController extends CController {
                 $sURLFormat='get'; // Fall back to get if an Apache server cannot be determined reliably
             }
             
-            $sConfigurationFileContents = "<?php if (!defined('BASEPATH')) exit('No direct script access allowed');" . "\n"
+            $sConfigurationFileContents = "<?php if (!class_exists('Yii', false)) die('No direct script access allowed in ' . __FILE__);" . "\n"
             ."/*"."\n"
             ."| -------------------------------------------------------------------"."\n"
             ."| DATABASE CONNECTIVITY SETTINGS"."\n"
@@ -1074,8 +1074,8 @@ class InstallerController extends CController {
             . "/* End of file config.php */"              . "\n"
             . "/* Location: ./application/config/config.php */";
 
-            if (is_writable(APPPATH . 'config')) {
-                file_put_contents(APPPATH . 'config/config.php', $sConfigurationFileContents);
+            if (is_writable(Yii::app()->basePath . 'config')) {
+                file_put_contents(Yii::app()->basePath . 'config/config.php', $sConfigurationFileContents);
                 Yii::app()->session['configFileWritten'] = true;
                 $oUrlManager = Yii::app()->getComponent('urlManager');
                 /* @var $oUrlManager CUrlManager */

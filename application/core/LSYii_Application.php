@@ -43,13 +43,13 @@ class LSYii_Application extends CWebApplication
     {
         if (is_string($config) && !file_exists($config))
         {
-            $config = APPPATH . 'config/config-sample-mysql' . EXT;
+            $config = Yii::app()->basePath . 'config/config-sample-mysql' . EXT;
         } 
         if(is_string($config)) {
             $config = require($config);
         }
         
-        if ($config['config']['debug'] == 2)
+        if (YII_DEBUG)
         {
             // If debug = 2 we add firebug / console logging for all trace messages
             // If you want to var_dump $config you could do:
@@ -109,14 +109,15 @@ class LSYii_Application extends CWebApplication
 
         parent::__construct($config);
         // Load the default and environmental settings from different files into self.
-        $ls_config = require(APPPATH . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config-defaults.php');
-        $email_config = require(APPPATH . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'email.php');
-        $version_config = require(APPPATH . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'version.php');
+        
+        $ls_config = require(Yii::getPathOfAlias('application.config') . '/config-defaults.php');
+        $email_config = require(Yii::getPathOfAlias('application.config') . '/email.php');
+        $version_config = require(Yii::getPathOfAlias('application.config') . '/version.php');
         $settings = array_merge($ls_config, $version_config, $email_config);
         
-        if(file_exists(APPPATH . DIRECTORY_SEPARATOR. 'config' . DIRECTORY_SEPARATOR . 'config.php'))
+        if(file_exists(Yii::getPathOfAlias('application.config') . '/config.php'))
         {
-            $ls_config = require(APPPATH . DIRECTORY_SEPARATOR. 'config' . DIRECTORY_SEPARATOR . 'config.php');
+            $ls_config = require(Yii::getPathOfAlias('application.config') . '/config.php');
             if(is_array($ls_config['config']))
             {
                 $settings = array_merge($settings, $ls_config['config']);
@@ -221,7 +222,7 @@ class LSYii_Application extends CWebApplication
     */
     public function loadConfig($file)
     {
-        $config = require_once(APPPATH . '/config/' . $file . '.php');
+        $config = require_once(Yii::app()->basePath . '/config/' . $file . '.php');
         if(is_array($config))
         {
             foreach ($config as $k => $v)
