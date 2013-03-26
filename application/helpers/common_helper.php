@@ -295,7 +295,8 @@ function isStandardTemplate($sTemplateName)
     'limespired',
     'mint_idea',
     'sherpa',
-    'vallendar'));
+    'vallendar',
+    'unl'));
 }
 
 /**
