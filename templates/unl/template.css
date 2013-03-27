@@ -549,9 +549,12 @@ table.group {
 }
 
 .group-name {
-	font-size: small;
 	font-family:Verdana, Arial, Helvetica, sans-serif;
 	font-weight: bold;
+    display: block;
+    font-size: 3em;
+    margin: 0.75em;
+    padding: 10px;
 }
 
 .group-description {
