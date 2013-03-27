@@ -1609,3 +1609,8 @@ span.hide-tip div.error {
 .outerframe {
     border-radius: 5px;
 }
+
+.questiontext ul {
+    list-style: none;
+    margin-left: 2.5em;
+}
