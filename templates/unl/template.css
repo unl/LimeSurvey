@@ -560,6 +560,7 @@ table.group {
 .group-description {
 	font-size: small;
 	font-family:Verdana, Arial, Helvetica, sans-serif;
+    text-align: left;
 }
 
 .question-wrapper {
