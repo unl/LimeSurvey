@@ -1614,3 +1614,11 @@ span.hide-tip div.error {
     list-style: none;
     margin-left: 2.5em;
 }
+
+.boilerplate {
+    margin-left: -1.5em;
+}
+
+.boilerplate .answer {
+    margin-left: 0px;
+}
