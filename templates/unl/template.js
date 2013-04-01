@@ -74,5 +74,14 @@ function correctPNG() // correctly handle PNG transparency in Win IE 5.5 & 6.
 }
 
 $(document).ready(function(){
-
+    $("#movesubmitbtn").removeAttr("onClick");
+    
+    $("#movesubmitbtn").click(function() {
+        if (confirm("Are you sure that you want to submit your responses to this survey at this time?  This action is permanent and will log your response as complete.")) {
+            document.limesurvey.move.value = 'movesubmit';
+            return true;
+        }
+        
+        return false;
+    });
 });
