@@ -126,7 +126,7 @@ function displayUploadedFiles(jsonstring, filecount, fieldname, show_title, show
                     display += '<tr><td class="upload placeholder"><img src="'+imageurl+'/placeholder.png" height=100px /></td>';
             }
             if (show_title != 0)
-                display += '<td class="upload title"><a href="' + uploadurl + '/sid/'+surveyid+'/filegetcontents/'+decodeURIComponent(jsonobj[i].filename)+'" target="_blank">'+jsonobj[i].title+'</a></td>';
+                display += '<td class="title"><a href="' + uploadurl + '/sid/'+surveyid+'/filegetcontents/'+decodeURIComponent(jsonobj[i].filename)+'" target="_blank">'+jsonobj[i].title+'</a></td>';
             if (show_comment != 0)                                                                                                  
                 display += '<td class="upload comment">'+jsonobj[i].comment+'</td>';
             display +='<td class="upload edit">'+decodeURIComponent(jsonobj[i].name)+'</td><td>'+'<img src="'+imageurl+'/edit.png" onclick="javascript:upload_'+fieldname+'();$(\'#upload_'+fieldname+'\').click();" style="cursor:pointer"></td></tr>';
